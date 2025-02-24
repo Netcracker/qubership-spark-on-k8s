@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: pod-template
+ namespace: {{ .Release.Namespace }}
+ labels:
+  {{- include "all_objects_labels_sts" . | nindent 2 }}
+data:
+ pod-template.yaml: |
+   kind: Pod
+   spec:
+     containers:
+       - name: spark-thrift-executor
+         securityContext:
+           {{- toYaml .Values.securityContext | nindent 10 }}

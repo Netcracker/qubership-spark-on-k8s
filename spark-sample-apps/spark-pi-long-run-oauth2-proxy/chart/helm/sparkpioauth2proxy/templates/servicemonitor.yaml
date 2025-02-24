@@ -1,0 +1,31 @@
+{{- if and .Values.oauth2Proxy.metrics.enabled .Values.oauth2Proxy.metrics.servicemonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "oauth2-proxy.fullname" . }}
+{{- if .Values.oauth2Proxy.metrics.servicemonitor.namespace }}
+  namespace: {{ .Values.oauth2Proxy.metrics.servicemonitor.namespace }}
+{{- else }}
+  namespace: {{ template "oauth2-proxy.namespace" $ }}
+{{- end }}
+  labels:
+    prometheus: {{ .Values.oauth2Proxy.metrics.servicemonitor.prometheusInstance }}
+    app: {{ template "oauth2-proxy.name" . }}
+{{- include "oauth2-proxy.labels" . | indent 4 }}
+{{- if .Values.oauth2Proxy.metrics.servicemonitor.labels }}
+{{ toYaml .Values.oauth2Proxy.metrics.servicemonitor.labels | indent 4}}
+{{- end }}
+spec:
+  jobLabel: {{ template "oauth2-proxy.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "oauth2-proxy.selectorLabels" . | indent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ template "oauth2-proxy.namespace" $ }}
+  endpoints:
+  - port: metrics
+    path: "/metrics"
+    interval: {{ .Values.oauth2Proxy.metrics.servicemonitor.interval }}
+    scrapeTimeout: {{ .Values.oauth2Proxy.metrics.servicemonitor.scrapeTimeout }}
+{{- end }}

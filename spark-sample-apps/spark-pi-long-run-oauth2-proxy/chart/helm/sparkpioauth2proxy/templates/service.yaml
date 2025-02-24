@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{template "oauth2-proxy.name" .}}
+  {{- include "oauth2-proxy.labels" . | indent 4}}
+  name: {{template "oauth2-proxy.fullname" .}}
+  {{- if .Values.oauth2Proxy.service.annotations}}
+  annotations:
+  {{toYaml .Values.oauth2Proxy.service.annotations | indent 4}}
+    {{- end}}
+spec:
+{{- if (or (eq .Values.oauth2Proxy.service.type "ClusterIP") (empty .Values.oauth2Proxy.service.type)) }}
+  type: ClusterIP
+  {{- if .Values.oauth2Proxy.service.clusterIP }}
+  clusterIP: {{ .Values.oauth2Proxy.service.clusterIP }}
+  {{end}}
+{{- else if eq .Values.oauth2Proxy.service.type "LoadBalancer" }}
+  type: {{ .Values.oauth2Proxy.service.type }}
+  {{- if .Values.oauth2Proxy.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.oauth2Proxy.service.loadBalancerIP }}
+  {{- end }}
+  {{- if .Values.oauth2Proxy.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml .Values.oauth2Proxy.service.loadBalancerSourceRanges | indent 4 }}
+  {{- end -}}
+{{- else }}
+  type: {{ .Values.oauth2Proxy.service.type }}
+{{- end }}
+  ports:
+    - port: {{ .Values.oauth2Proxy.service.portNumber }}
+      targetPort: {{ .Values.oauth2Proxy.service.portName }}
+      {{- if (and (eq .Values.oauth2Proxy.service.type "NodePort") (not (empty .Values.oauth2Proxy.service.nodePort))) }}
+      nodePort: {{ .Values.oauth2Proxy.service.nodePort }}
+      {{- end }}
+      protocol: TCP
+      {{- with .Values.oauth2Proxy.service.appProtocol }}
+      appProtocol: {{ . }}
+      {{- end }}
+      name: {{ .Values.oauth2Proxy.service.portName }}
+    {{- if and .Values.oauth2Proxy.metrics.enabled .Values.oauth2Proxy.metrics.port }}
+    - port: {{ .Values.oauth2Proxy.metrics.port }}
+      protocol: TCP
+      {{- with .Values.oauth2Proxy.metrics.service.appProtocol }}
+      appProtocol: {{ . }}
+      {{- end }}
+      targetPort: metrics
+      {{- if (and (eq .Values.oauth2Proxy.service.type "NodePort") (not (empty .Values.oauth2Proxy.metrics.nodePort))) }}
+      nodePort: {{ .Values.oauth2Proxy.metrics.nodePort }}
+      {{- end }}
+      name: metrics
+    {{- end }}
+  selector:
+    {{- include "oauth2-proxy.selectorLabels" . | indent 4 }}

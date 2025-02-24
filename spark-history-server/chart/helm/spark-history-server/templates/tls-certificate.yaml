@@ -1,0 +1,47 @@
+{{- define "certDnsNames" -}}
+  {{- $dnsNames := list "localhost" "spark-history-server" (printf "%s.%s" "spark-history-server" .Release.Namespace) (printf "%s.%s.svc" "spark-history-server" .Release.Namespace) -}}
+    {{- $dnsNames = concat $dnsNames .Values.certManagerInegration.subjectAlternativeName.additionalDnsNames -}}
+  {{- $dnsNames | toYaml -}}
+{{- end -}}
+{{- define "certIpAddresses" -}}
+  {{- $ipAddresses := list "127.0.0.1" -}}
+  {{- $ipAddresses = concat $ipAddresses .Values.certManagerInegration.subjectAlternativeName.additionalIpAddresses -}}
+  {{- $ipAddresses | toYaml -}}
+{{- end -}}
+
+
+{{- if .Values.certManagerInegration.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: spark-history-server-services-tls-certificate
+  labels:
+    {{- include "all_objects_labels_shs" . | nindent 4 }}
+    {{- include "cert_manager_label_shs" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": "pre-install,pre-upgrade"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-failed
+    "helm.sh/hook-weight": "-11"
+spec:
+  secretName: {{ .Values.certManagerInegration.secretName }}
+  duration: {{ default 365 .Values.certManagerInegration.duration | mul 24 }}h
+  commonName: spark-history-server.svc
+  isCA: true
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+{{ ( include "certDnsNames" . | indent 4 ) }}
+  ipAddresses:
+{{ ( include "certIpAddresses" . | indent 4) }}
+  issuerRef:
+    group: cert-manager.io
+  {{- if .Values.certManagerInegration.clusterIssuerName }}
+    name: {{ .Values.certManagerInegration.clusterIssuerName }}
+    kind: ClusterIssuer
+  {{- else }}
+    name: spark-tls-issuer
+    kind: Issuer
+  {{- end }}
+{{- end }}

@@ -1,0 +1,14 @@
+{{ if .Values.grafanadashboard.enable }}
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDashboard
+metadata:
+  name: spark-operator-grafana-dashboard
+  labels:
+    app: grafana
+    {{- include "all_objects_labels" . | nindent 4 }}
+    {{- include "grafana_operator_label" . | nindent 4 }}
+spec:
+  name: dashboard-with-plugins.json
+  json: >
+{{ .Files.Get "monitoring/grafana-dashboard.json" | indent 4 }}
+{{ end }}

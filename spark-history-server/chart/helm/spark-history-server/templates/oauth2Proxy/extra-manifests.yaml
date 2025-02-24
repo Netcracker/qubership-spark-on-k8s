@@ -1,0 +1,6 @@
+{{- if .Values.oauth2Proxy.enabled }}
+{{ range .Values.oauth2Proxy.extraObjects }}
+---
+{{ tpl (toYaml .) $ }}
+{{ end }}
+{{- end }}

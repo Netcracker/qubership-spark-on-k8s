@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: log4j-properties
+  namespace: spark-apps
+data:
+  log4j.properties: | #log4j properties
+     log4j.rootCategory=DEBUG, console
+     log4j.appender.console=org.apache.log4j.ConsoleAppender
+     log4j.appender.console.target=System.err
+     log4j.appender.console.layout=org.apache.log4j.PatternLayout
+     log4j.logger.org.apache.spark.repl.Main=DEBUG
+     log4j.logger.org.sparkproject.jetty=DEBUG
+     log4j.logger.org.sparkproject.jetty.util.component.AbstractLifeCycle=ERROR
+     log4j.logger.org.apache.spark.repl.SparkIMain$exprTyper=INFO
+     log4j.logger.org.apache.spark.repl.SparkILoop$SparkILoopInterpreter=INFO
+     log4j.logger.org.apache.hadoop.hive.metastore.RetryingHMSHandler=FATAL
+     log4j.logger.org.apache.hadoop.hive.ql.exec.FunctionRegistry=ERROR
+     log4j.logger.org.apache.parquet.CorruptStatistics=ERROR
+     log4j.logger.parquet.CorruptStatistics=ERROR
+     log4j.logger.com.qubership.spark.app.sample=DEBUG
+     log4j.logger.org.apache.spark=DEBUG
+     log4j.logger.org.apache.hadoop=DEBUG
+     log4j.appender.console.layout.ConversionPattern=%d{yy/MM/dd HH:mm:ss} %p %c{1}: %m%n

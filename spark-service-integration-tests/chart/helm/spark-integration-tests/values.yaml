@@ -1,0 +1,42 @@
+service:
+  name: spark-integration-tests-runner
+
+serviceAccount:
+  create: true
+  name: "spark-integration-tests"
+image: "ghcr.io/netcracker/qubership-spark-service-integration-tests"
+tags: "test_appORspark_images"
+sparkAppsNamespace: "spark-apps"
+status_writing_enabled: "true"
+cr_status_writing:
+  is_short_status_message: "true"
+  only_integration_tests: "true"
+  status_custom_resource_path: "apps/v1/spark/deployments/spark-integration-tests-runner"
+prometheusUrl: ""
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 50m
+  limits:
+    memory: 256Mi
+    cpu: 400m
+sparkAppImage: ghcr.io/netcracker/qubership-spark-customized:main
+sparkPyAppImage: ghcr.io/netcracker/qubership-spark-customized-py:main
+
+podSecurityContext: {}
+
+priorityClassName: ~
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+
+#ToDo store in secrets
+testsS3Endpoint: http://your.minio.endpoint.com
+testsS3AccessKey: miniokey
+testsS3SecretKey: miniopass

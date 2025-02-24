@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.service.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+    {{- include "deployment_and_service_only_labels_ssit" . | nindent 4 }}
+spec:
+  ports:
+    - name: http
+      port: 8080
+      protocol: TCP
+  selector:
+    {{- include "selector_labels_ssit" . | nindent 4 }}

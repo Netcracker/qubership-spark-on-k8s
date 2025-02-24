@@ -1,0 +1,20 @@
+{{- if .Values.hdfs.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-hdfs-config
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    {{- include "all_objects_labels_shs" . | nindent 4 }}
+data:
+  {{- if .Values.hdfs.hdfs_site }}
+  hdfs-site.xml: |
+    {{- .Values.hdfs.hdfs_site | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.hdfs.core_site }}
+  core-site.xml: |
+    {{- .Values.hdfs.core_site | nindent 4 }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metricspropertiesconfigmap
+  namespace: spark-apps
+  labels:
+    component: config
+data:
+  metrics.properties: |
+    *.sink.prometheusServlet.class=org.apache.spark.metrics.sink.PrometheusServlet
+    *.sink.prometheusServlet.path=/metrics/prometheus
+    master.sink.prometheusServlet.path=/metrics/master/prometheus
+    applications.sink.prometheusServlet.path=/metrics/applications/prometheus

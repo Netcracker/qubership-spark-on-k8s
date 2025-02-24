@@ -1,0 +1,179 @@
+{{- if .Values.s3InitJob.enabled -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spark-s3-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "all_objects_labels_shs" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.s3InitJob.initAnnotations | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "all_objects_labels_shs" . | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        {{- if .Values.extraVolumes }}
+          {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
+        {{- end }}
+      containers:
+      - name: s3init
+        image: {{ template "spark-history-server.image" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+        command: ["/bin/bash"]
+        resources: {{- toYaml .Values.s3InitJob.resources | nindent 12 }}
+        env:
+          {{- if .Values.extraEnv }}
+          {{- toYaml .Values.extraEnv | nindent 10}}
+          {{- end }}
+          - name: "ACCESS_KEY"
+            valueFrom:
+              secretKeyRef:
+                key: s3_accessKey
+                name: {{ .Chart.Name }}-init-job-credentials
+          - name: "SECRET_KEY"
+            valueFrom:
+              secretKeyRef:
+                key: s3_secretKey
+                name: {{ .Chart.Name }}-init-job-credentials
+        volumeMounts:
+          {{- if .Values.extraVolumeMounts }}
+            {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
+          {{- end }}
+
+        args:
+          - "-c"
+          - |-
+            s3_url="{{ .Values.s3.endpoint }}"
+            s3_uri="{{ .Values.logDirectory }}"
+            aws_sigv4="{{ .Values.s3InitJob.awsSigV4 }}"
+            curlOpts="--retry 5"
+            
+            echo "s3_url: $s3_url"
+            echo "s3_uri: $s3_uri"
+            
+            {{- if .Values.s3.sslInsecure }}
+            curlOpts="${curlOpts} --insecure"
+            echo "TLS certificate validation is disabled."
+            {{- end }}
+
+            # remove last '/'
+            s3_uri=$(echo "$s3_uri" | sed 's/\/$//')
+            
+            # get bucket dir from S3 URI
+            bucket_dir=$(echo "$s3_uri" | cut -d/ -f4-)
+            
+            # get bucket name from S3 URI
+            bucket_name=$(echo "$s3_uri" | cut -d/ -f3)
+            
+            get_http_code_from_response() {
+              response="$1"
+              status_code=$(echo "$response" | grep -E "^HTTP/[0-9\.]*\s[0-9]{3}(\s[a-zA-Z]*)?" | grep -oE "[0-9]{3}")
+              echo "${status_code}"
+            }
+
+            head_bucket() {
+              response=$(curl -v -s -I ${curlOpts} --head ${s3_url}/${bucket_name} \
+                              -H "Date: $(date --utc +'%Y%m%dT%H%M%SZ')" \
+                              --user ${ACCESS_KEY}:${SECRET_KEY} \
+                              --aws-sigv4 "${aws_sigv4}" 2>&1)
+
+              echo "${response}"
+            }
+
+            create_bucket() {
+              response=$(curl -v -s -I ${curlOpts} -X PUT \
+                              -H "Date: $(date --utc +'%Y%m%dT%H%M%SZ')" \
+                              -H "Content-Length: 0" \
+                              --user ${ACCESS_KEY}:${SECRET_KEY} \
+                              --aws-sigv4 "${aws_sigv4}" \
+                              ${s3_url}/${bucket_name} 2>&1)
+
+              echo "${response}"
+            }
+
+            put_file_to_bucket_dir() {
+              s3_path=""
+              mock_file="mock.txt"
+            
+              if [[ ${bucket_dir} != "" ]]; then
+                s3_path=${bucket_name}/${bucket_dir}/${mock_file}
+              else
+                s3_path=${bucket_name}/${mock_file}
+              fi
+            
+              response=$(curl -v -s -I ${curlOpts} -X PUT \
+                              -H "Date: $(date --utc +'%Y%m%dT%H%M%SZ')" \
+                              -H "Content-Type: text/plain" \
+                              --user ${ACCESS_KEY}:${SECRET_KEY} \
+                              --aws-sigv4 "${aws_sigv4}" \
+                              ${s3_url}/${s3_path} 2>&1)
+
+              echo "${response}"
+            }
+
+            echo -e "\n\n\n\n-----Check if bucket '${bucket_name}' exists-------"
+            head_response=$(head_bucket)
+            head_http_status_code="$(get_http_code_from_response "$head_response")"
+            echo "head_http_status: $head_http_status_code"
+
+            if [[ "$head_http_status_code" = 200 ]]; then
+              echo "Bucket '$bucket_name' already exists."
+              echo -e "\n\n\n\n------Create\Update bucket path '$bucket_dir' and upload mock file-------"
+              put_response=$(put_file_to_bucket_dir)
+              put_http_status_code="$(get_http_code_from_response "$put_response")"
+              echo "put_http_status: $put_http_status_code"
+
+              if [[ "$put_http_status_code" = 200 ]]; then
+                echo "Bucket path '$bucket_dir' has been successfully created\updated with mock file."
+              else
+                echo "Could not create\update a bucket path '$bucket_dir' with mock file."
+                echo "$put_response"
+                exit 1
+              fi
+
+            else
+              if [[ "$head_http_status_code" = 404 ]]; then
+                echo "Bucket '$bucket_name' does not exist"
+                echo -e "\n\n\n\n------Create bucket '$bucket_name'-------"
+                create_response=$(create_bucket)
+                create_http_status_code="$(get_http_code_from_response "$create_response")"
+                echo "create_http_status: $create_http_status_code"
+
+                if [[ "$create_http_status_code" = 200 ]]; then
+                  echo "Bucket '$bucket_name' has been successfully created."
+                else
+                  echo "Could not create a bucket."
+                  echo "$create_response"
+                  exit 1
+                fi
+
+                echo -e "\n\n\n\n------Create bucket path '$bucket_dir' upload mock file-------"
+                put_response=$(put_file_to_bucket_dir)
+                put_http_status_code="$(get_http_code_from_response "$put_response")"
+                echo "put_http_status: $put_http_status_code"
+
+                if [[ "$put_http_status_code" = 200 ]]; then
+                  echo "Bucket path has been successfully created with mock file."
+                else
+                  echo "Could not create a bucket path with mock file."
+                  echo "$put_response"
+                  exit 1
+                fi
+
+              else
+                echo "Could not check if bucket '$bucket_name' exists".
+                echo "$head_response"
+                exit 1
+              fi
+            fi
+
+      restartPolicy: Never
+  backoffLimit: 5
+{{- end }}

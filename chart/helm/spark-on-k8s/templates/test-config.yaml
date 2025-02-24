@@ -1,0 +1,10 @@
+{{- if index .Values "spark-integration-tests" "enabled" }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tests-config
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+data:
+  dd_images: ""
+{{ end }}

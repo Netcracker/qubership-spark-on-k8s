@@ -1,0 +1,124 @@
+spark-operator:
+  image:
+    registry: ghcr.io
+    repository: netcracker/qubership-spark-operator
+    tag: main
+  controller:
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      runAsUser: 185
+    resources:
+       limits:
+         cpu: 200m
+         memory: 600Mi
+       requests:
+         cpu: 100m
+         memory: 300Mi
+  webhook:
+    podSecurityContext:
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
+      runAsUser: 185
+    resources:
+       limits:
+         cpu: 200m
+         memory: 600Mi
+       requests:
+         cpu: 100m
+         memory: 300Mi
+  spark:
+    jobNamespaces:
+    - spark-apps
+    serviceAccount:
+      name: "sparkapps-sa"
+  prometheus:
+    podMonitor:
+      create: false
+      labels:
+        app.kubernetes.io/component: monitoring
+        app.kubernetes.io/name: spark-operator-gcp-podmonitor
+        app.kubernetes.io/part-of: platform-monitoring
+        k8s-app: spark-operator-gcp-podmonitor
+
+# ToDo remove metrics parameter, it is excessive
+metrics:
+  enable: true
+grafanaApplicationDashboard:
+  enable: false
+grafanadashboard:
+  enable: false
+prometheusRules:
+  alert:
+    enable: false
+appServiceMonitor:
+  enable: false
+spark-history-server:
+  enabled: false
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    runAsUser: 185
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+  oauth2Proxy:
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 2000
+      runAsGroup: 2000
+      seccompProfile:
+        type: RuntimeDefault
+spark-thrift-server:
+  enabled: false
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    runAsUser: 185
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+spark-integration-tests:
+  enabled: false
+  sparkOperatorControllerDeploymentName: sparkoperator-spark-operator-controller
+  sparkOperatorWebhookDeploymentName: sparkoperator-spark-operator-webhook
+  sparkAppsServiceAccount: sparkapps-sa
+statusProvisioner:
+  podSecurityContext:
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+    runAsUser: 185
+  securityContext:
+      readOnlyRootFilesystem: true
+      privileged: false
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+  priorityClassName: ~
+  enabled: true
+  resources:
+    requests:
+      memory: "200Mi"
+      cpu: "200m"
+    limits:
+      memory: "200Mi"
+      cpu: "200m"
+  image: ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.1
+  lifetimeAfterCompletion: 600
+  podReadinessTimeout: 300
+  integrationTestsTimeout: 2000
+  labels: {}

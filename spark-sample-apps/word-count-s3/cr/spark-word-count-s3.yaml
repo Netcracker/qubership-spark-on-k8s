@@ -1,0 +1,84 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: spark-word-count-s3
+  namespace: spark-gcp-apps
+spec:
+  type: Java
+  mode: cluster
+  image: "ghcr.io/netcracker/qubership-spark-sample-apps-word-count-s3:main"
+  imagePullPolicy: Always
+  mainClass: com.qubership.spark.app.WordCountApp
+  mainApplicationFile: "local:///opt/spark/examples/word-count-spark-app-1.0-SNAPSHOT.jar"
+  sparkVersion: "3.5.3"
+  restartPolicy:
+    type: Never
+  sparkConf:
+    "spark.jars.ivy": "/tmp/.ivy"
+    "spark.s3.input.file": "s3a://spark-samples/wordcount/input/log4j.properties"
+    "spark.s3.output.path": "s3a://spark-samples/wordcount/output"
+    #"spark.kubernetes.local.dirs.tmpfs": "true"
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    "spark.kubernetes.driver.connectionTimeout": "60000000"
+    "spark.kubernetes.driver.requestTimeout": "60000000"
+  hadoopConf:
+    "fs.s3a.endpoint": http://minio-endpoint.cloud.qubership.com
+    "fs.s3a.impl": org.apache.hadoop.fs.s3a.S3AFileSystem
+    "fs.s3a.connection.ssl.enabled": "false"
+    "fs.s3a.path.style.access": "true"
+    "fs.s3a.committer.magic.enabled": "false"
+    "fs.s3a.committer.name": directory
+    "fs.s3a.committer.staging.abort.pending.uploads": "true"
+    "fs.s3a.committer.staging.conflict-mode": append
+    "fs.s3a.connection.timeout": "200000"
+
+  driver:
+    labels:
+      version: 3.5.3
+    serviceAccount: sparkapps-sa
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+    env:
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: s3-cred
+            key: accesskey
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: s3-cred
+            key: secretkey
+  executor:
+    cores: 1
+    instances: 1
+    labels:
+      version: 3.5.3
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+    env:
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: s3-cred
+            key: accesskey
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: s3-cred
+            key: secretkey

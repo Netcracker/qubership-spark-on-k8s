@@ -1,0 +1,83 @@
+#
+# Copyright 2017 Google LLC
+# Modified in 2025 by NetCracker Technology Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: spark-pi-event-logs-s3
+  namespace: spark-apps
+spec:
+  type: Scala
+  mode: cluster
+  image: "ghcr.io/netcracker/qubership-spark-customized:main"
+  imagePullPolicy: Always
+  mainClass: org.apache.spark.examples.SparkPi
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.3.jar"
+  sparkVersion: "3.5.3"
+  restartPolicy:
+    type: Never
+  sparkConf:
+    "spark.jars.ivy": "/tmp/.ivy"
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "s3a://tmp/spark/logs"
+    #"spark.kubernetes.local.dirs.tmpfs": "true"
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    "spark.kubernetes.driver.connectionTimeout": "60000000"
+    "spark.kubernetes.driver.requestTimeout": "60000000"
+  hadoopConf:
+    "fs.s3a.endpoint": http://your.minio.endpoint.com
+    "fs.s3a.access.key": miniokey
+    "fs.s3a.secret.key": miniopass
+    "fs.s3a.impl": org.apache.hadoop.fs.s3a.S3AFileSystem
+    "fs.s3a.connection.ssl.enabled": "false"
+    "fs.s3a.path.style.access": "true"
+    "fs.s3a.committer.magic.enabled": "false"
+    "fs.s3a.committer.name": directory
+    "fs.s3a.committer.staging.abort.pending.uploads": "true"
+    "fs.s3a.committer.staging.conflict-mode": append
+    "fs.s3a.connection.timeout": "200000"
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+    labels:
+      version: 3.5.3
+    serviceAccount: sparkapps-sa
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+  executor:
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: 3.5.3
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL

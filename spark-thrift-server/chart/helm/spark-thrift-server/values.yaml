@@ -1,0 +1,172 @@
+# Default values for spark-thrift-server.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+replicas: 1
+
+
+image:
+  repository: ghcr.io/netcracker/qubership-spark-customized
+  pullPolicy: Always
+  tag: main
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: "spark-thrift-server"
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "spark-thrift-sa"
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+priorityClassName: ~
+
+service:
+  type: NodePort
+  ports:
+    thriftServerPort:
+      name: thrift-server-port
+      protocol: TCP
+      port: 10000
+      targetPort: 10000
+      nodePort: 30204
+    sparkDriverPort:
+      name: spark-driver-port
+      protocol: TCP
+      port: 7078
+      targetPort: 7078
+    sparkUIPort:
+      name: spark-ui
+      protocol: TCP
+      port: 4040
+      targetPort: 4040
+      nodePort: 30868
+    additionalPorts:
+      - name: spark-blockmanager
+        protocol: TCP
+        port: 22322
+        targetPort: 22322
+        nodePort: 32485
+
+ingress:
+  enabled: true
+  host: ""
+  path: /
+  # kubernetes.io/ingress.class: nginx
+  # nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+  # host: 'spark-thrift-server.minio.your.cloud.qubeship.com'
+  # path: '/'
+
+
+#resources: {}
+#resources:
+#  limits:
+#    cpu: 500m
+#    memory: 1000Mi
+#  requests:
+#    cpu: 500m
+#    memory: 1000Mi
+resources:
+  limits:
+    cpu: 1500m
+    memory: 3000Mi
+  requests:
+    cpu: 500m
+    memory: 1000Mi
+
+log4j2Properties: |
+  rootLogger.level = info
+  rootLogger.appenderRef.stdout.ref = console
+  appender.console.type = Console
+  appender.console.name = console
+  appender.console.target = SYSTEM_ERR
+  appender.console.layout.type = PatternLayout
+  logger.spark.name = org.apache.spark
+  logger.spark.level = info
+  logger.nio.name = java.base/sun.nio.ch
+  logger.nio.level = debug
+  logger.thriftserver.name = org.apache.spark.sql.hive.thriftserver
+  logger.thriftserver.level = debug
+  logger.hive.name = org.apache.hive
+  logger.hive.level = info
+  appender.console.layout.pattern = %d{yy/MM/dd HH:mm:ss} %p %c{1}: %m%n%ex
+
+s3:
+  endpoint: http://minio.your.cloud.qubeship.com
+  accesskey: minioaccesskey
+  secretkey: miniosecretkey
+
+hivemetastore:
+  uri: thrift://hive-metastore.hive-metastore-r.svc:9083
+  warehouse: s3a://thrift/warehouse
+
+sparkMasterUri: local
+
+sparkProperties: |
+  spark.kubernetes.executor.deleteOnTermination true
+  spark.driver.extraJavaOptions "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+  spark.kubernetes.file.upload.path s3a://thrift/tmp
+  spark.dynamicAllocation.enabled true
+  spark.hadoop.fs.s3a.committer.name directory
+  spark.hadoop.fs.s3a.fast.upload true
+  spark.hadoop.fs.s3a.impl org.apache.hadoop.fs.s3a.S3AFileSystem
+  spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version 2
+  spark.hadoop.mapreduce.fileoutputcommitter.cleanup-failures.ignored true
+  spark.hadoop.parquet.enable.summary-metadata false
+  spark.sql.catalogImplementation hive
+  spark.sql.hive.metastorePartitionPruning true
+  spark.sql.legacy.createHiveTableByDefault.enabled false
+  spark.sql.parquet.filterPushdown true
+  spark.sql.parquet.mergeSchema true
+  spark.sql.parquet.output.committer.class org.apache.parquet.hadoop.ParquetOutputCommitter
+  spark.hadoop.fs.s3a.aws.credentials.provider org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider
+  spark.hadoop.fs.s3.buckets.create.enabled true
+  spark.hadoop.fs.s3a.committer.magic.enabled false
+  spark.hadoop.fs.s3a.committer.staging.abort.pending.uploads true
+  spark.sql.extensions io.delta.sql.DeltaSparkSessionExtension
+  spark.sql.catalog.spark_catalog org.apache.spark.sql.delta.catalog.DeltaCatalog
+  spark.hadoop.fs.s3a.committer.staging.conflict-mode append
+  spark.hadoop.fs.s3a.connection.ssl.enabled false
+  spark.sql.sources.default parquet
+  spark.hadoop.fs.s3a.connection.timeout 200000
+  spark.hadoop.fs.s3a.fast.upload.active.blocks 4
+  spark.hadoop.fs.s3a.fast.upload.buffer array
+  spark.hadoop.fs.s3a.max.total.tasks 5
+  spark.hadoop.fs.s3a.multipart.threshold 128M
+  spark.hadoop.fs.s3a.path.style.access true
+  spark.hadoop.fs.s3a.threads.max 10
+  spark.hadoop.fs.s3a.path.style.access true
+  spark.serializer org.apache.spark.serializer.KryoSerializer
+  spark.blockManager.port 22322
+  spark.executor.memory 6g
+  spark.sql.shuffle.partitions 50
+
+#hiveConfigSecret:
+#  hiveSiteProperties: |
+#  coreSiteProperties: |
+#    <configuration>
+#      <property>
+#        <name>fs.s3a.path.style.access</name>
+#        <value>true</value>
+#      </property>
+#      <property>
+#        <name>fs.s3a.impl</name>
+#        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+#      </property>
+#      <property>
+#        <name>fs.s3a.fast.upload</name>
+#        <value>true</value>
+#      </property>
+#    </configuration>
+#  hdfsSiteProperties: |

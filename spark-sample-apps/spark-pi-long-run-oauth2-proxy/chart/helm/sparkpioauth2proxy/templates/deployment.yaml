@@ -1,0 +1,367 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "oauth2-proxy.name" . }}
+{{- include "oauth2-proxy.labels" . | indent 4 }}
+  {{- if .Values.oauth2Proxy.deploymentAnnotations }}
+  annotations:
+{{ toYaml .Values.oauth2Proxy.deploymentAnnotations | indent 8 }}
+  {{- end }}
+  name: {{ template "oauth2-proxy.fullname" . }}
+  namespace: {{ template "oauth2-proxy.namespace" $ }}
+spec:
+  replicas: {{ .Values.oauth2Proxy.replicas }}
+  {{- if .Values.oauth2Proxy.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.oauth2Proxy.revisionHistoryLimit }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "oauth2-proxy.selectorLabels" . | indent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.oauth2Proxy.alphaConfig.enabled }}
+        checksum/alpha-config: {{ include (print $.Template.BasePath "/secret-alpha.yaml") . | sha256sum }}
+        {{- end }}
+        checksum/config-emails: {{ include (print $.Template.BasePath "/configmap-authenticated-emails-file.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        checksum/google-secret: {{ include (print $.Template.BasePath "/google-secret.yaml") . | sha256sum }}
+        checksum/redis-secret: {{ include (print $.Template.BasePath "/redis-secret.yaml") . | sha256sum }}
+{{- if .Values.oauth2Proxy.htpasswdFile.enabled }}
+        checksum/htpasswd: {{ include (print $.Template.BasePath "/secret-htpasswd-file.yaml") . | sha256sum }}
+{{- end }}
+    {{- if .Values.oauth2Proxy.podAnnotations }}
+{{ toYaml .Values.oauth2Proxy.podAnnotations | indent 8 }}
+    {{- end }}
+      labels:
+        app: {{ template "oauth2-proxy.name" . }}
+        {{- include "oauth2-proxy.labels" . | indent 8 }}
+      {{- if .Values.oauth2Proxy.podLabels }}
+{{ toYaml .Values.oauth2Proxy.podLabels | indent 8 }}
+      {{- end }}
+    spec:
+    {{- if .Values.oauth2Proxy.priorityClassName }}
+      priorityClassName: "{{ .Values.oauth2Proxy.priorityClassName }}"
+    {{- end }}
+      {{- with .Values.oauth2Proxy.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ template "oauth2-proxy.serviceAccountName" . }}
+      automountServiceAccountToken : {{ .Values.oauth2Proxy.serviceAccount.automountServiceAccountToken }}
+      {{- if .Values.oauth2Proxy.hostAlias.enabled }}
+      hostAliases:
+        - ip: {{ .Values.oauth2Proxy.hostAlias.ip }}
+          hostnames:
+          - {{ .Values.oauth2Proxy.hostAlias.hostname }}
+      {{- end }}
+      {{- if and .Values.oauth2Proxy.redis.enabled .Values.oauth2Proxy.initContainers.waitForRedis.enabled }}
+      initContainers:
+      - name: wait-for-redis
+        image: "bitnami/kubectl:1.27.7"
+        args:
+          - wait
+          - pod/{{ include "oauth2-proxy.redis.fullname" . }}-master-0
+          - --for=condition=ready
+          - --timeout={{ .Values.oauth2Proxy.initContainers.waitForRedis.timeout }}s
+      {{- if .Values.oauth2Proxy.initContainers.waitForRedis.securityContext.enabled }}
+      {{- $securityContext := unset .Values.oauth2Proxy.initContainers.waitForRedis.securityContext "enabled" }}
+        securityContext:
+          {{- toYaml $securityContext | nindent 10 }}
+      {{- end }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.oauth2Proxy.image.repository }}:v{{ include "oauth2-proxy.version" . }}"
+        imagePullPolicy: {{ .Values.oauth2Proxy.image.pullPolicy }}
+        args:
+        {{- if .Values.oauth2Proxy.alphaConfig.enabled }}
+          - --alpha-config=/etc/oauth2_proxy/oauth2_proxy.yml
+        {{- else }}
+          - --http-address=0.0.0.0:4180
+          - --https-address=0.0.0.0:4443
+        {{- if .Values.oauth2Proxy.metrics.enabled }}
+          - --metrics-address=0.0.0.0:44180
+        {{- end }}
+        {{- end }}
+        {{- if .Values.oauth2Proxy.config.cookieName }}
+          - --cookie-name={{ .Values.oauth2Proxy.config.cookieName }}
+        {{- end }}
+        {{- if kindIs "map" .Values.oauth2Proxy.extraArgs }}
+          {{- range $key, $value := .Values.oauth2Proxy.extraArgs }}
+          {{- if not (kindIs "invalid" $value) }}
+          - --{{ $key }}={{ tpl ($value | toString) $ }}
+          {{- else }}
+          - --{{ $key }}
+          {{- end }}
+          {{- end }}
+        {{- end }}
+        {{- if kindIs "slice" .Values.oauth2Proxy.extraArgs }}
+          {{- with .Values.oauth2Proxy.extraArgs }}
+            {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- end }}
+        {{- if or .Values.oauth2Proxy.config.existingConfig .Values.oauth2Proxy.config.configFile }}
+          - --config=/etc/oauth2_proxy/oauth2_proxy.cfg
+        {{- end }}
+        {{- if .Values.oauth2Proxy.authenticatedEmailsFile.enabled }}
+        {{- if .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+          - --authenticated-emails-file=/etc/oauth2-proxy/{{ .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+        {{- else }}
+          - --authenticated-emails-file=/etc/oauth2-proxy/authenticated-emails-list
+        {{- end }}
+        {{- end }}
+        {{- with .Values.oauth2Proxy.config.google }}
+        {{- if and .adminEmail (or .serviceAccountJson .existingSecret .useApplicationDefaultCredentials) }}
+          - --google-admin-email={{ .adminEmail }}
+        {{- if .useApplicationDefaultCredentials }}
+          - --google-use-application-default-credentials=true
+        {{- else }}
+          - --google-service-account-json=/google/service-account.json
+        {{- end }}
+        {{- if .targetPrincipal }}
+          - --google-target-principal={{ .targetPrincipal }}
+        {{- end }}
+        {{- end }}
+        {{- if .groups }}
+        {{- range $group := .groups }}
+          - --google-group={{ $group }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.oauth2Proxy.htpasswdFile.enabled }}
+          - --htpasswd-file=/etc/oauth2_proxy/htpasswd/users.txt
+        {{- end }}
+        env:
+        {{- if .Values.oauth2Proxy.proxyVarsAsSecrets }}
+        - name: OAUTH2_PROXY_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name:  {{ template "oauth2-proxy.secretName" . }}
+              key: client-id
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name:  {{ template "oauth2-proxy.secretName" . }}
+              key: client-secret
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name:  {{ template "oauth2-proxy.secretName" . }}
+              key: cookie-secret
+        {{- end }}
+        {{- if eq (default "cookie" .Values.oauth2Proxy.sessionStorage.type) "redis" }}
+        - name: OAUTH2_PROXY_SESSION_STORE_TYPE
+          value: "redis"
+         {{- if or .Values.oauth2Proxy.sessionStorage.redis.existingSecret .Values.oauth2Proxy.sessionStorage.redis.password (and .Values.oauth2Proxy.redis.enabled (.Values.oauth2Proxy.redis.auth).enabled )}}
+        - name: OAUTH2_PROXY_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if .Values.oauth2Proxy.sessionStorage.redis.existingSecret }}
+              name: {{ .Values.oauth2Proxy.sessionStorage.redis.existingSecret }}
+              {{- else if .Values.oauth2Proxy.sessionStorage.redis.password }}
+              name: {{ template "oauth2-proxy.fullname" . }}-redis-access
+              {{- else }}
+              name: {{ include "oauth2-proxy.redis.fullname" . }}
+              {{- end }}
+              key: {{ .Values.oauth2Proxy.sessionStorage.redis.passwordKey }}
+        {{- end }}
+        {{- if eq (default "" .Values.oauth2Proxy.sessionStorage.redis.clientType) "standalone" }}
+        - name: OAUTH2_PROXY_REDIS_CONNECTION_URL
+          value: {{ include "oauth2-proxy.redis.StandaloneUrl" . }}
+        {{- else if eq (default "" .Values.oauth2Proxy.sessionStorage.redis.clientType) "cluster" }}
+        - name: OAUTH2_PROXY_REDIS_USE_CLUSTER
+          value: "true"
+        - name: OAUTH2_PROXY_REDIS_CLUSTER_CONNECTION_URLS
+          value: {{ .Values.oauth2Proxy.sessionStorage.redis.cluster.connectionUrls }}
+        {{- else if eq (default "" .Values.oauth2Proxy.sessionStorage.redis.clientType) "sentinel" }}
+        - name: OAUTH2_PROXY_REDIS_USE_SENTINEL
+          value: "true"
+        - name: OAUTH2_PROXY_REDIS_SENTINEL_MASTER_NAME
+          value: {{ .Values.oauth2Proxy.sessionStorage.redis.sentinel.masterName }}
+        - name: OAUTH2_PROXY_REDIS_SENTINEL_CONNECTION_URLS
+          value: {{ .Values.oauth2Proxy.sessionStorage.redis.sentinel.connectionUrls }}
+        {{- if or .Values.oauth2Proxy.sessionStorage.redis.sentinel.existingSecret .Values.oauth2Proxy.sessionStorage.redis.existingSecret .Values.oauth2Proxy.sessionStorage.redis.sentinel.password }}
+        - name: OAUTH2_PROXY_REDIS_SENTINEL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              {{- if or .Values.oauth2Proxy.sessionStorage.redis.sentinel.existingSecret .Values.oauth2Proxy.sessionStorage.redis.existingSecret }}
+              name: {{ .Values.oauth2Proxy.sessionStorage.redis.sentinel.existingSecret | default .Values.oauth2Proxy.sessionStorage.redis.existingSecret }}
+              {{- else }}
+              name: {{ template "oauth2-proxy.fullname" . }}-redis-access
+              {{- end }}
+              key: {{ .Values.oauth2Proxy.sessionStorage.redis.sentinel.passwordKey }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.oauth2Proxy.extraEnv }}
+{{ tpl (toYaml .Values.oauth2Proxy.extraEnv) . | indent 8 }}
+        {{- end }}
+        ports:
+        {{- if .Values.oauth2Proxy.containerPort }}
+          - containerPort: {{ .Values.oauth2Proxy.containerPort }}
+        {{- else if (and (eq .Values.oauth2Proxy.httpScheme "http") (empty .Values.oauth2Proxy.containerPort)) }}
+          - containerPort: 4180
+        {{- else if (and (eq .Values.oauth2Proxy.httpScheme "https") (empty .Values.oauth2Proxy.containerPort)) }}
+          - containerPort: 4443
+        {{- else }}
+        {{- end}}
+            name: {{ .Values.oauth2Proxy.service.portName }}
+            protocol: TCP
+{{- if .Values.oauth2Proxy.metrics.enabled }}
+          - containerPort: 44180
+            protocol: TCP
+            name: metrics
+{{- end }}
+{{- if .Values.oauth2Proxy.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: {{ .Values.oauth2Proxy.service.portName }}
+            scheme: {{ .Values.oauth2Proxy.httpScheme | upper }}
+          initialDelaySeconds: {{ .Values.oauth2Proxy.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.oauth2Proxy.livenessProbe.timeoutSeconds }}
+{{- end }}
+{{- if .Values.oauth2Proxy.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ if gt (include "oauth2-proxy.version" .) "7.4.0" }}/ready{{ else }}/ping{{ end }}
+            port: {{ .Values.oauth2Proxy.service.portName }}
+            scheme: {{ .Values.oauth2Proxy.httpScheme | upper }}
+          initialDelaySeconds: {{ .Values.oauth2Proxy.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.oauth2Proxy.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.oauth2Proxy.readinessProbe.successThreshold }}
+          periodSeconds: {{ .Values.oauth2Proxy.readinessProbe.periodSeconds }}
+{{- end }}
+        resources:
+{{ toYaml .Values.oauth2Proxy.resources | indent 10 }}
+        volumeMounts:
+{{- with .Values.oauth2Proxy.config.google }}
+{{- if and .adminEmail (or .serviceAccountJson .existingSecret) }}
+        - name: google-secret
+          mountPath: /google
+          readOnly: true
+{{- end }}
+{{- end }}
+{{- if or .Values.oauth2Proxy.config.existingConfig .Values.oauth2Proxy.config.configFile }}
+        - mountPath: /etc/oauth2_proxy/oauth2_proxy.cfg
+          name: configmain
+          subPath: oauth2_proxy.cfg
+{{- end }}
+{{- if .Values.oauth2Proxy.alphaConfig.enabled }}
+        - mountPath: /etc/oauth2_proxy/oauth2_proxy.yml
+          name: configalpha
+          subPath: oauth2_proxy.yml
+{{- end }}
+{{- if .Values.oauth2Proxy.authenticatedEmailsFile.enabled }}
+        - mountPath: /etc/oauth2-proxy
+          name: configaccesslist
+          readOnly: true
+{{- end }}
+{{- if .Values.oauth2Proxy.htpasswdFile.enabled }}
+        - mountPath: /etc/oauth2_proxy/htpasswd
+          name: {{ template "oauth2-proxy.fullname" . }}-htpasswd-file
+          readOnly: true
+{{- end }}
+{{- if ne (len .Values.oauth2Proxy.extraVolumeMounts) 0 }}
+{{ toYaml .Values.oauth2Proxy.extraVolumeMounts | indent 8 }}
+{{- end }}
+{{- if .Values.oauth2Proxy.securityContext.enabled }}
+{{- $securityContext := unset .Values.oauth2Proxy.securityContext "enabled" }}
+        securityContext:
+          {{- toYaml $securityContext | nindent 10 }}
+{{- end }}
+{{- if .Values.oauth2Proxy.extraContainers }}
+  {{- toYaml .Values.oauth2Proxy.extraContainers | nindent 6 }}
+{{- end }}
+      volumes:
+{{- with .Values.oauth2Proxy.config.google }}
+{{- if and .adminEmail (or .serviceAccountJson .existingSecret) }}
+      - name: google-secret
+        secret:
+          secretName: {{ if .existingSecret }}{{ .existingSecret }}{{ else }} {{ template "oauth2-proxy.secretName" $ }}-google{{ end }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.oauth2Proxy.htpasswdFile.enabled }}
+      - name: {{ template "oauth2-proxy.fullname" . }}-htpasswd-file
+        secret:
+          secretName: {{ if .Values.oauth2Proxy.htpasswdFile.existingSecret }}{{ .Values.oauth2Proxy.htpasswdFile.existingSecret }}{{ else }} {{ template "oauth2-proxy.fullname" . }}-htpasswd-file {{ end }}
+{{- end }}
+
+{{- if and (.Values.oauth2Proxy.authenticatedEmailsFile.enabled) (eq .Values.oauth2Proxy.authenticatedEmailsFile.persistence "secret") }}
+      - name: configaccesslist
+        secret:
+          items:
+          - key: {{ default "restricted_user_access" .Values.oauth2Proxy.authenticatedEmailsFile.restrictedUserAccessKey }}
+{{- if .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+            path: {{ .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+{{- else }}
+            path: authenticated-emails-list
+{{- end }}
+{{- if .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+          secretName: {{ .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+{{- else }}
+          secretName: {{ template "oauth2-proxy.fullname" . }}-accesslist
+{{- end }}
+{{- end }}
+
+{{- if or .Values.oauth2Proxy.config.existingConfig .Values.oauth2Proxy.config.configFile }}
+      - configMap:
+          defaultMode: 420
+          name: {{ if .Values.oauth2Proxy.config.existingConfig }}{{ .Values.oauth2Proxy.config.existingConfig }}{{ else }}{{ template "oauth2-proxy.fullname" . }}{{ end }}
+        name: configmain
+{{- end }}
+{{- if .Values.oauth2Proxy.alphaConfig.enabled }}
+{{- if .Values.oauth2Proxy.alphaConfig.existingConfig }}
+      - configMap:
+          defaultMode: 420
+          name: {{ .Values.oauth2Proxy.alphaConfig.existingConfig }}
+        name: configalpha
+{{- else }}
+      - secret:
+          defaultMode: 420
+          secretName: {{ if .Values.oauth2Proxy.alphaConfig.existingSecret }}{{ .Values.oauth2Proxy.alphaConfig.existingSecret }}{{ else }}{{ template "oauth2-proxy.fullname" . }}-alpha{{ end }}
+        name: configalpha
+{{- end }}
+{{- end }}
+{{- if ne (len .Values.oauth2Proxy.extraVolumes) 0 }}
+{{ toYaml .Values.oauth2Proxy.extraVolumes | indent 6 }}
+{{- end }}
+{{- if and (.Values.oauth2Proxy.authenticatedEmailsFile.enabled) (eq .Values.oauth2Proxy.authenticatedEmailsFile.persistence "configmap") }}
+      - configMap:
+{{- if .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+          name: {{ .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+{{- else }}
+          name: {{ template "oauth2-proxy.fullname" . }}-accesslist
+{{- end }}
+          items:
+          - key: {{ default "restricted_user_access" .Values.oauth2Proxy.authenticatedEmailsFile.restrictedUserAccessKey }}
+{{- if .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+            path: {{ .Values.oauth2Proxy.authenticatedEmailsFile.template }}
+{{- else }}
+            path: authenticated-emails-list
+{{- end }}
+        name: configaccesslist
+{{- end }}
+
+      {{- if .Values.oauth2Proxy.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.oauth2Proxy.imagePullSecrets | indent 8 }}
+      {{- end }}
+    {{- if .Values.oauth2Proxy.affinity }}
+      affinity:
+{{ toYaml .Values.oauth2Proxy.affinity | indent 8 }}
+    {{- end }}
+    {{- if .Values.oauth2Proxy.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.oauth2Proxy.nodeSelector | indent 8 }}
+    {{- end }}
+      tolerations:
+{{ toYaml .Values.oauth2Proxy.tolerations | indent 8 }}
+      {{- with .Values.oauth2Proxy.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
