@@ -5,7 +5,7 @@ kind: ServiceMonitor
 metadata:
   {{- with .Values.oauth2Proxy.metrics.serviceMonitor.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+{{ tpl ( toYaml . ) $ | indent 4 }}
   {{- end }}
   name: {{ template "oauth2-proxy.fullname" . }}
 {{- if .Values.oauth2Proxy.metrics.serviceMonitor.namespace }}
