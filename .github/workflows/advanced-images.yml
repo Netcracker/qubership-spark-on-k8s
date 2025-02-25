@@ -1,10 +1,5 @@
 name: Build Advanced Images
 on:
-  release:
-    types: [created]
-  push:
-    branches:
-      - '**'
   workflow_run:
     workflows: [Build Basic Images]
     types:
