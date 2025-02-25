@@ -1,8 +1,7 @@
 name: Build Advanced Images
 on:
   workflow_run:
-    workflows:
-      - Build Basic Images
+    workflows: [Build Basic Images]
     types:
       - completed
   workflow_dispatch:
