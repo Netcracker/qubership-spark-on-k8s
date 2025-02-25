@@ -1436,7 +1436,7 @@ To enable OAuth2 Proxy authentication:
 
 1. Deploy Keycloak.
 2. Configure a client.
-   - If you are using Infra or Vanilla Keycloak, configure Keycloak referring to the OAuth2 Proxy official documentation at [https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc).
+   - If you are using Vanilla Keycloak, configure Keycloak referring to the OAuth2 Proxy official documentation at [https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc).
      In general, you need to: 
       * Create and configure a client.
       * Add Group Membership and Audience mappers to the client.
