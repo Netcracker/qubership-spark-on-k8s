@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: spark-conf
+ namespace: {{ .Release.Namespace }}
+ labels:
+  {{- include "all_objects_labels_sts" . | nindent 2 }}
+data:
+ spark-defaults.conf: |-
+  spark.master {{ .Values.sparkMasterUri }}
+  spark.kubernetes.namespace {{ .Release.Namespace }}
+  spark.kubernetes.authenticate.driver.serviceAccountName {{ include "spark-thrift-server.serviceAccountName" . }}
+  spark.kubernetes.executor.podTemplateFile /opt/spark/conf/pod-template.yaml
+  spark.kubernetes.executor.podTemplateContainerName spark-thrift-executor
+  {{ if and (.Values.sparkMasterUri) (hasPrefix "k8s" .Values.sparkMasterUri) }}
+  spark.kubernetes.container.image {{ template "spark-thrift-server.image" . }}
+  {{ end }}
+  spark.hadoop.fs.s3a.endpoint {{ .Values.s3.endpoint }}
+  spark.hadoop.hive.metastore.uris {{ .Values.hivemetastore.uri }}
+  spark.driver.port {{ .Values.service.ports.sparkDriverPort.port }}
+  {{ if .Values.hivemetastore.warehouse }}
+  spark.sql.warehouse.dir {{ .Values.hivemetastore.warehouse }}
+  {{ end }}
+  spark.kubernetes.driver.pod.name {{ template "spark-thrift-server.fullname" . }}-0
+  spark.driver.host {{ template "spark-thrift-server.fullname" . }}-service
+  {{- if .Values.sparkProperties }}
+    {{- .Values.sparkProperties | nindent 4 }}
+  {{- end }}

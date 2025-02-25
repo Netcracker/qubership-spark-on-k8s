@@ -1,0 +1,34 @@
+apiVersion: v1
+
+name: qubership-spark-on-k8s
+
+description: A helm extension for Kubeflow spark-operator chart for more convinient running of spark application in k8s
+
+version: 1.0.0
+
+appVersion: 1.0.0
+
+keywords:
+- apache spark
+- kubeflow spark operator
+- big data
+
+home: https://github.com/Netcracker/qubership-spark-on-k8s
+
+
+dependencies:
+  - name: spark-operator
+    version: "2.1.0"
+    repository: "file://charts/spark-operator"
+  - name: spark-history-server
+    condition: spark-history-server.enabled
+    version: "0.1.0"
+    repository: "file://charts/spark-history-server"
+  - name: spark-thrift-server
+    condition: spark-thrift-server.enabled
+    version: "0.1.0"
+    repository: "file://charts/spark-thrift-server"
+  - name: spark-integration-tests
+    condition: spark-integration-tests.enabled
+    version: "0.1.0"
+    repository: "file://charts/spark-integration-tests"

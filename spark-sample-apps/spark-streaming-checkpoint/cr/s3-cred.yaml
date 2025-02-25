@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-cred
+  namespace: spark-apps
+type: Opaque
+data:
+  ## Access Key for MinIO, base64 encoded (echo -n 'minioaccesskey' | base64)
+  accesskey: bWluaW9hY2Nlc3NrZXk=
+  ## Secret Key for MinIO, base64 encoded (echo -n 'miniosecretkey' | base64)
+  secretkey: bWluaW9zZWNyZXRrZXk=

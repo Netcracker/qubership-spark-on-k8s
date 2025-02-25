@@ -1,0 +1,20 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: spark-streaming-kafka-word-count
+  namespace: spark-apps
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: spark-streaming-kafka-word-count-ui-svc.dashboard.cloud.qubership.com
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                name: spark-streaming-kafka-word-count-ui-svc
+                port:
+                  number: 4040
+status:
+  loadBalancer: {}

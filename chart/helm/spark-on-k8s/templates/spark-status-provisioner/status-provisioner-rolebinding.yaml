@@ -1,0 +1,15 @@
+{{- if .Values.statusProvisioner.enabled }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spark-status-provisioner
+  labels:
+    {{- include "all_objects_labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: spark-status-provisioner
+roleRef:
+  kind: Role
+  name: spark-status-provisioner
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

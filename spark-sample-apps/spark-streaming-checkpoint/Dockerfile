@@ -1,0 +1,18 @@
+FROM maven:3-eclipse-temurin-17-alpine AS unpacker
+
+COPY --chmod=0777 src src
+COPY --chmod=0777 pom.xml pom.xml
+
+RUN mvn clean install
+FROM ghcr.io/netcracker/qubership-spark-customized:main
+
+ARG spark_uid=185
+USER root
+
+USER ${spark_uid}
+
+COPY --from=unpacker --chmod=0777 target/spark-streaming-checkpoint-1.0-SNAPSHOT-jar-with-dependencies.jar /opt/spark/examples/
+
+
+
+

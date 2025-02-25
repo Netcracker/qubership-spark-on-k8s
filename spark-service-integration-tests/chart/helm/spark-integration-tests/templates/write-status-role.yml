@@ -1,0 +1,30 @@
+{{- if eq (.Values.status_writing_enabled | toString) "true" }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: spark-integration-tests-write-status
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+rules:
+- apiGroups:
+  - {{ template "apigroup_custom_resource" . }}
+  resources:
+  - {{ template "plural_custom_resource" . }}/status
+  - {{ template "plural_custom_resource" . }}/scale
+  - {{ template "plural_custom_resource" . }}
+  verbs:
+  - get
+  - patch
+- apiGroups:
+  - ''
+  verbs:
+  - get
+  resources:
+  - configmaps
+- apiGroups:
+    - apps
+  verbs:
+  - get
+  resources:
+  - statefulsets
+{{- end }}

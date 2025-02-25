@@ -1,0 +1,43 @@
+{{- if .Values.oauth2Proxy.ingress.enabled -}}
+{{- $serviceName := include "oauth2-proxy.fullname" . -}}
+{{- $servicePort := .Values.oauth2Proxy.service.portNumber -}}
+{{- $ingressPath := .Values.oauth2Proxy.ingress.path -}}
+{{- $ingressPathType := .Values.oauth2Proxy.ingress.pathType -}}
+{{- $extraPaths := .Values.oauth2Proxy.ingress.extraPaths -}}
+apiVersion: {{ include "capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  labels:
+    app: {{ template "oauth2-proxy.name" . }}
+    {{- include "oauth2-proxy.labels" . | indent 4 }}
+{{- if .Values.oauth2Proxy.ingress.labels }}
+{{ toYaml .Values.oauth2Proxy.ingress.labels | indent 4 }}
+{{- end }}
+  name: {{ template "oauth2-proxy.fullname" . }}
+{{- with .Values.oauth2Proxy.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  {{- if and .Values.oauth2Proxy.ingress.className ( eq "true" ( include "ingress.supportsIngressClassName" . ) ) }}
+  ingressClassName: {{ .Values.oauth2Proxy.ingress.className | quote }}
+  {{- end }}
+  rules:
+    {{- range $host := .Values.oauth2Proxy.ingress.hosts }}
+    - host: {{ tpl $host $ | quote }}
+      http:
+        paths:
+{{- if $extraPaths }}
+{{ toYaml $extraPaths | indent 10 }}
+{{- end }}
+          - path: {{ $ingressPath }}
+            {{- if eq "true" ( include "ingress.supportsPathType" $ ) }}
+            pathType: {{ $ingressPathType }}
+            {{- end }}
+            backend: {{- include "ingress.backend" ( dict "serviceName" $serviceName "servicePort" $servicePort "context" $ )  | nindent 14 }}
+    {{- end -}}
+  {{- if .Values.oauth2Proxy.ingress.tls }}
+  tls:
+{{ tpl (toYaml .Values.oauth2Proxy.ingress.tls) $ | indent 4 }}
+  {{- end -}}
+{{- end -}}

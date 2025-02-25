@@ -1,0 +1,88 @@
+{{ if and (.Values.metrics.enable) (.Values.prometheusRules.alert.enable) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app.kubernetes.io/component: monitoring
+    prometheus: spark-operator-rules
+    role: alert-rules
+    {{- include "all_objects_labels" . | nindent 4 }}
+    {{- include "prometheus_operator_label" . | nindent 4 }}
+  name: spark-operator-prometheus-rules
+spec:
+  groups:
+  - name: {{ .Release.Namespace }}
+    rules:
+    - alert: SparkOperatorControllerCPUusage
+      annotations:
+        summary: Some of Spark Operator controller pods CPU load is higher than specified threshold
+        description: 'Spark Operator controller CPU load is higher than {{ default 90 .Values.prometheusRules.alert.cpuThreshold }} percent on {{ .Release.Namespace }}'
+      expr: max(rate(container_cpu_usage_seconds_total{image!="", namespace="{{ .Release.Namespace }}", container!="POD", pod=~"sparkoperator.*.controller.*"}[1m])) / max(kube_pod_container_resource_limits_cpu_cores{exported_namespace="{{ .Release.Namespace }}", container="spark-operator-controller"}) * 100 > {{ default 90 .Values.prometheusRules.alert.cpuThreshold }}
+      labels:
+        severity: warning
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorControllerMemoryUsage
+      annotations:
+        summary: Some of Spark Operator controller pods memory usage is higher than specified threshold
+        description: 'Spark Operator controller memory usage is higher than {{ default 90 .Values.prometheusRules.alert.memoryThreshold }} percent on {{ .Release.Namespace }}'
+      expr: max(container_memory_working_set_bytes{image!="", namespace="{{ .Release.Namespace }}", container!="POD", pod=~"sparkoperator.*.controller.*"}) / max(kube_pod_container_resource_limits_memory_bytes{exported_namespace="{{ .Release.Namespace }}", container="spark-operator-controller"}) * 100 > {{ default 90 .Values.prometheusRules.alert.memoryThreshold }}
+      labels:
+        severity: warning
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorWebhookCPUusage
+      annotations:
+        summary: Some of Spark Operator webhook pods CPU load is higher than specified threshold
+        description: 'Spark Operator webhook CPU load is higher than {{ default 90 .Values.prometheusRules.alert.cpuThreshold }} percent on {{ .Release.Namespace }}'
+      expr: max(rate(container_cpu_usage_seconds_total{image!="", namespace="{{ .Release.Namespace }}", container!="POD", pod=~"sparkoperator.*.webhook.*"}[1m])) / max(kube_pod_container_resource_limits_cpu_cores{exported_namespace="{{ .Release.Namespace }}", container="spark-operator-webhook"}) * 100 > {{ default 90 .Values.prometheusRules.alert.cpuThreshold }}
+      labels:
+        severity: warning
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorWebhookMemoryUsage
+      annotations:
+        summary: Some of Spark Operator webhook pods memory usage is higher than specified threshold
+        description: 'Spark Operator webhook memory usage is higher than {{ default 90 .Values.prometheusRules.alert.memoryThreshold }} percent on {{ .Release.Namespace }}'
+      expr: max(container_memory_working_set_bytes{image!="", namespace="{{ .Release.Namespace }}", container!="POD", pod=~"sparkoperator.*.webhook.*"}) / max(kube_pod_container_resource_limits_memory_bytes{exported_namespace="{{ .Release.Namespace }}", container="spark-operator-webhook"}) * 100 > {{ default 90 .Values.prometheusRules.alert.memoryThreshold }}
+      labels:
+        severity: warning
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorControllerIsDegraded
+      annotations:
+        summary: Spark Operator Controller Is Degraded
+        description: 'Some of Spark Operator Controller pods went down on {{ .Release.Namespace }}'
+      expr: kube_replicaset_status_ready_replicas{exported_namespace="{{ .Release.Namespace }}", replicaset=~"sparkoperator.*.controller"} < kube_replicaset_spec_replicas{exported_namespace="{{ .Release.Namespace }}", replicaset=~"sparkoperator.*.controller"}
+      labels:
+        severity: high
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorControllerIsDown
+      annotations:
+        summary: Spark Operator Controller is down
+        description: 'Spark Operator Controller is down on {{ .Release.Namespace }}'
+      expr: absent(kube_pod_status_phase{exported_namespace="{{ .Release.Namespace }}", exported_pod=~"sparkoperator.*.controller.*", phase="Running"} == 1)
+      labels:
+        severity: critical
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorWebhookIsDegraded
+      annotations:
+        summary: Spark Operator Webhook Is Degraded
+        description: 'Some of Spark Operator Webhook pods went down on {{ .Release.Namespace }}'
+      expr: kube_replicaset_status_ready_replicas{exported_namespace="{{ .Release.Namespace }}", replicaset=~"sparkoperator.*.webhook"} < kube_replicaset_spec_replicas{exported_namespace="{{ .Release.Namespace }}", replicaset=~"sparkoperator.*.webhook"}
+      labels:
+        severity: high
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+    - alert: SparkOperatorWebhookIsDown
+      annotations:
+        summary: Spark Operator Webhook is down
+        description: 'Spark Operator Webhook is down on {{ .Release.Namespace }}'
+      expr: absent(kube_pod_status_phase{exported_namespace="{{ .Release.Namespace }}", exported_pod=~"sparkoperator.*.webhook.*", phase="Running"} == 1)
+      labels:
+        severity: critical
+        namespace: {{ .Release.Namespace }}
+        service: {{ .Release.Name }}
+{{ end }}

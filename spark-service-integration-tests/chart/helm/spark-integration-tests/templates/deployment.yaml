@@ -1,0 +1,92 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+    {{- include "deployment_and_service_only_labels_ssit" . | nindent 4 }}
+    {{- include "deployment_only_labels_ssit" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "selector_labels_ssit" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "all_objects_labels_ssit" . | nindent 8 }}
+        {{- include "deployment_and_service_only_labels_ssit" . | nindent 8 }}
+        {{- include "deployment_only_labels_ssit" . | nindent 8 }}
+    spec:
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- if .Values.affinity }}
+      affinity:
+        {{ .Values.affinity | toJson }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Values.service.name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ template "spark-integration-tests.image" . }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: TAGS
+              value: {{ .Values.tags }}
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SPARK_APPS_NAMESPACE
+              value: {{ .Values.sparkAppsNamespace }}
+            - name: BASE_APP_IMAGE
+              value: {{ template "spark-base-application.image" . }}
+            - name: BASE_PY_APP_IMAGE
+              value: {{ template "spark-py-base-application.image" . }}
+            - name: SPARK_APPS_SERVICEACCOUNT
+              value: {{ .Values.sparkAppsServiceAccount }}
+            - name: STATUS_WRITING_ENABLED
+              value: {{ .Values.status_writing_enabled | quote }}
+            - name: SPARK_OPEROTOR_CONTROLLER_DEPLOYMENT_NAME
+              value: {{ .Values.sparkOperatorControllerDeploymentName }}
+            - name: SPARK_OPEROTOR_WEBHOOK_DEPLOYMENT_NAME
+              value: {{ .Values.sparkOperatorWebhookDeploymentName }}
+            - name: S3_ENDPOINT
+              value: {{ .Values.testsS3Endpoint }}
+            - name: S3_ACCESS_KEY
+              value: {{ .Values.testsS3AccessKey }}
+            - name: S3_SECRET_KEY
+              value: {{ .Values.testsS3SecretKey }}
+            {{- if (eq "true" .Values.status_writing_enabled) }}
+            - name: ONLY_INTEGRATION_TESTS
+              value: {{ .Values.cr_status_writing.only_integration_tests | quote }}
+            - name: IS_SHORT_STATUS_MESSAGE
+              value: {{ .Values.cr_status_writing.is_short_status_message | quote }}
+            - name: STATUS_CUSTOM_RESOURCE_PATH
+              value: {{ toYaml .Values.cr_status_writing.status_custom_resource_path }}
+            - name: PROMETHEUS_URL
+              value: {{ .Values.prometheusUrl }}
+            {{- end }}
+          resources:
+            requests:
+              memory: {{ default "256Mi" .Values.resources.requests.memory }}
+              cpu: {{ default "200m" .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ default "256Mi" .Values.resources.limits.memory }}
+              cpu: {{ default "400m" .Values.resources.limits.cpu }}
+          volumeMounts:
+            - name: output
+              mountPath: /opt/robot/output
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+      volumes:
+        - name: output
+          emptyDir: {}

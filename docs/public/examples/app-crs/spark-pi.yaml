@@ -1,0 +1,89 @@
+#
+# Copyright 2017 Google LLC
+# Modified in 2025 by NetCracker Technology Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: spark-pi
+  namespace: spark-apps
+spec:
+  type: Scala
+  mode: cluster
+  image: "ghcr.io/netcracker/qubership-spark-customized:main"
+  imagePullPolicy: Always
+  mainClass: org.apache.spark.examples.SparkPi
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.3.jar"
+  sparkVersion: "3.5.3"
+  sparkConf:
+    "spark.jars.ivy": "/tmp/.ivy"
+    #"spark.kubernetes.local.dirs.tmpfs": "true"
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    "spark.kubernetes.driver.connectionTimeout": "60000000"
+    "spark.kubernetes.driver.requestTimeout": "60000000"
+  arguments:
+    - "100000" #set 1000000 for OOM
+  restartPolicy:
+    type: Never
+  driver:
+    env:
+      - name: CLOUD_NAMESPACE
+        value: spark-apps
+      - name: MICROSERVICE_NAME
+        value: spark-pi-driver
+      - name: NC_DIAGNOSTIC_MODE
+        value: prod
+      - name: NC_DIAGNOSTIC_AGENT_SERVICE
+        value: esc-collector-service.profiler.svc
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+    labels:
+      version: 3.5.3
+    serviceAccount: sparkapps-sa
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+  executor:
+    env:
+      - name: CLOUD_NAMESPACE
+        value: spark-apps
+      - name: MICROSERVICE_NAME
+        value: spark-pi-executor
+      - name: NC_DIAGNOSTIC_MODE
+        value: prod
+      - name: NC_DIAGNOSTIC_AGENT_SERVICE
+        value: esc-collector-service.profiler.svc
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: 3.5.3
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL

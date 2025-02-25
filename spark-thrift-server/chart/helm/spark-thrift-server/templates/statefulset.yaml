@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "spark-thrift-server.fullname" . }}
+  labels:
+    {{- include "all_objects_labels_sts" . | nindent 4 }}
+    {{- include "deployment_and_service_only_labels_sts" . | nindent 4 }}
+    {{- include "deployment_only_labels_sts" . | nindent 4 }}
+spec:
+  serviceName: {{ template "spark-thrift-server.fullname" . }}-service
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "selector_labels_sts" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "all_objects_labels_sts" . | nindent 8 }}
+        {{- include "deployment_and_service_only_labels_sts" . | nindent 8 }}
+        {{- include "deployment_only_labels_sts" . | nindent 8 }}
+    spec:
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      {{- end }}
+      serviceAccountName: {{ include "spark-thrift-server.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: thrift-server
+          image: {{ template "spark-thrift-server.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: THRIFT_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: spark-thrift-secret
+                  key: accesskey
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: spark-thrift-secret
+                  key: secretkey
+          command:
+            - '/opt/thrift-server-entrypoint.sh'
+          volumeMounts:
+            - name: log4j2-properties
+              mountPath: /opt/spark/conf/log4j2.properties
+              subPath: log4j2.properties
+            - name: spark-conf-volume
+              mountPath: /opt/spark/conf/spark-defaults.conf
+              subPath: spark-defaults.conf
+            {{- if .Values.hiveConfigSecret }}
+              {{- if .Values.hiveConfigSecret.hiveSiteProperties }}
+            - name: hive-cfg-secret
+              mountPath: /opt/spark/conf/hive-site.xml
+              subPath: hive-site.xml
+              {{- end }}
+              {{- if .Values.hiveConfigSecret.coreSiteProperties }}
+            - name: hive-cfg-secret
+              mountPath: /opt/spark/conf/core-site.xml
+              subPath: core-site.xml
+              {{- end }}
+              {{- if .Values.hiveConfigSecret.hdfsSiteProperties }}
+            - name: hive-cfg-secret
+              mountPath: /opt/spark/conf/hdfs-site.xml
+              subPath: hdfs-site.xml
+              {{- end }}
+            {{- end }}
+            - name: pod-template-volume
+              mountPath: /opt/spark/conf/pod-template.yaml
+              subPath: pod-template.yaml
+      volumes:
+        - name: log4j2-properties
+          configMap:
+            name: log4j2-properties
+        - name: pod-template-volume
+          configMap:
+            name: pod-template
+        - name: spark-conf-volume
+          configMap:
+            name: spark-conf
+            items:
+             - key: spark-defaults.conf
+               path: spark-defaults.conf
+        {{- if .Values.hiveConfigSecret }}
+        - name: hive-cfg-secret
+          secret:
+            secretName: hive-cfg-secret
+            items:
+              {{- if .Values.hiveConfigSecret.hiveSiteProperties }}
+              - key: hive-site.xml
+                path: hive-site.xml
+              {{- end }}
+              {{- if .Values.hiveConfigSecret.coreSiteProperties }}
+              - key: core-site.xml
+                path: core-site.xml
+              {{- end }}
+              {{- if .Values.hiveConfigSecret.hdfsSiteProperties }}
+              - key: hdfs-site.xml
+                path: hdfs-site.xml
+              {{- end }}
+        {{- end }}

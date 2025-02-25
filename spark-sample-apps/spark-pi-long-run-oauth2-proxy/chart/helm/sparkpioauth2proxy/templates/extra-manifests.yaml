@@ -1,0 +1,4 @@
+{{ range .Values.oauth2Proxy.oauth2ProxyxtraObjects }}
+---
+{{ tpl (toYaml .) $ }}
+{{ end }}

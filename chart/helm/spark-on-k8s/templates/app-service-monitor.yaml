@@ -1,0 +1,46 @@
+{{ if .Values.appServiceMonitor.enable }}
+{{ if index .Values "spark-operator" "spark" "jobNamespaces" }}
+{{- range index .Values "spark-operator" "spark" "jobNamespaces" }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  namespace: {{ . }}
+  labels:
+    app.kubernetes.io/component: monitoring
+    {{- include "all_objects_labels" . | nindent 4 }}
+    {{- include "prometheus_operator_label" . | nindent 4 }}
+  name: spark-servicemonitor
+spec:
+  endpoints:
+  - interval: 5s
+    path: /metrics/executors/prometheus/
+    port: spark-ui
+  - interval: 5s
+    path: /metrics/prometheus
+    port: spark-ui
+  selector:
+    matchExpressions:
+    - key: spark-app-selector
+      operator: Exists
+{{- end }}
+{{ else }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/component: monitoring
+  name: spark-servicemonitor
+spec:
+  endpoints:
+  - interval: 5s
+    path: /metrics/executors/prometheus/
+    port: spark-ui
+  - interval: 5s
+    path: /metrics/prometheus
+    port: spark-ui
+  selector:
+    matchExpressions:
+    - key: spark-app-selector
+      operator: Exists
+{{ end }}
+{{ end }}

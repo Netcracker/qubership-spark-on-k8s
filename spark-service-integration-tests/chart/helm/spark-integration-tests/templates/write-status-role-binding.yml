@@ -1,0 +1,16 @@
+{{- if eq (.Values.status_writing_enabled | toString) "true" }}
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spark-integration-tests-write-status
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: spark-integration-tests
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: spark-integration-tests-write-status
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

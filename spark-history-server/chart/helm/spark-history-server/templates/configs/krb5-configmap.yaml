@@ -1,0 +1,15 @@
+{{- if .Values.kerberos.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-krb5conf
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    {{- include "all_objects_labels_shs" . | nindent 4 }}
+data:
+  {{- if .Values.kerberos }}
+  krb5.conf: |
+    {{- .Values.kerberos.config | nindent 4 }}
+  {{- end }}
+{{- end }}

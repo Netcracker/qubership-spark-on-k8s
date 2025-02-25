@@ -1,0 +1,26 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Chart.Name }}-spark-config
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    {{- include "all_objects_labels_shs" . | nindent 4 }}
+data:
+  spark-defaults.conf: |-
+    {{- if .Values.kerberos.enabled }}
+    spark.history.kerberos.enabled=true
+    spark.history.kerberos.principal={{ .Values.kerberos.principal }}
+    spark.history.kerberos.keytab=/etc/kerberos/keytabs/hdfs.keytab
+    {{- end }}
+
+    {{- if .Values.s3.enabled }}
+    spark.hadoop.fs.s3a.endpoint={{ .Values.s3.endpoint }}
+    spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+    spark.hadoop.fs.s3a.path.style.access=true
+    {{- end }}
+
+    {{- if .Values.sparkProperties }}
+       {{- .Values.sparkProperties | nindent 4 }}
+    {{- end }}
+

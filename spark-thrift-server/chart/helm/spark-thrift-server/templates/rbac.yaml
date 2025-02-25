@@ -1,0 +1,40 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: spark-thrift-role
+  labels:
+    {{- include "all_objects_labels_sts" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - configmaps
+    verbs:
+      - "*"
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumeclaims
+      - services
+    verbs:
+      - deletecollection
+      - list
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: spark-role-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "all_objects_labels_sts" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "spark-thrift-server.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: spark-thrift-role
