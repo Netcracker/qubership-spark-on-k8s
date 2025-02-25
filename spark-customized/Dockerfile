@@ -5,7 +5,7 @@ ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
 RUN mkdir -p /opt/spark/jars/ && \
     #curl -k https://dlcdn.apache.org/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz | tar xvz -C /opt && \
-    curl -k -L $MAVEN_REPO/com/amazonaws/aws-java-sdk-bundle/1.12.778/aws-java-sdk-bundle-1.12.778.jar --output $SPARK_JARS_DIR/aws-java-sdk-bundle-1.12.778.jar && \
+    curl -k -L $MAVEN_REPO/com/amazonaws/aws-java-sdk-bundle/1.12.782/aws-java-sdk-bundle-1.12.782.jar --output $SPARK_JARS_DIR/aws-java-sdk-bundle-1.12.782.jar && \
     curl -k -L $MAVEN_REPO/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar --output $SPARK_JARS_DIR/hadoop-aws-3.3.4.jar && \
     curl -k -L $MAVEN_REPO/org/codehaus/jackson/jackson-mapper-asl/1.9.13-cloudera.4/jackson-mapper-asl-1.9.13-cloudera.4.jar --output $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13-cloudera.4.jar && \
     curl -k -L $MAVEN_REPO/org/apache/ivy/ivy/2.5.2/ivy-2.5.2.jar --output $SPARK_JARS_DIR/ivy-2.5.2.jar && \
