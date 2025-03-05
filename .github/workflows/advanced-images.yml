@@ -1,15 +1,9 @@
 name: Build Advanced Images
 on:
-  release:
-    types: [created]
-  push:
-    branches:
-      - '**'
-# ToDo: revert in master, see https://github.com/orgs/community/discussions/25288
-#  workflow_run:
-#    workflows: [Build Basic Images]
-#    types:
-#      - completed
+  workflow_run:
+    workflows: [Build Basic Images]
+    types:
+      - completed
   workflow_dispatch:
     inputs:
       publish_docker:

@@ -8,9 +8,9 @@ metadata:
 {{- include "oauth2-proxy.labels" . | indent 4 }}
   name: {{ template "oauth2-proxy.fullname" . }}
   namespace: {{ template "oauth2-proxy.namespace" $ }}
-{{- if .Values.oauth2Proxy.service.annotations }}
+{{- with .Values.oauth2Proxy.service.annotations }}
   annotations:
-{{ toYaml .Values.oauth2Proxy.service.annotations | indent 4 }}
+{{ tpl ( toYaml . ) $ | indent 4 }}
 {{- end }}
 spec:
 {{- if (or (eq .Values.oauth2Proxy.service.type "ClusterIP") (empty .Values.oauth2Proxy.service.type)) }}
@@ -32,7 +32,7 @@ spec:
 {{- end }}
   ports:
     - port: {{ .Values.oauth2Proxy.service.portNumber }}
-#     diff from community to pick right port name
+#     diff from community oauth2proxy chart to pick right port name
       targetPort: {{ .Values.oauth2Proxy.service.portName }}
       {{- if (and (eq .Values.oauth2Proxy.service.type "NodePort") (not (empty .Values.oauth2Proxy.service.nodePort))) }}
       nodePort: {{ .Values.oauth2Proxy.service.nodePort }}
@@ -41,7 +41,7 @@ spec:
       {{- with .Values.oauth2Proxy.service.appProtocol }}
       appProtocol: {{ . }}
       {{- end }}
-#     diff from community to pick right port name
+#     diff from community oauth2proxy chart to pick right port name
       name: {{ .Values.oauth2Proxy.service.portName }}
     {{- if and .Values.oauth2Proxy.metrics.enabled .Values.oauth2Proxy.metrics.port }}
     - port: {{ .Values.oauth2Proxy.metrics.port }}
