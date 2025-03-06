@@ -1,8 +1,5 @@
 name: Build Test Images
 on:
-  push:
-    branches:
-      - '**'
   workflow_dispatch:
     inputs:
       publish_docker:
