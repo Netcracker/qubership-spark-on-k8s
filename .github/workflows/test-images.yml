@@ -33,7 +33,7 @@ jobs:
             context: spark-sample-apps/spark-streaming-word-count
           - name: qubership-tests-spark-word-count-s3
             file: spark-sample-apps/word-count-s3/Dockerfile
-            context: park-sample-apps/word-count-s3
+            context: spark-sample-apps/word-count-s3
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
