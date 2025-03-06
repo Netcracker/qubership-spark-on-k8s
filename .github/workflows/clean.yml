@@ -15,6 +15,10 @@ jobs:
           - name: qubership-spark-on-k8s-transfer
           - name: qubership-spark-on-k8s-tests
           - name: qubership-spark-customized-py
+          - name: qubership-tests-spark-pi-long-run
+          - name: qubership-tests-spark-streaming-checkpoint
+          - name: qubership-tests-spark-streaming-word-count
+          - name: qubership-tests-spark-word-count-s3
     if: github.event.ref_type == 'branch'
     runs-on: ubuntu-latest
     steps:
