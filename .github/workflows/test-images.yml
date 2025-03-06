@@ -27,13 +27,13 @@ jobs:
             context: spark-sample-apps/spark-pi-long-run
           - name: qubership-tests-spark-streaming-checkpoint
             file: spark-sample-apps/spark-streaming-checkpoint/Dockerfile
-            context: spark-customized
+            context: spark-sample-apps/spark-streaming-checkpoint/
           - name: qubership-tests-spark-streaming-word-count
             file: spark-sample-apps/spark-streaming-word-count/Dockerfile
-            context: spark-customized
+            context: spark-sample-apps/spark-streaming-word-count
           - name: qubership-tests-spark-word-count-s3
             file: spark-sample-apps/word-count-s3/Dockerfile
-            context: spark-customized
+            context: park-sample-apps/word-count-s3
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

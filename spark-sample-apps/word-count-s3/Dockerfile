@@ -1,3 +1,5 @@
+ARG base_img=ghcr.io/netcracker/qubership-spark-customized:main
+
 FROM maven:3-eclipse-temurin-17-alpine AS unpacker
 
 COPY --chmod=0777 src src
