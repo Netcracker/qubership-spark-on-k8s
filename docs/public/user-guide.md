@@ -59,7 +59,7 @@ spec:
   sparkConf:
 ...
     "spark.jars.ivy": "/tmp/.ivy"
-```.
+```
 
 The application might work without it, but it is required for successful execution in some clouds. Hence, to avoid problems with migration between clouds, it is recommended to always set it.
 
