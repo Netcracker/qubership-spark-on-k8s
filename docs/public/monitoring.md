@@ -5,19 +5,18 @@ This section describes the Spark Operator monitoring.
 * [Grafana Dashboard](#grafana-dashboard)  
 * [Prometheus Rules](#prometheus-rules)
 
-
 # Grafana Dashboard
 
 This chapter describes Spark Operator monitoring dashboard.
 To access the dashboard:
-
-![Dashboard Variables](/docs/public/images/operator_dashboard_variables.png)
 
 1. Navigate to the Grafana server and log in using the provided credentials.
 1. Select the Spark Operator dashboard.
 1. Select the `namespace`. 
 1. Select the operator's `pod`.
 1. Select the time range.
+
+![Dashboard Variables](/docs/public/images/operator_dashboard_variables.png)
 
 ## DR Cluster
 
