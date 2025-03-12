@@ -61,7 +61,7 @@ spec:
     "spark.jars.ivy": "/tmp/.ivy"
 ```
 
-The application might work without it, but it is required for successful execution in some clouds. Hence, to avoid problems with migration between clouds, it is recommended to always set it.
+The application might work without this property, but it is required for successful execution in some clouds. Hence, to avoid problems with migration between clouds, it is recommended to always set it.
 
 ## Spark Application on Kubernetes
 
@@ -70,7 +70,7 @@ Qubership-spark-on-k8s includes Kubeflow Spark operator chart as a subchart. The
 To run a Spark application on Kubernetes:
 
 1. Prepare a docker image of application.  
-   The following images can be used as parent docker images: ghcr.io/netcracker/qubership-spark-customized , qubership-spark-customized-py .
+   The following images can be used as parent docker images: ghcr.io/netcracker/qubership-spark-customized, qubership-spark-customized-py.
    
    Parent images define a user with id=185.  
    The Kubeflow Spark operator provides an ability to set up security context for the driver and executor pods.
@@ -84,7 +84,9 @@ To run a Spark application on Kubernetes:
                                                                                                 ```
    **Note**: A mutating admission webhook is needed to use this feature.
    
-   For more information on how to enable the mutating admission webhook, see [Quick Start Guide](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/quick-start-guide.md).
+<!-- #GFCFilterMarkerStart# -->
+For more information on how to enable the mutating admission webhook, see [Quick Start Guide](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/quick-start-guide.md).
+<!-- #GFCFilterMarkerEnd# -->
 
 2. Prepare a `SparkApplication` specification and store it in the YAML file.  
    Following is an example of a `SparkApplication` specification and description of main parameters.
@@ -119,7 +121,8 @@ To run a Spark application on Kubernetes:
        labels:
          version: 3.5.3
    ```
-   **Note**: it is possible to add labels to CR. For example, for Qubership Cloud release recommends adding the following labels to the CR:
+   **Note**: It is possible to add labels to the CR. For example, for Qubership Cloud release recommends adding the following labels to the CR:
+   
    ```yaml
    ...
    kind: SparkApplication
@@ -162,16 +165,14 @@ The driver pod by default uses the `default` service account in the namespace it
 
 The service account is created during the operator deployment. The name of the service account depends on the helm release name of the operator.
 
-Reference to original docs: [writing-driver-specification](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#writing-driver-specification).
-
----
+For more information, refer to the original documents: [writing-driver-specification](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#writing-driver-specification).
 
 ## Spark Application Dependencies
 
 As the Spark documentation ([Spark 3.4.1 on Kubernetes](https://spark.apache.org/docs/3.4.1/running-on-kubernetes.html#dependency-management), [Spark 3.0.0 on Kubernetes](https://spark.apache.org/docs/3.0.0/running-on-kubernetes.html#dependency-management), [Spark 2.4.5 on Kubernetes](https://spark.apache.org/docs/2.4.5/running-on-kubernetes.html#dependency-management)) suggests, the dependencies can be referred to by their remote URL or can be pre-mounted into custom-built Docker images.  
 Those dependencies can be added to the classpath by referencing them with local:// URIs and/or setting the SPARK_EXTRA_CLASSPATH environment variable in the Dockerfiles.
 
-**Note**: Currently URL approached dependencies do not work properly for the Spark Operator.
+**Note**: Currently, the URL approached dependencies do not work properly for the Spark Operator.
 
 For more information on Spark Operator dependencies, refer to [https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#specifying-application-dependencies](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#specifying-application-dependencies).
 
@@ -296,7 +297,7 @@ To work with S3 storage:
 
 # Using Spark Operator with Volcano
 
-For more information about Volcano refer to the _Official Volcano Documentation_ at [https://volcano.sh/en/](https://volcano.sh/en/).
+For more information about Volcano, refer to the _Official Volcano Documentation_ at [https://volcano.sh/en/](https://volcano.sh/en/).
 
 ## Spark Operator Installation Prerequisites
 
