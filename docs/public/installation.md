@@ -1,4 +1,5 @@
-This document describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. The following topics are covered in the document:
+This document describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. 
+The following topics are covered in the document:
 
 * [Prerequisites](#prerequisites)
     * [Common](#common) 
@@ -662,9 +663,11 @@ spark-thrift-server:
 
 # Best Practices and Recommendations
 
-Best practices and recommendations are as follows:
+Best practices and recommendations for the installation are as follows:
 
 ## Hardware Requirements
+
+The hardware requirements are as follows:
 
 **Note**: Kubeflow Spark Operator include some parameters that are not part of resource profiles that can affect performance or can be useful for performance debugging:
 * `spark-operator.controller.workers` - Reconcile concurrency, higher values might increase memory usage.
@@ -678,7 +681,7 @@ The hardware requirements as per profiles are as follows:
 
 `Small` profile is enough to start the spark operator services and to run not more than one spark application at the same time.
 
-The profile resources are shown below:
+The profile resources are given below:
 
 | Container                             | CPU  | RAM, Mi | Number of containers |
 |---------------------------------------|------|---------|----------------------|
@@ -691,12 +694,11 @@ The profile resources are shown below:
 
 Here `*` - optional container based on configuration, `**` - temporary container.
 
-
 ### Medium
 
 `Medium` profile is enough to start the spark operator services and to run a few spark applications at the same time.
 
-The profile resources are shown below:
+The profile resources are given below:
 
 | Container                             | CPU  | RAM, Mi | Number of containers |
 |---------------------------------------|------|---------|----------------------|
@@ -725,7 +727,6 @@ The profile resources are shown below:
 | Integration tests   (`*`)(`**`)       | 0.4  | 256     | 1                    |
 
 Here `*` - optional container based on configuration, `**` - temporary container.
-
 
 # Parameters
 
@@ -1008,7 +1009,6 @@ statusProvisioner:
   resources: {}
 ```
 
-
 # Installation
 
 The installation procedure is described in the below sub-sections.
@@ -1017,13 +1017,13 @@ The installation procedure is described in the below sub-sections.
 
 Installation [prerequisites](#prerequisites) should be fulfilled to prepare for the installation. 
 
-
 # On-Prem
 
 The installation for On-Prem is described below.
 
 ## Manual Deployment
 
+The manual deployment procedure is specified below.
 
 1. For qubership-spark-on-k8s installation, it is necessary to extract the combined chart from docker transfer image.
 
@@ -1262,6 +1262,8 @@ spark-history-server:
 
 ### Enabling HTTPS for Spark History Server Service
 
+To enable HTTPS for Spark History Server Service:
+
 1. Prepare the certificates as describe in the [Enabling HTTPS for Spark History Server Ingresses](#enabling-https-for-spark-history-server-ingresses) section.   
    Or use `extraVolumes` and `extraVolumeMounts` to mount existing certificates.
    Cert Manager configuration example:
@@ -1330,8 +1332,7 @@ It is possible to enable TLS on Spark History Server web user interface directly
 TLS key and certificate can be requested from cert-manager using `certManagerInegration.enabled` parameter. By default, it will create secret `spark-history-tls-cm` with TLS certificate, TLS key and CA certificate.
 Alternatively, TLS key and certificate can be specified and mounted into the pod using `extraSecrets`, `extraVolumes`, `extraVolumeMounts` parameters.
 Then, the mounted certificates should be set as described in the [Enabling HTTPS for Spark History Server Service](#enabling-https-for-spark-history-server-service) section to enable TLS on Spark History Server as a backend.
-If using kubernetes with NGINX ingress controller, it is possible to pass annotations for ingress controller to work with TLS backend. Configuration examples are shown below.
-
+If using kubernetes with NGINX ingress controller, it is possible to pass the annotations for ingress controller to work with TLS backend. Configuration examples are shown below.
 
 ```yaml
 ingress:

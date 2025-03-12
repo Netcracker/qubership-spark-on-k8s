@@ -12,14 +12,14 @@ This section describes the details of the Spark History Server.
 
 ## Overview
 
-The Spark application UI becomes unavailable after the Spark application's driver completes. To be able to access the application's UI, after the completion, they can be configured to the log events to be rendered by the Spark History Server.
+The Spark application user interface becomes unavailable after the Spark application's driver completes. To be able to access the application's user interface, after the completion, they can be configured to the log events to be rendered by the Spark History Server.
 
-The Spark History Server tracks completed and running Spark applications. The History server and applications should point to the same log directory.  
-![alt text](/docs/public/images/spark-history-server.png "Spark History Server")
+The Spark History Server tracks the completed and running Spark applications. The History server and applications should point to the same log directory.  
+![Spark History Server](/docs/public/images/spark-history-server.png)
 
 ## Official Documents
 
-You can access the official Spark documentation at [https://spark.apache.org/docs/latest/monitoring.html#viewing-after-the-fact](https://spark.apache.org/docs/latest/monitoring.html#viewing-after-the-fact).
+You can access the _Official Spark Documentation_ at [https://spark.apache.org/docs/latest/monitoring.html#viewing-after-the-fact](https://spark.apache.org/docs/latest/monitoring.html#viewing-after-the-fact).
 
 ## Docker Image
 
@@ -28,7 +28,7 @@ The `/opt/spark/sbin/start-history-server.sh` script runs the History Server.
 
 ## Deployment
 
-The Spark History Server deployment can be enabled by the Spark Operator GCP `spark-history-server.enable` deployment parameter.
+You can enable the Spark History Server deployment by the Spark Operator GCP `spark-history-server.enable` deployment parameter.
 All possible parameters are listed in a table in the [Spark History Server Subchart Deployment Parameters](/docs/public/installation.md#spark-history-server) section.
 
 The Spark History Server has its separate helm chart. This chart is a sub-chart of the spark-on-k8s helm chart.
@@ -51,12 +51,12 @@ sparkConf:
 ```
 
 Note that the application should be properly configured to log an event in the specified storage.  
-In case of using S3 storage, refer to [S3 Storage](/docs/public/applications-management.md#s3-storage) for application configuration details.
+In case of using S3 storage, refer to the [S3 Storage](/docs/public/applications-management.md#s3-storage) section for application configuration details.
 
 ## Supported Storages
 
 The Spark History Server can use S3 or HDFS as the event logs storage.  
-For parameters description, refer to the [Spark History Server Subchart Deployment Parameters](/docs/public/installation.md#spark-history-server) section.
+For parameters description, refer to the [Spark History Server Subchart Deployment Parameters](/docs/public/installation.md#spark-history-server) section in the _Spark Operator Installation Procedure_.
 
 ### S3
 
