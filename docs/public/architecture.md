@@ -1,3 +1,5 @@
+This guide covers the following:
+
 * [Overview](#overview)
   * [Spark Operator](#spark-operator)
   * [Spark History Server](#spark-history-server)
@@ -48,8 +50,7 @@ As a Spark application, Spark Thrift server consists of a driver and multiple ex
 
 ## Cluster Mode
 
-When a query is submitted, 
-the driver requests resources required for processing the query and creates as many executors as need (dynamic allocation is enabled by default) to perform the tasks.  
+When a query is submitted, the driver requests resources required for processing the query and creates as many executors as need (dynamic allocation is enabled by default) to perform the tasks.  
 Spark Thrift Server communicates with Hive Metastore to get the metadata required for query compilation.
 
 ![Spark Thrift Server in Cluster Mode](/docs/public/images/architecture/spark-thrift-cluster.png)
@@ -61,6 +62,8 @@ In local mode, the Spark driver executes queries in local threads, it does not c
 ![Spark Thrift Server in Local Mode](/docs/public/images/architecture/spark-thrift-local.png)
 
 # Supported Deployment Scheme
+
+The information about supported deployment scheme s provided in the below sub-sections.
 
 ## On-Prem
 
