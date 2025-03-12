@@ -84,9 +84,7 @@ To run a Spark application on Kubernetes:
                                                                                                 ```
    **Note**: A mutating admission webhook is needed to use this feature.
    
-<!-- #GFCFilterMarkerStart# -->
 For more information on how to enable the mutating admission webhook, see [Quick Start Guide](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/quick-start-guide.md).
-<!-- #GFCFilterMarkerEnd# -->
 
 2. Prepare a `SparkApplication` specification and store it in the YAML file.  
    Following is an example of a `SparkApplication` specification and description of main parameters.
