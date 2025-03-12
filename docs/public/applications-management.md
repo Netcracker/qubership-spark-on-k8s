@@ -168,9 +168,7 @@ The updated CR file can then be resubmitted to the Kubernetes.
 In case of using `Airflow DAG` for Spark applications submission, the old application should be deleted before submitting an updated CR file.  
 Currently, an Airflow task based on [airflow.providers.cncf.kubernetes.operators.spark_kubernetes](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/_api/airflow/providers/cncf/kubernetes/operators/spark_kubernetes/index.html) fails while submitting an application which already exists.  
 
-<!-- #GFCFilterMarkerStart# -->
 There is an open issue in Airflow github community related to this - [Allow deleting existing spark application before creating new one via SparkKubernetesOperator in Kubernetes](https://github.com/apache/airflow/issues/16290).
-<!-- #GFCFilterMarkerEnd# -->
 
 # Applications Auto-Recovery Using Checkpoints
 
