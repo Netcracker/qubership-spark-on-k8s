@@ -2,11 +2,11 @@ This guide lists the troubleshooting techniques and known issues of the Spark Op
 
 # Explore Logs
 
-* The Spark Operator logs can be found in the operator's pod logs.
-* The Spark application logs can be found in the driver's and executor's logs whose pods are located in the application namespace specified by the `.Values.spark-operator.spark.jobNamespaces` parameter during the Spark Operator deployment.
+* You can find the Spark Operator logs in the operator's pod logs.
+* You can find the Spark application logs in the driver's and executor's logs, whose pods are located in the application namespace specified by the `.Values.spark-operator.spark.jobNamespaces` parameter during the Spark Operator deployment.
 * When the application fails to submit or run, the Spark Operator adds logs into the application custom resource description.
 
-  To get the logs, either navigate to the application CR using Kubernetes UI or use the following `kubectl` command: 
+  To get the logs, either navigate to the application CR using Kubernetes user interface or use the following `kubectl` command: 
 
   ```
    kubectl describe sparkapplication.sparkoperator.k8s.io <spark_application_name> --namespace <applications_namespace>
@@ -15,12 +15,12 @@ This guide lists the troubleshooting techniques and known issues of the Spark Op
 * The `attach_log` parameter of the Airflow `SparkKubernetesSensor` allows appending a Spark application driver pod's logs to the sensor log.  
   The application logs are rendered in the task of `SparkKubernetesSensor` when the application fails or completes successfully.
 
-# Spark UI
+# Spark User Interface
 
 Apache Spark provides a suite of web user interfaces (Jobs, Stages, Tasks, Storage, Environment, Executors, and SQL) that can be used to monitor the status, resource consumption, and troubleshooting of your Spark application.  
-For more details, refer to the Apache Spark official documentation at [https://spark.apache.org/docs/3.5.3/web-ui.html#streaming-dstreams-tab](https://spark.apache.org/docs/3.5.3/web-ui.html#streaming-dstreams-tab).
+For more details, refer to the _Apache Spark_ official documentation at [https://spark.apache.org/docs/3.5.3/web-ui.html#streaming-dstreams-tab](https://spark.apache.org/docs/3.5.3/web-ui.html#streaming-dstreams-tab).
 
-To enable the Spark UI for applications, the Spark Operator should be deployed with the following properties:
+To enable the Spark user interface for applications, the Spark Operator should be deployed with the following properties:
 
 ```
 uiService: true #enabled by default
