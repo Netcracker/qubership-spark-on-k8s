@@ -152,11 +152,10 @@ The value is reset to 0 after the Spark Operator restarts. The restarts are disp
 This displays the total number of Spark executors that failed.  
 The value is reset to 0 after the Spark Operator restarts. The restarts are displayed on a graph area of the panel by the line going to 0.
 
-### Work Queue Metrics
+### Spark Applications Timing Metrics
 
-**Note**: This panel is deprecated and will be replaced.
 
-![Work Queue Metrics](/docs/public/images/work-queue-metrics.png)
+![Spark Applications Timing Metrics](/docs/public/images/spark-applications-timing-metrics.png)
 
 #### Average startup latency of Applications 
 

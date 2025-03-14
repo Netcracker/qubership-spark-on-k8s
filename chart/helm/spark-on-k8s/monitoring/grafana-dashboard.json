@@ -2133,7 +2133,7 @@
           "refId": "A"
         }
       ],
-      "title": "Work Queue Metrics",
+      "title": "Spark Applications Timing Metrics",
       "type": "row"
     },
     {
@@ -2632,8 +2632,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2807,8 +2806,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -2932,8 +2930,7 @@
                   "mode": "absolute",
                   "steps": [
                     {
-                      "color": "rgba(50, 172, 45, 0.97)",
-                      "value": null
+                      "color": "rgba(50, 172, 45, 0.97)"
                     },
                     {
                       "color": "rgba(237, 129, 40, 0.89)",
@@ -3937,7 +3934,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {
@@ -3966,6 +3963,6 @@
   },
   "timezone": "",
   "title": "Spark Operator",
-  "version": 75,
+  "version": 76,
   "weekStart": ""
 }
