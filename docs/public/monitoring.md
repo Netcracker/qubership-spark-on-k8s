@@ -159,19 +159,19 @@ The value is reset to 0 after the Spark Operator restarts. The restarts are disp
 
 #### Average startup latency of Applications 
 
-This displays the `average startup latency of applications`in seconds handled by a work queue.
+This displays the `average startup latency of applications`in seconds.
 
 #### Average execution time of failed applications 
 
-This displays the `average execution time of failed applications`in seconds handled by a work queue.
+This displays the `average execution time of failed applications`in seconds.
 
 #### Number of Applications by Start Latency
 
-This displays the `the number of applications by start up latency` handled by a work queue.
+This displays the `the number of applications by start up latency`.
 
 #### Average execution Time of successful applications
 
-This displays the `average execution time of successful applications`in seconds handled by a work queue.
+This displays the `average execution time of successful applications`in seconds.
 
 ### CPU Usage
 
