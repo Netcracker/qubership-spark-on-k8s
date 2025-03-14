@@ -2210,7 +2210,7 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
@@ -2227,13 +2227,13 @@
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "spark_application_start_latency_seconds_sum/spark_application_start_latency_seconds_count{namespace=\"$namespace\"}",
+          "expr": "sum(spark_application_start_latency_seconds_sum{cluster=\"$cluster\", namespace=\"$namespace\"})/ sum(spark_application_start_latency_seconds_count{cluster=\"$cluster\", namespace=\"$namespace\"})",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": false,
           "instant": false,
           "interval": "",
-          "legendFormat": "Average startup latency",
+          "legendFormat": "Avg startup latency",
           "range": true,
           "refId": "A",
           "useBackend": false
@@ -2316,7 +2316,7 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
@@ -2331,13 +2331,17 @@
             "type": "prometheus",
             "uid": "$datasource"
           },
+          "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "spark_application_failure_execution_time_seconds_sum/spark_application_failure_execution_time_seconds_count",
+          "expr": "sum(spark_application_failure_execution_time_seconds_sum{namespace=\"$namespace\", cluster=\"$cluster\"}) / sum(spark_application_failure_execution_time_seconds_count{namespace=\"$namespace\", cluster=\"$cluster\"})",
+          "fullMetaSearch": false,
           "hide": false,
+          "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Average Execution Time for Failed Applications",
+          "legendFormat": "Avg execution time",
           "range": true,
-          "refId": "B"
+          "refId": "B",
+          "useBackend": false
         }
       ],
       "title": "Average execution time of failed applications ",
@@ -2417,7 +2421,7 @@
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
@@ -2434,7 +2438,7 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "sum by (le) (spark_application_start_latency_seconds_histogram_bucket)",
+          "expr": "sum by(le) (spark_application_start_latency_seconds_histogram_bucket{namespace=\"$namespace\",cluster=\"$cluster\"})",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -2538,12 +2542,12 @@
           },
           "disableTextWrap": false,
           "editorMode": "code",
-          "expr": "spark_application_success_execution_time_seconds_sum / spark_application_success_execution_time_seconds_count",
+          "expr": "sum(spark_application_success_execution_time_seconds_sum{namespace=\"$namespace\", cluster=\"$cluster\"}) / sum(spark_application_success_execution_time_seconds_count{namespace=\"$namespace\", cluster=\"$cluster\"})",
           "fullMetaSearch": false,
           "hide": false,
           "includeNullMetadata": true,
           "instant": false,
-          "legendFormat": "Avg Execution Time (sec)",
+          "legendFormat": "Avg execution time",
           "range": true,
           "refId": "B",
           "useBackend": false
@@ -3278,8 +3282,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -3802,6 +3805,7 @@
       },
       {
         "current": {
+          "isNone": true,
           "selected": false,
           "text": "None",
           "value": ""
@@ -3933,7 +3937,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -3962,7 +3966,6 @@
   },
   "timezone": "",
   "title": "Spark Operator",
-  "uid": "cedb5u74gre2oa",
-  "version": 62,
+  "version": 75,
   "weekStart": ""
 }
