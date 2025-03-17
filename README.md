@@ -16,3 +16,5 @@
 ## Overview
 
 This repo contains helm charts and images to run [spark](https://spark.apache.org/) on kubernetes. It is based on [Kubeflow spark operator](https://github.com/kubeflow/spark-operator). The Spark and operator images include some additional improvements, for example, to work with S3 or with certificates. Additionally, this repository includes spark-history-server, spark-thrift-server charts and test applications that use spark image. Spark history server chart and some application charts include modified [oauth2-proxy helm chart](https://github.com/oauth2-proxy/manifests) to add authentication to spark-history and application UIs.
+
+The final helm chart for this project can be extracted from qubership-spark-on-k8s-transfer release image. Alternatively, it is possible to use [create_chart.sh](create_chart.sh) script.
