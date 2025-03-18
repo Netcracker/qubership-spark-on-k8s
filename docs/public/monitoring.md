@@ -151,27 +151,26 @@ The value is reset to 0 after the Spark Operator restarts. The restarts are disp
 This displays the total number of Spark executors that failed.  
 The value is reset to 0 after the Spark Operator restarts. The restarts are displayed on a graph area of the panel by the line going to 0.
 
-### Work Queue Metrics
+### Spark Applications Timing Metrics
 
-**Note**: This panel is deprecated and will be replaced.
 
-![Work Queue Metrics](/docs/public/images/work-queue-metrics.png)
+![Spark Applications Timing Metrics](/docs/public/images/spark-applications-timing-metrics.png)
 
-#### Number of Adds
+#### Average startup latency of Applications 
 
-This displays the total number of `adds` handled by a work queue.
+This displays the `average startup latency of applications`in seconds.
 
-#### Number of Retries
+#### Average execution time of failed applications 
 
-This displays the total number of retries handled by a work queue.
+This displays the `average execution time of failed applications`in seconds.
 
-#### Longest Running Processor
+#### Number of Applications by Start Latency
 
-This displays the longest running processor in microseconds. On the sidebar `min`, `max`, and `avg` values are available.
+This displays the `the number of applications by start up latency`.
 
-#### Unfinished Work
+#### Average execution Time of successful applications
 
-The unfinished work in seconds.
+This displays the `average execution time of successful applications`in seconds.
 
 ### CPU Usage
 
