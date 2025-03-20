@@ -31,6 +31,9 @@ jobs:
           - name: qubership-tests-spark-word-count-s3
             file: spark-sample-apps/word-count-s3/Dockerfile
             context: spark-sample-apps/word-count-s3
+          - name: qubership-tests-spark-hive-connection
+            file: spark-sample-apps/hive-connection-test/Dockerfile
+            context: spark-sample-apps/hive-connection-test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

@@ -220,7 +220,7 @@ FROM $base_img
 
 USER root
 
-ENV SPARK_VERSION=3.1.3
+ENV SPARK_VERSION=3.5.3
 ENV HADOOP_VERSION=3
 ENV SPARK_HOME=/opt/spark
 ENV PATH=${PATH}:${SPARK_HOME}/bin
@@ -248,3 +248,5 @@ USER 185
 COPY --chmod=0777 spark_hive_test.py /opt/spark/examples/src/main/python
 
 COPY --from=unpacker --chmod=0777 /opt/spark/hivejars /opt/spark/hivejars
+
+USER spark
