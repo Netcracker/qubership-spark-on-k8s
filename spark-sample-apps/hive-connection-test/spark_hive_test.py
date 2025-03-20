@@ -19,8 +19,6 @@ def main():
     
     spark.sql("CREATE DATABASE IF NOT EXISTS mysparkdb2")
     spark.sql("CREATE TABLE IF NOT EXISTS mysparkdb2.mytable20 (id INT, name STRING)")
-
-    spark.sql("DELETE FROM mysparkdb2.mytable20 WHERE id IN (SELECT id FROM mytemptview)")
     
     spark.sql("INSERT INTO mysparkdb2.mytable20 SELECT id, name FROM mytemptview")
 

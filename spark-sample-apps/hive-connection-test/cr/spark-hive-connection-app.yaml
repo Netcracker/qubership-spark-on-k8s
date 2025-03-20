@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: "artifactorycn.netcracker.com:17009/netcracker/qubership-spark-hive-test:improvement-support_to_hive4-v7"
+  image: "artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:improvement_support-to-hive4"
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/spark/examples/src/main/python/spark_hive_test.py
   sparkVersion: "3.5.3"
