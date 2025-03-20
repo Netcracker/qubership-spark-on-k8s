@@ -247,7 +247,7 @@ WORKDIR /opt
 
 USER 185
 
-COPY --chmod=0777 /src/main/python/spark_hive_test.py /opt/spark/examples/src/main/python
+COPY --chmod=0777 /src/main/python/spark_hive_test.py /opt/spark/examples/src/main/python/
 
 COPY --from=unpacker --chmod=0777 /opt/spark/hivejars /opt/spark/hivejars
 
