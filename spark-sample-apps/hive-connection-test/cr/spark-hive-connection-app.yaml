@@ -1,7 +1,7 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: spark-hive-test892755
+  name: spark-hive-test
   namespace: spark-apps
 spec:
   type: Python
@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:improvement_support-to-hive4"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/spark/examples/src/main/python/spark_hive_test.py
+  mainApplicationFile: local:///opt/spark/examples/spark_hive_test.py
   sparkVersion: "3.5.3"
   sparkConf:
     "spark.jars.ivy": "/tmp/.ivy"
