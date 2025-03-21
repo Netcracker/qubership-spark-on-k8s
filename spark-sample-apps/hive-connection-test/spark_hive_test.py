@@ -15,6 +15,7 @@ def main():
 
     spark.sql("CREATE DATABASE IF NOT EXISTS mysparkdb2")
     spark.sql("CREATE TABLE IF NOT EXISTS mysparkdb2.mytable20 (id INT, name STRING)")
+    spark.sql("INSERT INTO TABLE mysparkdb2.mytable20  SELECT * FROM mytemptview") 
 
     try:
         
@@ -23,15 +24,6 @@ def main():
                             .count() > 0
 
         if table_exists:
-            
-            row_count = spark.sql("SELECT COUNT(*) FROM mysparkdb2.mytable20").collect()[0][0]
-
-            if row_count == 0:
-                print("Table is empty. Inserting data...")
-                spark.sql("INSERT INTO mysparkdb2.mytable20 SELECT id, name FROM mytemptview")
-            else:
-                print("Table already contains data. Skipping insertion.")
-
             spark.sql("SELECT * FROM mysparkdb2.mytable20").show()
         else:
             print("Table mysparkdb2.mytable20 does not exist.")
