@@ -2,7 +2,7 @@ import sys
 from pyspark.sql import SparkSession
 
 def main():
-    
+    # Initialize SparkSession with Hive support
     spark = SparkSession.builder \
         .appName("Spark-hive-test") \
         .enableHiveSupport() \
