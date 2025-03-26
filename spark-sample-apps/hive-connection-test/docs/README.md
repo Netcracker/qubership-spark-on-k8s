@@ -10,7 +10,7 @@ The application is defined as a `SparkApplication` resource in Kubernetes, utili
 
 - **Application Name:** `spark-hive-test`
 - **Namespace:** `spark-apps`
-- **Image:** `artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:main`
+- **Image:** `ghcr.io/netcracker/qubership-tests-spark-hive-connection:main`
 - **Spark Version:** `3.5.3`
 - **Mode:** `cluster`
 - **Python Version:** `3`
@@ -22,10 +22,10 @@ The application includes various Spark and Hadoop configurations to integrate wi
 - `spark.sql.warehouse.dir`: `s3a://hive/warehouse`
 - `spark.sql.hive.metastore.version`: `3.1.3`
 - `spark.sql.hive.metastore.jars.path`: `/opt/spark/hivejars/*`
-- `spark.hadoop.hive.metastore.uris`: `thrift://10.109.36.230:31663`
-- `spark.hadoop.fs.s3a.endpoint`: `https://test-minio-gateway-nas.qa-kubernetes.openshift.sdntest.netcracker.com`
-- `spark.hadoop.fs.s3a.access.key`: `Z4nz2bxWnWM36lf3K21y`
-- `spark.hadoop.fs.s3a.secret.key`: `oqtAdywaB7c7OJWHQ9rLVuJcKjpUR8iSJfXMPCLr`
+- `spark.hadoop.hive.metastore.uris`: `thrift://127.0.0.0:31663`
+- `spark.hadoop.fs.s3a.endpoint`: `https://test-minio.com`
+- `spark.hadoop.fs.s3a.access.key`: `minioaccesskey`
+- `spark.hadoop.fs.s3a.secret.key`: `miniosecretkey`
 
 ### Security & Execution Context
 - Runs as a non-root user (`runAsUser: 185`)
