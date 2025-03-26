@@ -213,22 +213,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     
 FROM $base_img_py
 
-USER root
-
-ENV SPARK_VERSION=3.5.3
-ENV HADOOP_VERSION=3.3.4
-ENV SPARK_HOME=/opt/spark
-ENV PATH=${PATH}:${SPARK_HOME}/bin
-ENV AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true
-
-RUN python -m pip install --no-cache-dir pyspark findspark
-
-WORKDIR /opt
-
-USER 185
-
 COPY --chmod=0777 spark_hive_test.py /opt/spark/examples/
 
 COPY --from=unpacker --chmod=0777 /opt/spark/hivejars /opt/spark/hivejars
-
-USER spark
