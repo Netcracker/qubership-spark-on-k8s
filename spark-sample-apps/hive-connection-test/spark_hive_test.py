@@ -22,9 +22,9 @@ def main():
 
     # Check if S3 path exists before creating the table
     if fs.exists(spark._jvm.Path(s3_path)):
-        print(f"❌ S3 path {s3_path} already exists. Skipping table creation.")
+        print(f" S3 path {s3_path} already exists. Skipping table creation.")
     else:
-        print(f"✅ S3 path {s3_path} does not exist. Creating table...")
+        print(f"S3 path {s3_path} does not exist. Creating table...")
 
         # Create database and table
         spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
@@ -47,13 +47,13 @@ def main():
                             .count() > 0
 
         if table_exists:
-            print(f"✅ Table {database_name}.{table_name} exists. Fetching data:")
+            print(f"Table {database_name}.{table_name} exists. Fetching data:")
             spark.sql(f"SELECT * FROM {database_name}.{table_name}").show()
         else:
-            print(f"❌ Table {database_name}.{table_name} does not exist.")
+            print(f"Table {database_name}.{table_name} does not exist.")
 
     except Exception as e:
-        print(f"⚠️ Error querying table: {e}")
+        print(f"Error querying table: {e}")
 
     spark.stop()
 
