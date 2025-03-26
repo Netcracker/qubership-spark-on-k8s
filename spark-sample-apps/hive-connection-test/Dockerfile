@@ -1,4 +1,4 @@
-ARG base_img=artifactorycn.netcracker.com:17152/netcracker/qubership-spark-customized:main
+ARG base_img_py=artifactorycn.netcracker.com:17152/netcracker/qubership-spark-customized-py:main
 
 FROM maven:3-eclipse-temurin-17-alpine AS unpacker
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
@@ -20,7 +20,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-shims/3.1.3/hive-shims-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-standalone-metastore/3.1.3/hive-standalone-metastore-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/javolution/javolution/5.5.1/javolution-5.5.1.jar && \
-    curl -k -LO $MAVEN_REPO/com/google/guava/guava/19.0/guava-19.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hbase/hbase-client/2.0.0-alpha4/hbase-client-2.0.0-alpha4.jar && \
     curl -k -LO $MAVEN_REPO/com/jolbox/bonecp/0.8.0.RELEASE/bonecp-0.8.0.RELEASE.jar && \
     curl -k -LO $MAVEN_REPO/com/zaxxer/HikariCP/2.6.1/HikariCP-2.6.1.jar && \
@@ -41,7 +40,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/arrow/arrow-vector/0.8.0/arrow-vector-0.8.0.jar && \
     curl -k -LO $MAVEN_REPO/com/carrotsearch/hppc/0.7.2/hppc-0.7.2.jar && \
     curl -k -LO $MAVEN_REPO/com/vlkan/flatbuffers/1.2.0-3f79e055/flatbuffers-1.2.0-3f79e055.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/avro/avro/1.8.2/avro-1.8.2.jar && \
     curl -k -LO $MAVEN_REPO/net/sf/opencsv/opencsv/2.3/opencsv-2.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/parquet/parquet-hadoop-bundle/1.10.0/parquet-hadoop-bundle-1.10.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-classification/3.1.3/hive-classification-3.1.3.jar && \
@@ -73,7 +71,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/httpcomponents/httpcore/4.4.13/httpcore-4.4.13.jar && \
     curl -k -LO $MAVEN_REPO/commons-logging/commons-logging/1.2/commons-logging-1.2.jar && \
     curl -k -LO $MAVEN_REPO/org/slf4j/slf4j-log4j12/1.6.1/slf4j-log4j12-1.6.1.jar && \
-    curl -k -LO $MAVEN_REPO/io/netty/netty/3.7.0.Final/netty-3.7.0.Final.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/shims/hive-shims-0.23/3.1.3/hive-shims-0.23-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/shims/hive-shims-scheduler/3.1.3/hive-shims-scheduler-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/logging/log4j/log4j-core/2.17.1/log4j-core-2.17.1.jar && \
@@ -102,7 +99,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/aopalliance/aopalliance/1.0/aopalliance-1.0.jar && \
     curl -k -LO $MAVEN_REPO/com/sun/xml/bind/jaxb-impl/2.2.3-1/jaxb-impl-2.2.3-1.jar && \
     curl -k -LO $MAVEN_REPO/org/codehaus/jackson/jackson-core-asl/1.9.13/jackson-core-asl-1.9.13.jar && \
-    curl -k -LO $MAVEN_REPO/org/codehaus/jackson/jackson-mapper-asl/1.9.13/jackson-mapper-asl-1.9.13.jar && \
     curl -k -LO $MAVEN_REPO/org/codehaus/jackson/jackson-jaxrs/1.9.13/jackson-jaxrs-1.9.13.jar && \
     curl -k -LO $MAVEN_REPO/org/codehaus/jackson/jackson-xc/1.9.13/jackson-xc-1.9.13.jar && \
     curl -k -LO $MAVEN_REPO/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar && \
@@ -169,8 +165,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/ant/ant-launcher/1.9.1/ant-launcher-1.9.1.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/arrow/arrow-format/0.8.0/arrow-format-0.8.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/arrow/arrow-memory/0.8.0/arrow-memory-0.8.0.jar && \
-    curl -k -LO $MAVEN_REPO/io/netty/netty-buffer/4.1.17.Final/netty-buffer-4.1.17.Final.jar && \
-    curl -k -LO $MAVEN_REPO/io/netty/netty-common/4.1.17.Final/netty-common-4.1.17.Final.jar && \
     curl -k -LO $MAVEN_REPO/org/datanucleus/datanucleus-api-jdo/4.2.4/datanucleus-api-jdo-4.2.4.jar && \
     curl -k -LO $MAVEN_REPO/org/datanucleus/datanucleus-core/4.1.17/datanucleus-core-4.1.17.jar && \
     curl -k -LO $MAVEN_REPO/org/datanucleus/datanucleus-rdbms/4.1.19/datanucleus-rdbms-4.1.19.jar && \
@@ -201,7 +195,6 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/twill/twill-api/0.6.0-incubating/twill-api-0.6.0-incubating.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-llap-tez/3.1.3/hive-llap-tez-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/antlr/ST4/4.0.4/ST4-4.0.4.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/ivy/ivy/2.4.0/ivy-2.4.0.jar && \
     curl -k -LO $MAVEN_REPO/org/codehaus/groovy/groovy-all/2.4.11/groovy-all-2.4.11.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/calcite/calcite-core/1.16.0/calcite-core-1.16.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/calcite/avatica/avatica/1.11.0/avatica-1.11.0.jar && \
@@ -218,30 +211,17 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/xerial/snappy/snappy-java/1.1.8.2/snappy-java-1.1.8.2.jar && \
     curl -k -LO $MAVEN_REPO/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar 
     
-FROM $base_img
+FROM $base_img_py
 
 USER root
 
 ENV SPARK_VERSION=3.5.3
-ENV HADOOP_VERSION=3
+ENV HADOOP_VERSION=3.3.4
 ENV SPARK_HOME=/opt/spark
 ENV PATH=${PATH}:${SPARK_HOME}/bin
 ENV AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true
 
-RUN set -ex; \
-    apt-get update && apt-get install -y python3.11 python3.11-minimal python3.11-stdlib python3-pip mailcap mime-support && \
-    ln -s /usr/bin/python3.11 /usr/bin/python && \
-    mkdir tempdebs && cd tempdebs && \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/libpython3.11-minimal_3.11.11-1+jammy1_amd64.deb && \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/libpython3.11-stdlib_3.11.11-1+jammy1_amd64.deb && \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/python3.11_3.11.11-1+jammy1_amd64.deb && \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/python3.11-minimal_3.11.11-1+jammy1_amd64.deb && \
-    cd .. && \
-    dpkg -R --install tempdebs/ && \
-    rm -r tempdebs && \
-    rm -rf /var/lib/apt/lists/* && \
-    ln -sf python3.11 /usr/bin/python3 && \
-    python -m pip install --no-cache-dir pyspark findspark
+RUN python -m pip install --no-cache-dir pyspark findspark
 
 WORKDIR /opt
 
