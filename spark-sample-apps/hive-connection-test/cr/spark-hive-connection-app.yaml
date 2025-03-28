@@ -64,6 +64,13 @@ spec:
     - name: delete-s3
       image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
       command: ["python3", "/opt/spark/examples/delete_s3.py"]
+      resources:
+        requests:
+            cpu: "100m"
+            memory: "128Mi"
+        limits:
+            cpu: "1200m"
+            memory: "512Mi"
       env:
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
