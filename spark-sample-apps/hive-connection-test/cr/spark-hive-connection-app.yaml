@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:improvement_support-to-hive4"
+  image: "artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:improvement_support-to-hive4"
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/spark/examples/spark_hive_test.py
   sparkVersion: "3.5.3"
@@ -21,19 +21,23 @@ spec:
     "spark.sql.hive.metastore.version": "3.1.3"
     "spark.sql.hive.metastore.jars": "path"
     "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
-    "spark.hadoop.hive.metastore.uris": "thrift://127.0.0.0:31663"
+    "spark.hadoop.hive.metastore.uris": "thrift://127.0.0.0:32497"
     "spark.hadoop.hive.metastore.schema.verification": "false"
     "spark.hadoop.hive.metastore.schema.verification.record.version": "false"
     "spark.hadoop.hive.metastore.use.SSL": "false"
     "spark.hadoop.fs.s3.buckets.create.enabled": "true"
+    "spark.hadoop.fs.s3a.fast.upload": "true"
     "spark.hadoop.fs.s3a.endpoint": "https://test-minio.com"
-    "spark.hadoop.fs.s3a.access.key": "minoaccesskey"
-    "spark.hadoop.fs.s3a.secret.key": "miniosecretkey"
+    "spark.hadoop.fs.s3a.access.key": "minioaccesskey"
+    "spark.hadoop.fs.s3a.secret.key": "miniosecret"
     "spark.hadoop.fs.s3a.connection.ssl.enabled": "false"
     "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
     "spark.hadoop.fs.s3a.path.style.access": "true"
+    "spark.hadoop.fs.s3a.committer.magic.enabled": "true"
     "spark.driver.extraJavaOptions": "-Dcom.amazonaws.sdk.disableCertChecking"
     "spark.executor.extraJavaOptions": "-Dcom.amazonaws.sdk.disableCertChecking"
+    "spark.sql.catalogImplementation": "hive"
+    "spark.sql.legacy.createHiveTableByDefault": "false"
   restartPolicy:
     type: Never
     onFailureRetries: 3
@@ -47,15 +51,40 @@ spec:
     labels:
       version: 3.5.3
     serviceAccount: sparkapps-sa
+    initContainers:
+    - name: delete-s3
+      image: artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:improvement_support-to-hive4
+      command: ["python3", "/opt/examples/delete_s3.py"]
+      env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: s3-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: s3-secrets
+              key: AWS_SECRET_ACCESS_KEY
+        - name: S3_ENDPOINT_URL
+          valueFrom:
+            secretKeyRef:
+              name: s3-secrets
+              key: S3_ENDPOINT_URL
+        - name: METASTORE_URI
+          valueFrom:
+            secretKeyRef:
+              name: s3-secrets
+              key: METASTORE_URI
     securityContext:
-      seccompProfile:
-        type: RuntimeDefault
-      allowPrivilegeEscalation: false
-      runAsNonRoot: true
-      runAsUser: 185
-      capabilities:
-        drop:
-        - ALL  
+        seccompProfile:
+            type: RuntimeDefault
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        runAsUser: 185
+        capabilities:
+            drop:
+            - ALL
   executor:
     cores: 1
     instances: 1
@@ -63,11 +92,11 @@ spec:
     labels:
       version: 3.5.3
     securityContext:
-      seccompProfile:
-        type: RuntimeDefault
-      allowPrivilegeEscalation: false
-      runAsNonRoot: true
-      runAsUser: 185
-      capabilities:
-        drop:
-          - ALL
+        seccompProfile:
+            type: RuntimeDefault
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        runAsUser: 185
+        capabilities:
+            drop:
+            - ALL

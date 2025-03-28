@@ -1,8 +1,8 @@
-ARG base_img_py=artifactorycn.netcracker.com:17152/netcracker/qubership-spark-customized-py:main
+ARG base_img_py=ghcr.io/netcracker/qubership-spark-customized-py:main
 
 FROM maven:3-eclipse-temurin-17-alpine AS unpacker
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
-RUN apk add curl
+RUN apk add --no-cache curl
 
 RUN mkdir -p /opt/spark/hivejars && \
     cd /opt/spark/hivejars && \
@@ -209,10 +209,20 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/codehaus/janino/commons-compiler/2.7.6/commons-compiler-2.7.6.jar && \
     curl -k -LO $MAVEN_REPO/com/yahoo/datasketches/memory/0.9.0/memory-0.9.0.jar && \
     curl -k -LO $MAVEN_REPO/org/xerial/snappy/snappy-java/1.1.8.2/snappy-java-1.1.8.2.jar && \
-    curl -k -LO $MAVEN_REPO/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar 
-    
+    curl -k -LO $MAVEN_REPO/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar
+
 FROM $base_img_py
+
+ENV AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true
+
+USER root
+
+WORKDIR /opt/spark/examples/
 
 COPY --chmod=0777 spark_hive_test.py /opt/spark/examples/
 
+COPY --chmod=0777 delete_s3.py /opt/spark/examples/
+
 COPY --from=unpacker --chmod=0777 /opt/spark/hivejars /opt/spark/hivejars
+
+RUN python3 -m pip install --no-cache-dir pyspark findspark boto3
