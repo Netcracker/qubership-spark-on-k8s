@@ -213,8 +213,6 @@ RUN mkdir -p /opt/spark/hivejars && \
 
 FROM $base_img_py
 
-ENV AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true
-
 USER root
 
 WORKDIR /opt/spark/examples/
@@ -225,4 +223,4 @@ COPY --chmod=0777 delete_s3.py /opt/spark/examples/
 
 COPY --from=unpacker --chmod=0777 /opt/spark/hivejars /opt/spark/hivejars
 
-RUN python3 -m pip install --no-cache-dir pyspark findspark boto3
+RUN python3 -m pip install --no-cache-dir boto3

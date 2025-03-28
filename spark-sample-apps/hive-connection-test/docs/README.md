@@ -22,15 +22,59 @@ The application includes various Spark and Hadoop configurations to integrate wi
 - `spark.sql.warehouse.dir`: `s3a://hive/warehouse`
 - `spark.sql.hive.metastore.version`: `3.1.3`
 - `spark.sql.hive.metastore.jars.path`: `/opt/spark/hivejars/*`
-- `spark.hadoop.hive.metastore.uris`: `thrift://127.0.0.0:31663`
+- `spark.hadoop.hive.metastore.uris`: `thrift://127.0.0.0:123456`
 - `spark.hadoop.fs.s3a.endpoint`: `https://test-minio.com`
 - `spark.hadoop.fs.s3a.access.key`: `minioaccesskey`
 - `spark.hadoop.fs.s3a.secret.key`: `miniosecretkey`
+- `spark.hadoop.fs.s3a.connection.ssl.enabled`: `false`
+- `spark.hadoop.fs.s3a.impl`: `org.apache.hadoop.fs.s3a.S3AFileSystem`
+- `spark.hadoop.fs.s3a.path.style.access`: `true`
+- `spark.hadoop.fs.s3a.committer.magic.enabled`: `true`
+- `spark.driver.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking`
+- `spark.executor.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking`
+- `spark.sql.catalogImplementation`: `hive`
+- `spark.sql.legacy.createHiveTableByDefault`: `false`
 
 ### Security & Execution Context
 - Runs as a non-root user (`runAsUser: 185`)
 - Uses Kubernetes `seccompProfile` with `RuntimeDefault`
 - Drops all privileged capabilities for security
+
+### Kubernetes Secret for S3 Credentials
+The application uses a Kubernetes Secret to securely store S3 credentials:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-secrets
+  namespace: spark-apps
+type: Opaque
+data:
+  AWS_ACCESS_KEY_ID: {"minioaccesskey"}
+  AWS_SECRET_ACCESS_KEY: {"miniosecretkey"}
+  S3_ENDPOINT_URL: {"minio url"}
+```
+
+### Init Containers
+The application includes an init container to delete old S3 data before running the Spark job:
+
+- **Name:** `delete-s3`
+- **Image:** Same as the main application
+- **Script:** `delete_s3.py`
+- **Function:** Deletes old data from `s3://hive/warehouse/mysparkdb2.db/`
+- **Environment Variables:**
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+  - `S3_ENDPOINT_URL`
+  - `METASTORE_URI`
+- **Security Context:** Runs as a non-root user with restricted privileges
+
+## Environment Variables in Spark Application
+The following environment variables are set within the Spark application to improve execution and suppress unnecessary warnings:
+
+- `AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true`: Disables deprecation warnings from AWS Java SDK v1.
+- `PYTHONPATH="/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"`: Ensures that PySpark and Py4J dependencies are correctly resolved in the Python environment.
 
 ## Restart Policy
 The application will not restart automatically but has retry mechanisms in place:
@@ -64,3 +108,17 @@ If the Spark job fails to connect to Hive Metastore, verify:
 For S3 connection issues, check:
 - The endpoint, access key, and secret key settings.
 - SSL settings (`spark.hadoop.fs.s3a.connection.ssl.enabled=false`).
+
+## Expected Output
+The expected output of the application, as seen in the logs, is:
+
+```
++---+--------+
+| id|    name|
++---+--------+
+|  4|Jennifer|
+|  1|   James|
+|  3|    Jeff|
+|  2|     Ann|
++---+--------+
+```
