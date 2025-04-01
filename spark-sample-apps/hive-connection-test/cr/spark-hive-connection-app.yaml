@@ -95,8 +95,6 @@ spec:
             drop:
             - ALL
     env:
-      - name: AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT
-        value: "true"
       - name: PYTHONPATH
         value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
       - name: AWS_ACCESS_KEY_ID
@@ -125,8 +123,6 @@ spec:
             drop:
             - ALL
     env:
-      - name: AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT
-        value: "true"
       - name: PYTHONPATH
         value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
       - name: AWS_ACCESS_KEY_ID

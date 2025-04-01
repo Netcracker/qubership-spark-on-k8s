@@ -48,10 +48,9 @@ metadata:
   name: s3-secrets
   namespace: spark-apps
 type: Opaque
-data:
+stringData:
   AWS_ACCESS_KEY_ID: {"awsaccesskey"}
-  AWS_SECRET_ACCESS_KEY: {"awssecretkey"}
-stringData:  
+  AWS_SECRET_ACCESS_KEY: {"awssecretkey"}  
   S3_ENDPOINT_URL: {"aws endpoint url"}
 ```
 

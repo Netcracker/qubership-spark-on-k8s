@@ -7,7 +7,7 @@ def main():
     aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
     s3_endpoint_url = os.getenv("S3_ENDPOINT_URL")
     
-    s3_w = boto3.client('s3',
+    s3_w = boto3.client('s3', verify=False,
         endpoint_url=s3_endpoint_url,
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key
