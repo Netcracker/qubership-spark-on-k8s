@@ -22,10 +22,8 @@ The application includes various Spark and Hadoop configurations to integrate wi
 - `spark.sql.warehouse.dir`: `s3a://hive/warehouse`
 - `spark.sql.hive.metastore.version`: `3.1.3`
 - `spark.sql.hive.metastore.jars.path`: `/opt/spark/hivejars/*`
-- `spark.hadoop.hive.metastore.uris`: `thrift://127.0.0.0:123456`
+- `spark.hadoop.hive.metastore.uris`: `thrift://hive-metastore.hive-metastore:9083`
 - `spark.hadoop.fs.s3a.endpoint`: `https://test-minio.com`
-- `spark.hadoop.fs.s3a.access.key`: `minioaccesskey`
-- `spark.hadoop.fs.s3a.secret.key`: `miniosecretkey`
 - `spark.hadoop.fs.s3a.connection.ssl.enabled`: `false`
 - `spark.hadoop.fs.s3a.impl`: `org.apache.hadoop.fs.s3a.S3AFileSystem`
 - `spark.hadoop.fs.s3a.path.style.access`: `true`
@@ -51,9 +49,10 @@ metadata:
   namespace: spark-apps
 type: Opaque
 data:
-  AWS_ACCESS_KEY_ID: {"minioaccesskey"}
-  AWS_SECRET_ACCESS_KEY: {"miniosecretkey"}
-  S3_ENDPOINT_URL: {"minio url"}
+  AWS_ACCESS_KEY_ID: {"awsaccesskey"}
+  AWS_SECRET_ACCESS_KEY: {"awssecretkey"}
+stringData:  
+  S3_ENDPOINT_URL: {"aws endpoint url"}
 ```
 
 ### Init Containers
@@ -67,7 +66,6 @@ The application includes an init container to delete old S3 data before running 
   - `AWS_ACCESS_KEY_ID`
   - `AWS_SECRET_ACCESS_KEY`
   - `S3_ENDPOINT_URL`
-  - `METASTORE_URI`
 - **Security Context:** Runs as a non-root user with restricted privileges
 
 ## Environment Variables in Spark Application
@@ -75,6 +73,8 @@ The following environment variables are set within the Spark application to impr
 
 - `AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true`: Disables deprecation warnings from AWS Java SDK v1.
 - `PYTHONPATH="/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"`: Ensures that PySpark and Py4J dependencies are correctly resolved in the Python environment.
+- `AWS_ACCESS_KEY_ID`: AWS accesskey referenced from s3_secrets to connect to S3 endpoint
+- `AWS_SECRET_ACCESS_KEY`: AWS secret access key referenced from s3_secrets to connect to S3 endpoint
 
 ## Restart Policy
 The application will not restart automatically but has retry mechanisms in place:

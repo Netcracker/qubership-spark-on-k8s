@@ -21,9 +21,11 @@ spec:
     "spark.sql.hive.metastore.version": "3.1.3"
     "spark.sql.hive.metastore.jars": "path"
     "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
+    "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.hive-metastore:9083"
     "spark.hadoop.hive.metastore.schema.verification": "false"
     "spark.hadoop.hive.metastore.schema.verification.record.version": "false"
     "spark.hadoop.hive.metastore.use.SSL": "false"
+    "spark.hadoop.fs.s3a.endpoint": "https://test-minio.com"
     "spark.hadoop.fs.s3.buckets.create.enabled": "true"
     "spark.hadoop.fs.s3a.fast.upload": "true"
     "spark.hadoop.fs.s3a.connection.ssl.enabled": "false"
@@ -107,16 +109,6 @@ spec:
           secretKeyRef:
             name: s3-secrets
             key: AWS_SECRET_ACCESS_KEY
-      - name: SSL_S3_ENDPOINT_URL
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: SSL_S3_ENDPOINT_URL
-      - name: HIVE_METASTORE_THRIFT_URI
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: HIVE_METASTORE_THRIFT_URI
   executor:
     cores: 1
     instances: 1
@@ -147,13 +139,4 @@ spec:
           secretKeyRef:
             name: s3-secrets
             key: AWS_SECRET_ACCESS_KEY
-      - name: SSL_S3_ENDPOINT_URL
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: SSL_S3_ENDPOINT_URL
-      - name: HIVE_METASTORE_THRIFT_URI
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: HIVE_METASTORE_THRIFT_URI
+
