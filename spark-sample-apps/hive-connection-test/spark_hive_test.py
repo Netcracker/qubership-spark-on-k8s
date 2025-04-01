@@ -1,19 +1,9 @@
 import sys
-import os
 from pyspark.sql import SparkSession
 
 def main():
-    aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
-    aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-    ssl_s3_endpoint_url = os.getenv("SSL_S3_ENDPOINT_URL")
-    hive_meta_store_thrift_uri = os.getenv("HIVE_METASTORE_THRIFT_URI")
-
     spark = SparkSession.builder \
         .appName("Spark-hive-test") \
-        .config("spark.hadoop.fs.s3a.endpoint", ssl_s3_endpoint_url) \
-        .config("spark.hadoop.fs.s3a.access.key", aws_access_key) \
-        .config("spark.hadoop.fs.s3a.secret.key", aws_secret_key) \
-        .config("spark.hadoop.hive.metastore.uris", hive_meta_store_thrift_uri) \
         .enableHiveSupport() \
         .getOrCreate()
     
