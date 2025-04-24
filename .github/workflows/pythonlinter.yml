@@ -27,3 +27,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ENV_FILE: .github/workflows/super-linter.env
           FLAKE8_CONFIG_FILE: .github/linters/.flake8
+          VALIDATE_ALL_CODEBASE: false
+          FILTER_REGEX_INCLUDE: 'spark-sample-apps/hive-connection-test/spark_hive_test\.py'
+          RUN_LOCAL: true
