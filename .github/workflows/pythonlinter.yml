@@ -1,0 +1,27 @@
+name: Lint Python File
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - spark-sample-apps/hive-connection-test/spark_hive_test.py
+  pull_request:
+    branches:
+      - '**'
+    paths:
+      - spark-sample-apps/hive-connection-test/spark_hive_test.py
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Super-Linter
+        uses: github/super-linter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ENV_FILE: .github/workflows/super-linter.env
+          FLAKE8_CONFIG_FILE: .github/linters/.flake8
