@@ -30,3 +30,4 @@ jobs:
           VALIDATE_ALL_CODEBASE: false
           FILTER_REGEX_INCLUDE: 'spark-sample-apps/hive-connection-test/spark_hive_test\.py'
           RUN_LOCAL: true
+          DEFAULT_BRANCH: main
