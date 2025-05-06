@@ -8,10 +8,10 @@ RUN set -ex; \
     apt-get update; \
     mkdir tempdebs; \
     cd tempdebs; \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/libpython3.11-minimal_3.11.11-1+jammy1_amd64.deb; \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/libpython3.11-stdlib_3.11.11-1+jammy1_amd64.deb; \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/python3.11_3.11.11-1+jammy1_amd64.deb; \
-    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/python3.11-minimal_3.11.11-1+jammy1_amd64.deb; \
+    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/libpython3.11-minimal_3.11.12-1+jammy1_amd64.deb; \
+    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/libpython3.11-stdlib_3.11.12-1+jammy1_amd64.deb; \
+    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/python3.11_3.11.12-1+jammy1_amd64.deb; \
+    curl -sLO https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.11/python3.11-minimal_3.11.12-1+jammy1_amd64.deb; \
     cd ..; \
     apt-get install -y mailcap mime-support; \
     dpkg -R --install tempdebs/; \
