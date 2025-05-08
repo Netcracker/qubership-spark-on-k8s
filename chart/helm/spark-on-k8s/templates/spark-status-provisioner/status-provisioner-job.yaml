@@ -40,7 +40,7 @@ spec:
             - name: MONITORED_RESOURCES
               value: "{{ include "spark.monitoredResources" . | trim | trimSuffix "," }}"
             - name: RESOURCE_TO_SET_STATUS
-              value: {{ printf "batch v1 jobs spark-status-provisioner"}}
+              value: "{{ printf "batch v1 jobs spark-status-provisioner" }}"
             - name: CONDITION_REASON
               value: "SparkServiceReadinessStatus"
             - name: POD_READINESS_TIMEOUT
@@ -49,7 +49,7 @@ spec:
               value: Successful
           {{- if index .Values "spark-integration-tests" "enabled" }}
             - name: INTEGRATION_TESTS_RESOURCE
-              value: {{ printf "apps v1 deployments spark-integration-tests-runner"}}
+              value: "{{ printf "apps v1 deployments spark-integration-tests-runner" }}"
             - name: INTEGRATION_TESTS_CONDITION_REASON
               value: "IntegrationTestsExecutionStatus"
             - name: INTEGRATION_TESTS_SUCCESSFUL_CONDITION_TYPE
