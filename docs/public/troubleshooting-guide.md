@@ -64,3 +64,19 @@ Kubernetes service and ingress are created automatically for each application su
   *Solution*:
 
   Check spark operator resources, more than 1CPU/1GB of resources may be needed.
+
+* CRD Validation Error When Applying SparkApplication CRD
+ When applying the CustomResourceDefinition (CRD) for sparkapplications.sparkoperator.k8s.io, and sparkoperator.k8s.io_scheduledsparkapplications users might encounter the following error:
+  The CustomResourceDefinition "sparkapplications.sparkoperator.k8s.io" is invalid:
+  metadata.annotations: Too long: must have at most 262144 bytes
+   spec.preserveUnknownFields: Invalid value: true: must be false in order to use defaults in the schema 
+
+  *Cause*:
+
+  This happens because the CRD manifest contains large annotations (often from Helm or ArgoCD metadata) that exceed the Kubernetes limit of 262144 bytes. Additionally, Kubernetes 1.22+ requires spec.preserveUnknownFields to be false to allow the use of default values in the OpenAPI schema.
+
+  *Solution*:
+  
+  To bypass this issue, apply the CRD using `--server-side=true` which skips the client-side size validation:
+
+
