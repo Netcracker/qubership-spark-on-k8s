@@ -13,7 +13,7 @@
         <dependency> <!-- Spark dependency -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
-            <version>3.5.3</version>
+            <version>3.5.5</version>
             <!--<scope>provided</scope>-->
         </dependency>
     </dependencies>

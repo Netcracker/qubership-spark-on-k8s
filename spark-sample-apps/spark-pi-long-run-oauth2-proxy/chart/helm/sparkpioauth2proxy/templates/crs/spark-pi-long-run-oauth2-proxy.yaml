@@ -23,8 +23,8 @@ spec:
   image: "ghcr.io/netcracker/qubership-spark-sample-apps-spark-streaming-checkpoint:main"
   imagePullPolicy: Always
   mainClass: org.apache.spark.examples.SparkPi
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.3.jar"
-  sparkVersion: "3.5.3"
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.12-3.5.5.jar"
+  sparkVersion: "3.5.5"
   sparkConf:
     #"spark.kubernetes.local.dirs.tmpfs": "true"
     "spark.kubernetes.submission.connectionTimeout": "60000000"
@@ -45,7 +45,7 @@ spec:
     coreLimit: "1200m"
     memory: "512m"
     labels:
-      version: 3.5.3
+      version: 3.5.5
     serviceAccount: {{ .Values.app.serviceAccount }}
     securityContext:
       seccompProfile:
@@ -61,7 +61,7 @@ spec:
     instances: 1
     memory: "512m"
     labels:
-      version: 3.5.3
+      version: 3.5.5
     securityContext:
       seccompProfile:
         type: RuntimeDefault

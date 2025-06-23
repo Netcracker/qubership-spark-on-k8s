@@ -34,7 +34,7 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/delta/delta-storage/3.2.1/delta-storage-3.2.1.jar --output $SPARK_JARS_DIR/delta-storage-3.2.1.jar && \
     curl -k -L $MAVEN_REPO/io/delta/delta-spark_2.12/3.2.1/delta-spark_2.12-3.2.1.jar --output $SPARK_JARS_DIR/delta-spark_2.12-3.2.1.jar
 
-FROM spark:3.5.3-java17
+FROM spark:3.5.5-java17
 ENV SPARK_JARS_DIR=/opt/spark/jars
 
 USER root

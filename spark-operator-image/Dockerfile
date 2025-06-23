@@ -33,7 +33,7 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/4.1.118.Final/netty-transport-native-unix-common-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.118.Final.jar
 
 
-FROM kubeflow/spark-operator:2.1.0
+FROM kubeflow/spark-operator:2.2.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 
 RUN rm $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13.jar $SPARK_JARS_DIR/ivy-2.5.1.jar $SPARK_JARS_DIR/guava-14.0.1.jar $SPARK_JARS_DIR/avro-1.11.2.jar $SPARK_JARS_DIR/avro-ipc-1.11.2.jar $SPARK_JARS_DIR/avro-mapred-1.11.2.jar $SPARK_JARS_DIR/netty-all-4.1.96.Final.jar $SPARK_JARS_DIR/netty-buffer-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-http2-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-http-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-socks-4.1.96.Final.jar $SPARK_JARS_DIR/netty-common-4.1.96.Final.jar $SPARK_JARS_DIR/netty-handler-4.1.96.Final.jar $SPARK_JARS_DIR/netty-handler-proxy-4.1.96.Final.jar $SPARK_JARS_DIR/netty-resolver-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-classes-epoll-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-classes-kqueue-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.96.Final-linux-aarch_64.jar $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.96.Final-linux-x86_64.jar $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.96.Final-osx-aarch_64.jar $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.96.Final-osx-x86_64.jar $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.96.Final.jar

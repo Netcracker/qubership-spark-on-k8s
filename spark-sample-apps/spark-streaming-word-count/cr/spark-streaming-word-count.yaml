@@ -24,7 +24,7 @@ spec:
   imagePullPolicy: Always
   mainClass: com.qubership.spark.app.sample.JavaDirectKafkaWordCount
   mainApplicationFile: "local:///opt/spark/examples/spark-streaming-1.0-SNAPSHOT-jar-with-dependencies.jar"
-  sparkVersion: "3.5.3"
+  sparkVersion: "3.5.5"
   restartPolicy:
     type: Never
   sparkConf:
@@ -51,7 +51,7 @@ spec:
     coreLimit: "1200m"
     memory: "512m"
     labels:
-      version: 3.5.3
+      version: 3.5.5
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -70,7 +70,7 @@ spec:
     instances: 1
     memory: "512m"
     labels:
-      version: 3.5.3
+      version: 3.5.5
     securityContext:
       seccompProfile:
         type: RuntimeDefault
