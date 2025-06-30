@@ -18,7 +18,7 @@ This guide lists the troubleshooting techniques and known issues of the Spark Op
 # Spark User Interface
 
 Apache Spark provides a suite of web user interfaces (Jobs, Stages, Tasks, Storage, Environment, Executors, and SQL) that can be used to monitor the status, resource consumption, and troubleshooting of your Spark application.  
-For more details, refer to the _Apache Spark_ official documentation at [https://spark.apache.org/docs/3.5.3/web-ui.html#streaming-dstreams-tab](https://spark.apache.org/docs/3.5.3/web-ui.html#streaming-dstreams-tab).
+For more details, refer to the _Apache Spark_ official documentation at [https://spark.apache.org/docs/3.5.5/web-ui.html#streaming-dstreams-tab](https://spark.apache.org/docs/3.5.5/web-ui.html#streaming-dstreams-tab).
 
 To enable the Spark user interface for applications, the Spark Operator should be deployed with the following properties:
 

@@ -11,7 +11,7 @@ The application is defined as a `SparkApplication` resource in Kubernetes, utili
 - **Application Name:** `spark-hive-test`
 - **Namespace:** `spark-apps`
 - **Image:** `ghcr.io/netcracker/qubership-tests-spark-hive-connection:main`
-- **Spark Version:** `3.5.3`
+- **Spark Version:** `3.5.5`
 - **Mode:** `cluster`
 - **Python Version:** `3`
 
