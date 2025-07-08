@@ -9,7 +9,7 @@ def main():
     
     database_name = "mysparkdb2"
     table_name = "mytable20"
-
+# test linter
 # Ensure the database exists before dropping it
     databases = spark.sql("SHOW DATABASES").collect()
     db_names = [db[0] for db in databases]
