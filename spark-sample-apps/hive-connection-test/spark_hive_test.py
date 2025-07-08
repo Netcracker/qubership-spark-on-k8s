@@ -21,6 +21,7 @@ def main():
         print(f"Database {database_name} does not exist.")
 
 # Create the database and table again
+    print(f"Creating database {database_name} ")
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
 
     spark.sql(f"""
@@ -30,7 +31,7 @@ def main():
         ) USING PARQUET
         LOCATION 's3a://hive/warehouse/{database_name}.db/{table_name}'
     """)
-
+    print(f"Database {database_name} created.")
     columns = ["id", "name"]
     data = [(1, "James"), (2, "Ann"), (3, "Jeff"), (4, "Jennifer")]
 
@@ -39,7 +40,9 @@ def main():
 
 # Insert data
     spark.sql(f"INSERT INTO TABLE {database_name}.{table_name} SELECT * FROM mytemptview")
+    print(f"Data inserted")
     spark.sql(f"SELECT * FROM {database_name}.{table_name}").show()
+    print(f"Data fetched")
 
     spark.stop()
 
