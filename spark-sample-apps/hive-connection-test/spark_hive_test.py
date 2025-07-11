@@ -30,6 +30,7 @@ def main():
         ) USING PARQUET
         LOCATION 's3a://hive/warehouse/{database_name}.db/{table_name}'
     """)
+    
     columns = ["id", "name"]
     data = [(1, "James"), (2, "Ann"), (3, "Jeff"), (4, "Jennifer")]
 
