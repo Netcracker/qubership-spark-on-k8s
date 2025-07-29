@@ -4,9 +4,9 @@ service:
 serviceAccount:
   create: true
   name: "spark-integration-tests"
-image: 
-    repository: ghcr.io/netcracker/qubership-spark-on-k8s-tests
-    tag: main
+image:
+  repository: ghcr.io/netcracker/qubership-spark-on-k8s-tests
+  tag: main
 
 sparkAppsNamespace: "spark-apps"
 status_writing_enabled: "true"
@@ -38,7 +38,7 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-#ToDo store in secrets
+ #ToDo store in secrets
 testsS3Endpoint: http://your.minio.endpoint.com
 testsS3AccessKey: miniokey
 testsS3SecretKey: miniopass
