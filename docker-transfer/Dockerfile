@@ -23,15 +23,10 @@ COPY docker-transfer/sync_util.py /app/sync_util.py
 
 RUN pip install --no-cache-dir ruamel.yaml==0.17.32 && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/values.yaml && \
-    python sync_util.py dependencies chart/helm/spark-on-k8s/Chart.yaml && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-history-server/values.yaml && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-thrift-server/values.yaml && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-integration-tests/values.yaml && \
-    python sync_util.py qubership-spark-operator chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-operator/values.yaml && \
-    python sync_util.py chart-version chart/helm/spark-on-k8s/charts/spark-history-server/Chart.yaml chart/helm/spark-on-k8s/charts/spark-history-server/values.yaml && \
-    python sync_util.py chart-version chart/helm/spark-on-k8s/charts/spark-integration-tests/Chart.yaml chart/helm/spark-on-k8s/charts/spark-integration-tests/values.yaml && \
-    python sync_util.py chart-version chart/helm/spark-on-k8s/charts/spark-operator/Chart.yaml chart/helm/spark-on-k8s/charts/spark-operator/values.yaml && \
-    python sync_util.py chart-version chart/helm/spark-on-k8s/charts/spark-thrift-server/Chart.yaml chart/helm/spark-on-k8s/charts/spark-thrift-server/values.yaml
+    python sync_util.py qubership-spark-operator chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-operator/values.yaml
 
 FROM scratch
 
