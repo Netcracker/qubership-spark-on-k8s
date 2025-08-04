@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# The file is mostly similar to https://github.com/apache/spark-docker/blob/master/3.5.5/scala2.12-java17-ubuntu/entrypoint.sh
+# The file is mostly similar to https://github.com/apache/spark-docker/blob/master/4.0.0/scala2.13-java21-ubuntu/entrypoint.sh
 # except logic for modifying certificates is added and history-server entrypoint support is added
 #
 # Prevent any errors from being silently ignored
