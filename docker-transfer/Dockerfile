@@ -2,7 +2,7 @@ FROM alpine:latest AS unpacker
 
 RUN apk add curl
 RUN mkdir -p /chart/helm/spark-on-k8s/charts && \
-    curl -s -L https://github.com/kubeflow/spark-operator/releases/download/v2.2.1/spark-operator-2.2.1.tgz | tar xvz -C /chart/helm/spark-on-k8s/charts
+    curl -s -L https://github.com/kubeflow/spark-operator/releases/download/v2.3.0/spark-operator-2.3.0.tgz | tar xvz -C /chart/helm/spark-on-k8s/charts
 
 
 # Transfer
