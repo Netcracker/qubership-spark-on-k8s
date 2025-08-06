@@ -1,0 +1,10 @@
+{
+    "threshold": 4,
+    "ignore": [
+        "**/.git/**",
+        "**/chart/**",
+        "**/docs/public/examples/**",
+        "**/spark-sample-apps/**",
+        "**/.github/**"
+    ]
+}
