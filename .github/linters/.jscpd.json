@@ -3,6 +3,8 @@
     "ignore": [
         "**/.git/**",
         "**/chart/**",
-        "**/docs/examples/**"
+        "**/docs/public/examples/**",
+        "**/spark-sample-apps/**",
+        "**/.github/**"
     ]
 }
