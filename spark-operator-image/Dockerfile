@@ -11,4 +11,6 @@ RUN mkdir -p /opt/spark/jars/ && \
 FROM ghcr.io/kubeflow/spark-operator/controller:2.3.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 
+RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar
+
 COPY --from=unpacker --chmod=0777 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
