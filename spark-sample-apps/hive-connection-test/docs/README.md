@@ -28,8 +28,8 @@ The application includes various Spark and Hadoop configurations to integrate wi
 - `spark.hadoop.fs.s3a.impl`: `org.apache.hadoop.fs.s3a.S3AFileSystem`
 - `spark.hadoop.fs.s3a.path.style.access`: `true`
 - `spark.hadoop.fs.s3a.committer.magic.enabled`: `true`
-- `spark.driver.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking`
-- `spark.executor.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking`
+- `spark.driver.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking` - deprecated, for this option to work, your image should include AWS java SDK v1, since the default image includes AWS java SDK v2 where disabling certificate verification is not supported.
+- `spark.executor.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking` - deprecated, for this option to work, your image should include AWS java SDK v1, since the default image includes AWS java SDK v2 where disabling certificate verification is not supported.
 - `spark.sql.catalogImplementation`: `hive`
 - `spark.sql.legacy.createHiveTableByDefault`: `false`
 

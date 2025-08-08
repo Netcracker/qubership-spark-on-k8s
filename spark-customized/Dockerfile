@@ -29,6 +29,8 @@ RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/
 COPY --chmod=0777 ./entrypoint.sh /opt/
 COPY --chmod=0777 ./thrift-server-entrypoint.sh /opt/
 
+RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar
+
 COPY --from=unpacker --chmod=0777 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
 
 
