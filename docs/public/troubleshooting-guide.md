@@ -77,6 +77,15 @@ Kubernetes service and ingress are created automatically for each application su
 
   *Solution*:
   
-  To bypass this issue, apply the CRD using `--server-side=true` which skips the client-side size validation:
+  To bypass this issue, apply the CRD using `--server-side=true` which skips the client-side size validation.
 
+* MD 5 error when connecting to minio s3.
+
+  *Cause*:
+
+  Old minio version, see github.com/minio/minio/issues/20845 and https://github.com/aws/aws-sdk-java-v2/discussions/5802
+
+  *Solution*:
+
+  Update minio version. It also might be necessary to set AWS java SDK v2 properties `RequestChecksumCalculation` and `ResponseChecksumValidation` to `WHEN_REQUIRED`.
 
