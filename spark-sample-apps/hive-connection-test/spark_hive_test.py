@@ -1,4 +1,3 @@
-import sys
 from pyspark.sql import SparkSession
 
 
@@ -28,7 +27,7 @@ def main():
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {database_name}.{table_name} (
-            id INT, 
+            id INT,
             name STRING
         ) USING PARQUET
         LOCATION 's3a://hive/warehouse/{database_name}.db/{table_name}'
