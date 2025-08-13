@@ -1,5 +1,5 @@
 {
-  "components": [
+  "stage1_components": [
     {
       "name": "qubership-spark-customized",
       "file": "spark-customized/Dockerfile",
@@ -19,12 +19,16 @@
       "name": "qubership-spark-operator",
       "file": "spark-operator-image/Dockerfile",
       "context": "spark-operator-image"
-    },
+    }
+  ],
+  "stage1_platforms": "linux/amd64, linux/arm64",
+
+  "stage2_components": [
     {
       "name": "qubership-spark-customized-py",
       "file": "spark-customized/py/Dockerfile",
       "context": "spark-customized"
     }
   ],
-  "platforms": "linux/amd64"
+  "stage2_platforms": "linux/amd64"
 }
