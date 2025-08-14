@@ -1,0 +1,34 @@
+{
+  "stage1_components": [
+    {
+      "name": "qubership-spark-customized",
+      "file": "spark-customized/Dockerfile",
+      "context": "spark-customized"
+    },
+    {
+      "name": "qubership-spark-on-k8s-transfer",
+      "file": "docker-transfer/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "qubership-spark-on-k8s-tests",
+      "file": "spark-service-integration-tests/docker/Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "qubership-spark-operator",
+      "file": "spark-operator-image/Dockerfile",
+      "context": "spark-operator-image"
+    }
+  ],
+  "stage1_platforms": "linux/amd64, linux/arm64",
+
+  "stage2_components": [
+    {
+      "name": "qubership-spark-customized-py",
+      "file": "spark-customized/py/Dockerfile",
+      "context": "spark-customized"
+    }
+  ],
+  "stage2_platforms": "linux/amd64"
+}
