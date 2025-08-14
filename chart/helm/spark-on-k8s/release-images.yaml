@@ -4,4 +4,5 @@ qubership-spark-on-k8s-tests: ghcr.io/netcracker/qubership-spark-on-k8s-tests:ma
 qubership-spark-operator: ghcr.io/netcracker/qubership-spark-operator:main
 qubership-spark-customized-py: ghcr.io/netcracker/qubership-spark-customized-py:main
 qubership-deployment-status-provisioner: ghcr.io/netcracker/qubership-deployment-status-provisioner:main
-oauth2_proxy_release-image: quay.io/oauth2-proxy/oauth2-proxy:main
+oauth2_proxy_release-image: quay.io/oauth2-proxy/oauth2-proxy:v7.11.0
+
