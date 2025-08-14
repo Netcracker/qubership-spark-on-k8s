@@ -11,7 +11,7 @@ The application is defined as a `SparkApplication` resource in Kubernetes, utili
 - **Application Name:** `spark-hive-test`
 - **Namespace:** `spark-apps`
 - **Image:** `ghcr.io/netcracker/qubership-tests-spark-hive-connection:main`
-- **Spark Version:** `4.0.0`
+- **Spark Version:** `3.5.5`
 - **Mode:** `cluster`
 - **Python Version:** `3`
 
@@ -28,8 +28,8 @@ The application includes various Spark and Hadoop configurations to integrate wi
 - `spark.hadoop.fs.s3a.impl`: `org.apache.hadoop.fs.s3a.S3AFileSystem`
 - `spark.hadoop.fs.s3a.path.style.access`: `true`
 - `spark.hadoop.fs.s3a.committer.magic.enabled`: `true`
-- `spark.driver.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking` - deprecated, for this option to work, your image should include AWS java SDK v1, since the default image includes AWS java SDK v2 where disabling certificate verification is not supported.
-- `spark.executor.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking` - deprecated, for this option to work, your image should include AWS java SDK v1, since the default image includes AWS java SDK v2 where disabling certificate verification is not supported.
+- `spark.driver.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking`
+- `spark.executor.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking`
 - `spark.sql.catalogImplementation`: `hive`
 - `spark.sql.legacy.createHiveTableByDefault`: `false`
 

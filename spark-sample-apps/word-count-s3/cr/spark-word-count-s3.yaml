@@ -10,7 +10,7 @@ spec:
   imagePullPolicy: Always
   mainClass: com.qubership.spark.app.WordCountApp
   mainApplicationFile: "local:///opt/spark/examples/word-count-spark-app-1.0-SNAPSHOT.jar"
-  sparkVersion: "4.0.0"
+  sparkVersion: "3.5.5"
   restartPolicy:
     type: Never
   sparkConf:
@@ -35,7 +35,7 @@ spec:
 
   driver:
     labels:
-      version: 4.0.0
+      version: 3.5.5
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -61,7 +61,7 @@ spec:
     cores: 1
     instances: 1
     labels:
-      version: 4.0.0
+      version: 3.5.5
     securityContext:
       seccompProfile:
         type: RuntimeDefault

@@ -24,7 +24,7 @@ spec:
   imagePullPolicy: Always
   mainClass: com.qubership.spark.app.sample.SparkPi
   mainApplicationFile: "local:///opt/spark/examples/spark-pi-long-execution-1.0-SNAPSHOT.jar"
-  sparkVersion: "4.0.0"
+  sparkVersion: "3.5.5"
   arguments:
     - "100"
   restartPolicy:
@@ -45,7 +45,7 @@ spec:
     coreLimit: "1200m"
     memory: "1024m"
     labels:
-      version: 4.0.0
+      version: 3.5.5
     serviceAccount: sparkapps-sa
     configMaps:
       - name: metricspropertiesconfigmap
@@ -64,7 +64,7 @@ spec:
     instances: 1
     memory: "1024m"
     labels:
-      version: 4.0.0
+      version: 3.5.5
     configMaps:
       - name: metricspropertiesconfigmap
         path: /etc/metrics/conf
