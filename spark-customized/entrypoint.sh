@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# The file is mostly similar to https://github.com/apache/spark-docker/blob/master/3.5.5/scala2.12-java17-ubuntu/entrypoint.sh
+# The file is mostly similar to https://github.com/apache/spark-docker/blob/master/4.0.0/scala2.13-java21-ubuntu/entrypoint.sh
 # except logic for modifying certificates is added and history-server entrypoint support is added
 #
 # Prevent any errors from being silently ignored
@@ -21,7 +21,7 @@ attempt_setup_fake_passwd_entry() {
           NSS_WRAPPER_GROUP="$(mktemp)"
           export LD_PRELOAD="$wrapper" NSS_WRAPPER_PASSWD NSS_WRAPPER_GROUP
           local mygid; mygid="$(id -g)"
-          printf "spark:x:%s:%s:${SPARK_USER_NAME:-anonymous uid}:%s:/bin/false\n" "$myuid" "$mygid" "$SPARK_HOME" > "$NSS_WRAPPER_PASSWD"
+          printf 'spark:x:%s:%s:${SPARK_USER_NAME:-anonymous uid}:%s:/bin/false\n' "$myuid" "$mygid" "$SPARK_HOME" > "$NSS_WRAPPER_PASSWD"
           printf 'spark:x:%s:\n' "$mygid" > "$NSS_WRAPPER_GROUP"
           break
         fi
@@ -31,21 +31,20 @@ attempt_setup_fake_passwd_entry() {
 
 # QB change: patch certs
 
-if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls "${TRUST_CERTS_DIR}")" ]]; then
-    for filename in "${TRUST_CERTS_DIR}"/*; do
+if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
+    for filename in ${TRUST_CERTS_DIR}/*; do
         echo "Import $filename certificate to Java cacerts"
-        "${JAVA_HOME}"/bin/keytool -import -trustcacerts -keystore "${JAVA_HOME}"/lib/security/cacerts -storepass changeit -noprompt -alias "${filename}" -file "${filename}"
-
+        ${JAVA_HOME}/bin/keytool -import -trustcacerts -keystore ${JAVA_HOME}/lib/security/cacerts -storepass changeit -noprompt -alias ${filename} -file ${filename}
     done;
 fi
 
 if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then
   if [ ! -d "${TLS_KEYSTORE_DIR}" ]; then
     echo "Creating keystore directory"
-    mkdir -p "${TLS_KEYSTORE_DIR}"
+    mkdir -p ${TLS_KEYSTORE_DIR}
   fi
   echo "Adding to keystore"
-  openssl pkcs12 -export -in "${TLS_CERT_PATH}" -inkey "${TLS_KEY_PATH}" -out "${TLS_KEYSTORE_DIR}"/keystore.p12 -passout pass:"${TLS_KEYSTORE_PASSWORD}"
+  openssl pkcs12 -export -in ${TLS_CERT_PATH} -inkey ${TLS_KEY_PATH} -out ${TLS_KEYSTORE_DIR}/keystore.p12 -passout pass:${TLS_KEYSTORE_PASSWORD}
 fi
 
 if [ -z "$JAVA_HOME" ]; then
@@ -61,28 +60,26 @@ if [ -n "$SPARK_EXTRA_CLASSPATH" ]; then
   SPARK_CLASSPATH="$SPARK_CLASSPATH:$SPARK_EXTRA_CLASSPATH"
 fi
 
-if [ -n "${PYSPARK_PYTHON+x}" ]; then
+if ! [ -z "${PYSPARK_PYTHON+x}" ]; then
     export PYSPARK_PYTHON
 fi
-if [ -n "${PYSPARK_DRIVER_PYTHON+x}" ]; then
+if ! [ -z "${PYSPARK_DRIVER_PYTHON+x}" ]; then
     export PYSPARK_DRIVER_PYTHON
 fi
 
 # If HADOOP_HOME is set and SPARK_DIST_CLASSPATH is not set, set it here so Hadoop jars are available to the executor.
 # It does not set SPARK_DIST_CLASSPATH if already set, to avoid overriding customizations of this value from elsewhere e.g. Docker/K8s.
 if [ -n "${HADOOP_HOME}"  ] && [ -z "${SPARK_DIST_CLASSPATH}"  ]; then
-  SPARK_DIST_CLASSPATH="$("$HADOOP_HOME"/bin/hadoop classpath)"
-  export SPARK_DIST_CLASSPATH
-
+  export SPARK_DIST_CLASSPATH="$($HADOOP_HOME/bin/hadoop classpath)"
 fi
 
-if [ -n "${HADOOP_CONF_DIR+x}" ]; then
+if ! [ -z "${HADOOP_CONF_DIR+x}" ]; then
   SPARK_CLASSPATH="$HADOOP_CONF_DIR:$SPARK_CLASSPATH";
 fi
 
-if [ -n "${SPARK_CONF_DIR+x}" ]; then
+if ! [ -z "${SPARK_CONF_DIR+x}" ]; then
   SPARK_CLASSPATH="$SPARK_CONF_DIR:$SPARK_CLASSPATH";
-elif [ -n "${SPARK_HOME+x}" ]; then
+elif ! [ -z "${SPARK_HOME+x}" ]; then
   SPARK_CLASSPATH="$SPARK_HOME/conf:$SPARK_CLASSPATH";
 fi
 
@@ -91,7 +88,7 @@ SPARK_CLASSPATH="$SPARK_CLASSPATH:$PWD"
 
 # Switch to spark if no USER specified (root by default) otherwise use USER directly
 switch_spark_if_root() {
-  if [ "$(id -u)" -eq 0 ]; then
+  if [ $(id -u) -eq 0 ]; then
     echo gosu spark
   fi
 }
@@ -113,7 +110,7 @@ case "$1" in
   executor)
     shift 1
     CMD=(
-      "${JAVA_HOME}"/bin/java
+      ${JAVA_HOME}/bin/java
       "${SPARK_EXECUTOR_JAVA_OPTS[@]}"
       -Xms"$SPARK_EXECUTOR_MEMORY"
       -Xmx"$SPARK_EXECUTOR_MEMORY"
