@@ -26,6 +26,9 @@ jobs:
           - name: qubership-spark-customized-py
             file: spark-customized/py/Dockerfile
             context: spark-customized
+          - name: qubership-spark3-customized-py
+            file: spark3-customized/py/Dockerfile
+            context: spark3-customized  
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -65,6 +68,7 @@ jobs:
           build-args: |
             GH_ACCESS_TOKEN=${{ secrets.GH_ACCESS_TOKEN }}
             base_img=ghcr.io/netcracker/qubership-spark-customized:${{ env.TAG_NAME }}
+            spark3_base_img=ghcr.io/netcracker/qubership-spark3-customized:${{ env.TAG_NAME }}
       - uses: actions/delete-package-versions@v5
         with:
           package-name: ${{ matrix.component.name }}
