@@ -5,6 +5,10 @@
         "**/chart/**",
         "**/docs/public/examples/**",
         "**/spark-sample-apps/**",
-        "**/.github/**"
+        "**/.github/**",
+        "**/spark-customized/entrypoint.sh",
+        "**/spark3-customized/entrypoint.sh",
+        "**/spark-customized/thrift-server-entrypoint.sh",
+        "**/spark3-customized/thrift-server-entrypoint.sh"
     ]
 }
