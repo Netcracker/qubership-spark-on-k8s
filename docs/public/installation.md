@@ -826,7 +826,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 
 ## Spark Thrift Server
 
-**Note**: Thrift Server is not tested with spark 4. Qubership Spark 4 customized image does not include delta libraries (delta-storage,delta-spark) that are required for thrift server.
+**Note**: Thrift Server is not tested with spark 4. Qubership Spark 4 customized image does not include delta libraries (delta-storage, delta-spark) that are required for thrift server.
 
 The following table lists the Spark Thrift Server configuration parameters.  
 As GCP Spark Operator's chart is a parent chart, it can override the Spark Thrift Server deployment parameters.
