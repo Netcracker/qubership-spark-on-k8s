@@ -26,6 +26,9 @@ jobs:
           - name: qubership-spark-customized
             file: spark-customized/Dockerfile
             context: spark-customized
+          - name: qubership-spark3-customized
+            file: spark3-customized/Dockerfile
+            context: spark3-customized  
           - name: qubership-spark-operator
             file: spark-operator-image/Dockerfile
             context: spark-operator-image
