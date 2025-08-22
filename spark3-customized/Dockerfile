@@ -1,5 +1,5 @@
 FROM alpine:latest AS unpacker
-ENV HADOOP_VERSION=3.3.4
+ENV HADOOP_VERSION=3.3.6
 ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
@@ -13,7 +13,7 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/netty/netty-all/4.1.118.Final/netty-all-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-all-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-buffer/4.1.118.Final/netty-buffer-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-buffer-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec/4.1.118.Final/netty-codec-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-codec-http2/4.1.118.Final/netty-codec-http2-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-http2-4.1.118.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-codec-http2/4.1.124.Final/netty-codec-http2-4.1.124.Final.jar --output $SPARK_JARS_DIR/netty-codec-http2-4.1.124.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec-http/4.1.118.Final/netty-codec-http-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-http-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec-socks/4.1.118.Final/netty-codec-socks-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-socks-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-common/4.1.118.Final/netty-common-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-common-4.1.118.Final.jar && \
