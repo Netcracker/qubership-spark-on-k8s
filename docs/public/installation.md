@@ -1089,7 +1089,7 @@ spark-history-server:
     - name: TRUST_CERTS_DIR
       value: /home/spark/trustcerts/
     - name: CURL_CA_BUNDLE
-      value: /home/spark/trustcerts/
+      value: /home/spark/trustcerts/s3Cert.crt
   extraVolumeMounts:
     - name: s3-tls-cert
       mountPath: /home/spark/trustcerts/s3Cert.crt
