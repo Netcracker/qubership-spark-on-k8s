@@ -84,8 +84,6 @@ rules:
   resources:
   - mutatingwebhookconfigurations
   - validatingwebhookconfigurations
-  resourceNames:
-  - ${Replace_with_sparkoperator_webhook_name} # Replace the name with spark operator webhook name, usually sparkoperator-spark-operator-webhook
   verbs:
   - get
   - create
@@ -119,10 +117,10 @@ metadata:
   name: ${Replace_with_sparkoperator_controller_name} # Replace the name with spark operator controller name, usually sparkoperator-spark-operator-controller
   namespace: ${Replace_with_sparkoperator_installation_namespace} # Replace the namespace with spark operator installation namespace
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance} #spark operator instance, sparkoperator by default
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 rules:
@@ -132,14 +130,6 @@ rules:
   - nodes
   verbs:
   - get
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - update
-  - patch
 - apiGroups:
   - apiextensions.k8s.io
   resources:
@@ -154,10 +144,10 @@ metadata:
   name: ${Replace_with_sparkoperator_controller_name}
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 subjects:
@@ -176,10 +166,10 @@ metadata:
   name: ${Replace_with_sparkoperator_controller_name}
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 rules:
@@ -206,10 +196,10 @@ metadata:
   name: ${Replace_with_sparkoperator_controller_name}
   namespace: ${Replace_with_apps_namespace} # replace with applications namespace
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 rules:
@@ -263,21 +253,31 @@ rules:
   - patch
   - delete
 - apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - update
+  - patch
+- apiGroups:
   - extensions
   - networking.k8s.io
   resources:
   - ingresses
   verbs:
   - get
-  - create
-  - delete
   - list
   - watch
+  - create
+  - update
+  - delete
 - apiGroups:
   - sparkoperator.k8s.io
   resources:
   - sparkapplications
   - scheduledsparkapplications
+  - sparkconnects
   verbs:
   - get
   - list
@@ -293,10 +293,19 @@ rules:
   - sparkapplications/finalizers
   - scheduledsparkapplications/status
   - scheduledsparkapplications/finalizers
+  - sparkconnects/status
   verbs:
   - get
   - update
   - patch
+- apiGroups:
+  - scheduling.incubator.k8s.io
+  - scheduling.sigs.dev
+  - scheduling.volcano.sh
+  resources:
+  - podgroups
+  verbs:
+  - "*" 
 ---
 # Source: spark-operator/templates/controller/rbac.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -305,10 +314,10 @@ metadata:
   name: ${Replace_with_sparkoperator_controller_name}
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 subjects:
@@ -327,10 +336,10 @@ metadata:
   name: ${Replace_with_sparkoperator_controller_name}
   namespace: ${Replace_with_apps_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: controller
 subjects:
@@ -353,10 +362,10 @@ metadata:
   name: ${Replace_with_sparkoperator_webhook_name} # Replace the name with spark operator webhook name, usually sparkoperator-spark-operator-webhook
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: webhook
 rules:
@@ -394,10 +403,10 @@ metadata:
   name: ${Replace_with_sparkoperator_webhook_name}
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: webhook
 subjects:
@@ -416,10 +425,10 @@ metadata:
   name: ${Replace_with_sparkoperator_webhook_name}
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: webhook
 rules:
@@ -461,10 +470,10 @@ metadata:
   name: ${Replace_with_sparkoperator_webhook_name}
   namespace: ${Replace_with_apps_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: webhook
 rules:
@@ -509,10 +518,10 @@ metadata:
   name: ${Replace_with_sparkoperator_webhook_name}
   namespace: ${Replace_with_sparkoperator_installation_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: webhook
 subjects:
@@ -531,10 +540,10 @@ metadata:
   name: ${Replace_with_sparkoperator_webhook_name}
   namespace: ${Replace_with_apps_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: webhook
 subjects:
@@ -557,10 +566,10 @@ metadata:
   name: ${Replace_with_sparkapp_sa_name} # Replace the name with spark app name, sparkapps-sa by default
   namespace: ${Replace_with_apps_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -587,10 +596,10 @@ metadata:
   name: ${Replace_with_sparkapp_sa_name}
   namespace: ${Replace_with_apps_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
 subjects:
 - kind: ServiceAccount
@@ -610,10 +619,10 @@ metadata:
   name: ${Replace_with_sparkapp_sa_name}
   namespace: ${Replace_with_apps_namespace}
   labels:
-    helm.sh/chart: spark-operator-2.0.2
+    helm.sh/chart: spark-operator-2.3.0
     app.kubernetes.io/name: spark-operator
     app.kubernetes.io/instance: ${spark_operator_instance}
-    app.kubernetes.io/version: "2.0.2"
+    app.kubernetes.io/version: "2.3.0"
     app.kubernetes.io/managed-by: Helm
 ```
 
