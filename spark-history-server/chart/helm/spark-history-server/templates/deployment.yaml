@@ -113,6 +113,15 @@ spec:
           - name: http
             containerPort: {{ .Values.service.internalPort }}
             protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /api/v2/version
+            port: {{ .Values.service.internalPort }}
+            scheme: {{- if or .Values.ingress.tls.enabled .Values.certManagerInegration.enabled }} HTTPS {{- else }} HTTP {{- end }}
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 5
+          periodSeconds: 10      
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         resources:
