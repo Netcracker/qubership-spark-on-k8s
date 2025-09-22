@@ -117,7 +117,7 @@ spec:
           httpGet:
             path: /api/v1/version
             port: {{ .Values.service.internalPort }}
-            scheme: {{ ternary "https" "http" (and (not (empty .Values.sparkProperties)) (contains "spark.ssl.historyServer.protocol=tls" .Values.sparkProperties)) }}
+            scheme: {{ ternary "HTTPS" "HTTP" (and (not (empty .Values.sparkProperties)) (contains "spark.ssl.historyServer.protocol=tls" .Values.sparkProperties)) }}
           initialDelaySeconds: 15
           timeoutSeconds: 5
           failureThreshold: 5
