@@ -113,15 +113,28 @@ spec:
           - name: http
             containerPort: {{ .Values.service.internalPort }}
             protocol: TCP
+        {{if .Values.readinessProbe.enabled }}    
         readinessProbe:
           httpGet:
             path: /api/v1/version
             port: {{ .Values.service.internalPort }}
             scheme: {{ ternary "HTTPS" "HTTP" (and (not (empty .Values.sparkProperties)) (contains "spark.ssl.historyServer.protocol=tls" .Values.sparkProperties)) }}
-          initialDelaySeconds: 15
-          timeoutSeconds: 5
-          failureThreshold: 5
-          periodSeconds: 10      
+          initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+        {{- end }}
+        {{if .Values.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: /api/v1/version
+            port: {{ .Values.service.internalPort }}
+            scheme: {{ ternary "HTTPS" "HTTP" (and (not (empty .Values.sparkProperties)) (contains "spark.ssl.historyServer.protocol=tls" .Values.sparkProperties)) }}
+          initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+        {{- end }}         
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         resources:

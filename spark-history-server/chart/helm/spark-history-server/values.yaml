@@ -74,6 +74,20 @@ resources:
     cpu: 200m
     memory: 256Mi
 
+livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    timeoutSeconds: 20
+    failureThreshold: 5
+    periodSeconds: 60
+
+readinessProbe:
+    enabled: true
+    initialDelaySeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 5
+    periodSeconds: 10
+    
 hostAliases: []
 
 kerberos:
