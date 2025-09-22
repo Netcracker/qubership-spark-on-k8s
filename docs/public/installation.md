@@ -1323,7 +1323,6 @@ sparkProperties: |
   spark.ssl.historyServer.enabled=true
   spark.ssl.historyServer.protocol=tls
   spark.ssl.historyServer.port=6044
-  spark.ssl.historyServer.historyServer.enabled=true
   spark.ssl.historyServer.trustStore=/opt/java/openjdk/lib/security/cacerts
   spark.ssl.historyServer.keyStore=<keystor_dir>/keystore.p12
   spark.ssl.historyServer.trustStorePassword=changeit
@@ -1386,7 +1385,6 @@ sparkProperties: |
  spark.ssl.historyServer.enabled=true
  spark.ssl.historyServer.protocol=tls
  spark.ssl.historyServer.port=6044
- spark.ssl.historyServer.historyServer.enabled=true
  spark.ssl.historyServer.trustStore=/opt/java/openjdk/lib/security/cacerts
  spark.ssl.historyServer.keyStore=<keystor_dir>/keystore.p12
  spark.ssl.historyServer.trustStorePassword=changeit
