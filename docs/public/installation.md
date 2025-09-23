@@ -840,7 +840,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.readinessProbe.initialDelaySeconds`| No        | Integer | `0`     | Number of seconds after the container has started before readiness probes are initiated. |
 | `spark-history-server.readinessProbe.timeoutSeconds`     | No        | Integer | `1`     | Number of seconds after which the probe times out.                          |
 | `spark-history-server.readinessProbe.failureThreshold`   | No        | Integer | `3`     | Minimum consecutive failures for the probe to be considered failed, marking the container as **Not Ready**. |
-| `spark-history-server.readinessProbe.periodSeconds`      | No        | Integer | `10`    | How often (in seconds) to perform the probe.                                                     |
+| `spark-history-server.readinessProbe.periodSeconds`      | No        | Integer | `10`    | The time interval in seconds denoting how often to perform the probe.                                                     |
 
 
 ## Spark Thrift Server
