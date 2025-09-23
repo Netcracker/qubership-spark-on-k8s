@@ -835,7 +835,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.livenessProbe.initialDelaySeconds`| No        | Integer | `0`     | Number of seconds after the container has started before liveness probes are initiated. |
 | `spark-history-server.livenessProbe.timeoutSeconds`     | No        | Integer | `1`     | Number of seconds after which the probe times out.                          |
 | `spark-history-server.livenessProbe.failureThreshold`   | No        | Integer | `3`     | Minimum consecutive failures for the probe to be considered failed, causing container restart. |
-| `spark-history-server.livenessProbe.periodSeconds`      | No        | Integer | `10`    | How often (in seconds) to perform the probe.                                |
+| `spark-history-server.livenessProbe.periodSeconds`      | No        | Integer | `10`    | The time interval in seconds denoting how often to perform the probe.                                |
 | `spark-history-server.readinessProbe.enabled`            | No        | Boolean | `true` | Enables or disables the readiness probe.                                    |
 | `spark-history-server.readinessProbe.initialDelaySeconds`| No        | Integer | `0`     | Number of seconds after the container has started before readiness probes are initiated. |
 | `spark-history-server.readinessProbe.timeoutSeconds`     | No        | Integer | `1`     | Number of seconds after which the probe times out.                          |
