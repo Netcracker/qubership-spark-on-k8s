@@ -9,6 +9,7 @@ def main():
 
     spark = (
         SparkSession.builder.appName("Spark-hive-test")
+        .config("spark.sql.warehouse.dir", f"s3a://{bucket_name}/warehouse/")
         .enableHiveSupport()
         .getOrCreate()
     )
