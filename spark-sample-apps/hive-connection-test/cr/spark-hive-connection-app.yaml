@@ -17,7 +17,6 @@ spec:
     "spark.kubernetes.submission.requestTimeout": "60000000"
     "spark.kubernetes.driver.connectionTimeout": "60000000"
     "spark.kubernetes.driver.requestTimeout": "60000000"
-    "spark.sql.warehouse.dir": "s3a://hive/warehouse"
     "spark.sql.hive.metastore.version": "3.1.3"
     "spark.sql.hive.metastore.jars": "path"
     "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
@@ -85,6 +84,13 @@ spec:
             secretKeyRef:
               name: s3-secrets
               key: S3_ENDPOINT_URL
+        - name: BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: s3-secrets
+              key: BUCKET_NAME
+        - name: S3_PREFIX
+          value: "warehouse/mysparkdb2.db/"
       securityContext:
         seccompProfile:
             type: RuntimeDefault
@@ -107,6 +113,11 @@ spec:
           secretKeyRef:
             name: s3-secrets
             key: AWS_SECRET_ACCESS_KEY
+      - name: BUCKET_NAME
+        valueFrom:
+          secretKeyRef:
+            name: s3-secrets
+            key: BUCKET_NAME
   executor:
     cores: 1
     instances: 1
@@ -135,4 +146,8 @@ spec:
           secretKeyRef:
             name: s3-secrets
             key: AWS_SECRET_ACCESS_KEY
-
+      - name: BUCKET_NAME
+        valueFrom:
+          secretKeyRef:
+            name: s3-secrets
+            key: BUCKET_NAME
