@@ -22,10 +22,6 @@ def main():
         aws_secret_access_key=aws_secret_key,
     )
 
-    # Define the S3 path
-    bucket_name = "hive"
-    prefix = "warehouse/mysparkdb2.db/"
-
     # Delete S3 files one by one (avoids Content-MD5 error)
     response = s3_w.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     if "Contents" in response:
