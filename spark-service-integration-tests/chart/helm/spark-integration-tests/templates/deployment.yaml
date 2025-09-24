@@ -51,6 +51,8 @@ spec:
               value: {{ template "spark-base-application.image" . }}
             - name: BASE_PY_APP_IMAGE
               value: {{ template "spark-py-base-application.image" . }}
+            - name: SPARK_HIVE_IMAGE
+              value: {{ template "spark-hive.image" . }}  
             - name: SPARK_APPS_SERVICEACCOUNT
               value: {{ .Values.sparkAppsServiceAccount }}
             - name: STATUS_WRITING_ENABLED
