@@ -1,0 +1,15 @@
+{{- if .Values.volcanoIntegrationTests.enabled }}
+apiVersion: scheduling.volcano.sh/v1beta1
+kind: Queue
+metadata:
+  name: sparkqueue
+  namespace: {{ .Values.sparkAppsNamespace }}
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+spec:
+  reclaimable: true
+  weight: 1
+  capability:
+    cpu: "3"
+    memory: "3G"
+{{- end }}

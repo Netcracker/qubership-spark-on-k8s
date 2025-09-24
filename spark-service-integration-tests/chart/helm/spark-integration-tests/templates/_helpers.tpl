@@ -17,6 +17,13 @@ Get image for python base applications
 {{- end -}}
 
 {{/*
+Get image for spark-hive connection 
+*/}}
+{{- define "spark-hive.image" -}}
+    {{- printf "%s" .Values.sparkHiveIntegrationTests.sparkHiveImage -}}
+{{- end -}}    
+
+{{/*
 Get Custom Resource apiGroup from path in Values
 */}}
 {{- define "apigroup_custom_resource" -}}

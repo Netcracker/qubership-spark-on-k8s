@@ -35,9 +35,9 @@ The `serviceAccount.name` parameter specifies the name of the service account th
 parameter is empty, the service account, the required role, role binding are
 created automatically with default names (`spark-integration-tests`).
 
-The `integrationTests.image` parameter specifies the Docker image of Spark Service.
+The `spark-integration-tests.image` parameter specifies the Docker image of Spark Service.
 
-The `integrationTests.tags` parameter specifies the tags combined together with `AND`, `OR` and `NOT` operators that select test cases to run. 
+The `spark-integration-tests.tags` parameter specifies the tags combined together with `AND`, `OR` and `NOT` operators that select test cases to run. 
 You can use `spark`, `test_app` tags to run appropriate tests. You can use `alerts` tags to run alert tests. 
 
 To run alert tests you need to use `alerts` tag and set `prometheusUrl` variable in parameters:
@@ -48,38 +48,59 @@ spark-integration-tests:
   prometheusUrl: http://prometheus.cloud.url.qubership.com
 ```
 
-The `integrationTests.sparkAppsNamespace` parameter specifies the name of the Kubernetes namespace where Spark apps are located.
+The `spark-integration-tests.sparkAppsNamespace` parameter specifies the name of the Kubernetes namespace where Spark apps are located.
 
-The `integrationTests.resources.requests.memory` parameter specifies the minimum amount of memory the container should use. 
+The `spark-integration-tests.resources.requests.memory` parameter specifies the minimum amount of memory the container should use. 
 The value can be specified with SI suffixes (E, P, T, G, M, K, m) or 
 their power-of-two-equivalents (Ei, Pi, Ti, Gi, Mi, Ki). The default value is `256Mi.`
 
-The `integrationTests.resources.requests.cpu` parameter specifies the minimum number of CPUs the container should use. 
+The `spark-integration-tests.resources.requests.cpu` parameter specifies the minimum number of CPUs the container should use. 
 The default value is `200m.`
 
-The `integrationTests.resources.limits.memory` parameter specifies the maximum amount of memory the container can use. 
+The `spark-integration-tests.resources.limits.memory` parameter specifies the maximum amount of memory the container can use. 
 The value can be specified with SI suffixes (E, P, T, G, M, K, m) or 
 their power-of-two-equivalents (Ei, Pi, Ti, Gi, Mi, Ki). The default value is `256Mi`.
 
-The `integrationTests.resources.limits.cpu` parameter specifies the maximum number of CPUs the container can use. 
+The `spark-integration-tests.resources.limits.cpu` parameter specifies the maximum number of CPUs the container can use. 
 The default value is `400m.`
 
-The `integrationTests.affinity` parameter specifies the affinity scheduling rules. The value should be specified in json format. The
+The `spark-integration-tests.affinity` parameter specifies the affinity scheduling rules. The value should be specified in json format. The
 parameter can be empty.
 
-The `integrationTests.status_writing_enabled` - optional parameter specifies enable/disable writing status of Integration tests execution to
+The `spark-integration-tests.status_writing_enabled` - optional parameter specifies enable/disable writing status of Integration tests execution to
 specified Custom Resource. The default value is "true".
 
-The `integrationTests.cr_status_writing.is_short_status_message` - optional parameter specifies the size of integration test status message.
+The `spark-integration-tests.cr_status_writing.is_short_status_message` - optional parameter specifies the size of integration test status message.
 The message may have a short output of the tests execution result, which is contains the first line of file result.txt or full parsed result. The default value is "true".
 
-The `integrationTests.cr_status_writing.only_integration_tests` - optional parameter specifies to deploy only integration tests without any
+The `spark-integration-tests.cr_status_writing.only_integration_tests` - optional parameter specifies to deploy only integration tests without any
 component (component was installed before). The default value is "true".
 
-The `integrationTests.cr_status_writing.status_custom_resource_path` - optional parameter specifies path to Custom Resource that should be used
+The `spark-integration-tests.cr_status_writing.status_custom_resource_path` - optional parameter specifies path to Custom Resource that should be used
 for write status of auto-tests execution. The value is a field from k8s entity selfLink without apis prefix and namespace part.
 The path should be composed according to the following template: `<group>/<apiversion>/<namespace>/<plural>/<customResourceName>`.
 The default value is ``apps/v1/spark/deployments/spark-integration-tests-runner``.
+
+The `spark-integration-tests.volcanoIntegrationTests.enabled` - parameter specifies if the Volcano integration test needs to run. The default value is `false`.
+
+**Note** Before enabling `volcanoIntegrationTests.enabled`, ensure the Spark Operator is configured correctly and Volcano is functional:
+
+```
+spark-operator:
+    webhook:
+      enable: true
+    controller:
+      batchScheduler:
+        enable: true
+```        
+
+The `spark-integration-tests.sparkHiveIntegrationTests.enabled` - parameter specifies if the Spark-Hive connection integration test needs to run. The default value is `false`.
+
+**Note** Before enabling `sparkHiveIntegrationTests.enabled`, ensure the Hive metastore is accessible and functional within the cluster.
+
+The `spark-integration-tests.sparkHiveIntegrationTests.sparkHiveImage` - paramter specifies the Docker image for Spark-Hive connection integration test.
+
+
 
 ## Manual Deployment
 
@@ -95,7 +116,7 @@ serviceAccount:
   create: true
   name: "spark-integration-tests"
 
-integrationTests:
+spark-integration-tests:
   image: "ghcr.io/netcracker/qubership-spark-service-integration-tests"
   tags: "spark"
   sparkAppsNamespace: "spark-apps"
@@ -107,6 +128,7 @@ integrationTests:
       memory: 256Mi
       cpu: 400m
 ```
+
 
 To deploy the service you need to execute the following command:
 
