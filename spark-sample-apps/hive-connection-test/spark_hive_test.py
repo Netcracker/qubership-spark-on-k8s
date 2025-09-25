@@ -4,6 +4,7 @@ import os
 def main():
     # 1. Read the BUCKET_NAME environment variable
     bucket_name = os.getenv("BUCKET_NAME")
+    database_name = os.getenv("DB_NAME")
     if not bucket_name:
         raise ValueError("BUCKET_NAME environment variable not set")
 
@@ -14,7 +15,6 @@ def main():
         .getOrCreate()
     )
 
-    database_name = "mysparkdb2"
     table_name = "mytable20"
 
     # Ensure the database exists before dropping it
