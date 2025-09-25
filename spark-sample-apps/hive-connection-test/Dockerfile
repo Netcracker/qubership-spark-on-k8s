@@ -10,14 +10,14 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-metastore/3.1.3/hive-metastore-3.1.3.jar  && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-service/3.1.3/hive-service-3.1.3.jar  && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-jdbc/3.1.3/hive-jdbc-3.1.3.jar  && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-common/3.4.1/hadoop-common-3.4.1.jar  && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-common/3.2.2/hadoop-common-3.2.2.jar  && \
 	curl -k -LO $MAVEN_REPO/org/apache/hive/hive-common/3.1.3/hive-common-3.1.3.jar  && \
     curl -k -LO $MAVEN_REPO/org/apache/logging/log4j/log4j-api/2.10.0/log4j-api-2.10.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/derby/derby/10.14.1.0/derby-10.14.1.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-exec/3.1.3/hive-exec-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-serde/3.1.3/hive-serde-3.1.3.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-client-api/3.4.1/hadoop-client-api-3.4.1.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-client-runtime/3.4.1/hadoop-client-runtime-3.4.1.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-client-api/3.3.4/hadoop-client-api-3.3.4.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-client-runtime/3.3.4/hadoop-client-runtime-3.3.4.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-shims/3.1.3/hive-shims-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/hive-standalone-metastore/3.1.3/hive-standalone-metastore-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/javolution/javolution/5.5.1/javolution-5.5.1.jar && \
@@ -75,16 +75,16 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/shims/hive-shims-0.23/3.1.3/hive-shims-0.23-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/hive/shims/hive-shims-scheduler/3.1.3/hive-shims-scheduler-3.1.3.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/logging/log4j/log4j-core/2.17.1/log4j-core-2.17.1.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-resourcemanager/3.4.1/hadoop-yarn-server-resourcemanager-3.4.1.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-annotations/3.4.1/hadoop-annotations-3.4.1.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-resourcemanager/3.1.0/hadoop-yarn-server-resourcemanager-3.1.0.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-annotations/3.1.0/hadoop-annotations-3.1.0.jar && \
     curl -k -LO $MAVEN_REPO/com/google/inject/extensions/guice-servlet/4.0/guice-servlet-4.0.jar && \
     curl -k -LO $MAVEN_REPO/com/google/protobuf/protobuf-java/2.5.0/protobuf-java-2.5.0.jar && \
     curl -k -LO $MAVEN_REPO/commons-io/commons-io/2.6/commons-io-2.6.jar && \
     curl -k -LO $MAVEN_REPO/com/google/inject/guice/4.0/guice-4.0.jar && \
     curl -k -LO $MAVEN_REPO/com/sun/jersey/jersey-json/1.19/jersey-json-1.19.jar && \
     curl -k -LO $MAVEN_REPO/com/sun/jersey/contribs/jersey-guice/1.19/jersey-guice-1.19.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-common/3.4.1/hadoop-yarn-common-3.4.1.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-api/3.4.1/hadoop-yarn-api-3.4.1.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-common/3.1.0/hadoop-yarn-common-3.1.0.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-api/3.1.0/hadoop-yarn-api-3.1.0.jar && \
     curl -k -LO $MAVEN_REPO/javax/xml/bind/jaxb-api/2.2.11/jaxb-api-2.2.11.jar && \
     curl -k -LO $MAVEN_REPO/org/codehaus/jettison/jettison/1.1/jettison-1.1.jar && \
     curl -k -LO $MAVEN_REPO/com/sun/jersey/jersey-core/1.19/jersey-core-1.19.jar && \
@@ -92,9 +92,9 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/org/eclipse/jetty/jetty-util/9.3.19.v20170502/jetty-util-9.3.19.v20170502.jar && \
     curl -k -LO $MAVEN_REPO/org/eclipse/jetty/jetty-util-ajax/9.3.19.v20170502/jetty-util-ajax-9.3.19.v20170502.jar && \
     curl -k -LO $MAVEN_REPO/log4j/log4j/1.2.17/log4j-1.2.17.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-common/3.4.1/hadoop-yarn-server-common-3.4.1.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-applicationhistoryservice/3.4.1/hadoop-yarn-server-applicationhistoryservice-3.4.1.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-web-proxy/3.4.1/hadoop-yarn-server-web-proxy-3.4.1.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-common/3.1.0/hadoop-yarn-server-common-3.1.0.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-applicationhistoryservice/3.1.0/hadoop-yarn-server-applicationhistoryservice-3.1.0.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-server-web-proxy/3.1.0/hadoop-yarn-server-web-proxy-3.1.0.jar && \
     curl -k -LO $MAVEN_REPO/org/fusesource/leveldbjni/leveldbjni-all/1.8/leveldbjni-all-1.8.jar && \
     curl -k -LO $MAVEN_REPO/javax/inject/javax.inject/1/javax.inject-1.jar && \
     curl -k -LO $MAVEN_REPO/aopalliance/aopalliance/1.0/aopalliance-1.0.jar && \
@@ -105,7 +105,7 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar && \
     curl -k -LO $MAVEN_REPO/com/sun/jersey/jersey-servlet/1.19/jersey-servlet-1.19.jar && \
     curl -k -LO $MAVEN_REPO/com/sun/jersey/jersey-server/1.19/jersey-server-1.19.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-auth/3.4.1/hadoop-auth-3.4.1.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-auth/3.1.0/hadoop-auth-3.1.0.jar && \
     curl -k -LO $MAVEN_REPO/com/fasterxml/jackson/core/jackson-core/2.12.0/jackson-core-2.12.0.jar && \
     curl -k -LO $MAVEN_REPO/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.12.0/jackson-module-jaxb-annotations-2.12.0.jar && \
     curl -k -LO $MAVEN_REPO/com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.12.0/jackson-jaxrs-json-provider-2.12.0.jar && \
@@ -133,7 +133,7 @@ RUN mkdir -p /opt/spark/hivejars && \
     curl -k -LO $MAVEN_REPO/jakarta/xml/bind/jakarta.xml.bind-api/2.3.2/jakarta.xml.bind-api-2.3.2.jar && \
     curl -k -LO $MAVEN_REPO/jakarta/activation/jakarta.activation-api/1.2.1/jakarta.activation-api-1.2.1.jar && \
     curl -k -LO $MAVEN_REPO/com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/2.12.0/jackson-jaxrs-base-2.12.0.jar && \
-    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-registry/3.4.1/hadoop-yarn-registry-3.4.1.jar && \
+    curl -k -LO $MAVEN_REPO/org/apache/hadoop/hadoop-yarn-registry/3.1.0/hadoop-yarn-registry-3.1.0.jar && \
     curl -k -LO $MAVEN_REPO/org/apache/geronimo/specs/geronimo-jcache_1.0_spec/1.0-alpha-1/geronimo-jcache_1.0_spec-1.0-alpha-1.jar && \
     curl -k -LO $MAVEN_REPO/org/ehcache/ehcache/3.3.1/ehcache-3.3.1.jar && \
     curl -k -LO $MAVEN_REPO/com/zaxxer/HikariCP-java7/2.4.12/HikariCP-java7-2.4.12.jar && \

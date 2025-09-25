@@ -118,6 +118,8 @@ spec:
           secretKeyRef:
             name: s3-secrets
             key: BUCKET_NAME
+      - name: DB_NAME
+        value: "mysparkdb2"
   executor:
     cores: 1
     instances: 1
@@ -151,3 +153,5 @@ spec:
           secretKeyRef:
             name: s3-secrets
             key: BUCKET_NAME
+      - name: DB_NAME
+        value: "mysparkdb2"
