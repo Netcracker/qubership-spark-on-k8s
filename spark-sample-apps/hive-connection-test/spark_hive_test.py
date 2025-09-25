@@ -1,14 +1,20 @@
 from pyspark.sql import SparkSession
-
+import os
 
 def main():
+    # 1. Read the BUCKET_NAME environment variable
+    bucket_name = os.getenv("BUCKET_NAME")
+    database_name = os.getenv("DB_NAME")
+    if not bucket_name:
+        raise ValueError("BUCKET_NAME environment variable not set")
+
     spark = (
         SparkSession.builder.appName("Spark-hive-test")
+        .config("spark.sql.warehouse.dir", f"s3a://{bucket_name}/warehouse/")
         .enableHiveSupport()
         .getOrCreate()
     )
 
-    database_name = "mysparkdb2"
     table_name = "mytable20"
 
     # Ensure the database exists before dropping it
@@ -24,13 +30,17 @@ def main():
     # Create the database and table again
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
 
+    # 2. Use the environment variable to construct the S3 LOCATION path
+    table_location = f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
+    print(f"Creating table at location: {table_location}")
+
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {database_name}.{table_name} (
             id INT,
             name STRING
         ) USING PARQUET
-        LOCATION 's3a://hive/warehouse/{database_name}.db/{table_name}'
+        LOCATION '{table_location}'
     """
     )
 
@@ -48,6 +58,6 @@ def main():
 
     spark.stop()
 
-
 if __name__ == "__main__":
     main()
+
