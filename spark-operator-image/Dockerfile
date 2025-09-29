@@ -16,7 +16,6 @@ RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar
 COPY --from=unpacker --chmod=0644 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
 
 # copy entrypoint and make it executable
-COPY operator-entrypoint.sh /usr/bin/operator-entrypoint.sh
-RUN chmod +x /usr/bin/operator-entrypoint.sh
+COPY --chmod=0755 operator-entrypoint.sh /usr/bin/operator-entrypoint.sh
 
 ENTRYPOINT ["/usr/bin/operator-entrypoint.sh"]
