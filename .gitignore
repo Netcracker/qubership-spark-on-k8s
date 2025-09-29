@@ -4,3 +4,5 @@ build/_output
 extras/target/*
 /spark-sample-apps/spark-streaming-word-count/target/
 /target/
+spark-sample-apps/hive-connection-test/test1.py
+spark-sample-apps/hive-connection-test/test2.py

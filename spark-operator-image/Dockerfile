@@ -14,3 +14,7 @@ ENV SPARK_JARS_DIR=/opt/spark/jars
 RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar
 
 COPY --from=unpacker --chmod=0777 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
+
+COPY operator-entrypoint.sh /usr/bin/
+
+ENTRYPOINT ["/usr/bin/operator-entrypoint.sh"]
