@@ -11,12 +11,12 @@ RUN mkdir -p /opt/spark/jars/ && \
 FROM ghcr.io/kubeflow/spark-operator/controller:2.3.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 
+USER root
+
 RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar
-
 COPY --from=unpacker --chmod=0644 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
+COPY --chmod=0755 operator-entrypoint.sh /usr/bin/operator-entrypoint.sh
 
-COPY operator-entrypoint.sh /usr/bin/operator-entrypoint.sh
-
-RUN chmod +x /usr/bin/operator-entrypoint.sh
+USER 185:185
 
 ENTRYPOINT ["/usr/bin/operator-entrypoint.sh"]

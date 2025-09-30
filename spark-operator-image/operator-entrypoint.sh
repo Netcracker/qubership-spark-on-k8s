@@ -1,15 +1,8 @@
-#!/bin/bash
-
-# echo commands to the terminal output
+#!/bin/sh
 set -ex
 
-# Check whether there is a passwd entry for the container UID
 myuid="$(id -u)"
-# If there is no passwd entry for the container UID, attempt to fake one
-# You can also refer to the https://github.com/docker-library/official-images/pull/13089#issuecomment-1534706523
-# It's to resolve OpenShift random UID case.
-# See also: https://github.com/docker-library/postgres/pull/448
-if ! getent passwd "$myuid" &> /dev/null; then
+if ! getent passwd "$myuid" >/dev/null 2>&1; then
     for wrapper in {/usr,}/lib{/*,}/libnss_wrapper.so; do
       if [ -s "$wrapper" ]; then
         NSS_WRAPPER_PASSWD="$(mktemp)"
@@ -24,8 +17,7 @@ if ! getent passwd "$myuid" &> /dev/null; then
     done
 fi
 
-# Import custom certificates into Java truststore if S3_CERTS_DIR is set and not empty
-if [ -n "${S3_CERTS_DIR}" ] && [[ "$(ls -A ${S3_CERTS_DIR})" ]]; then
+if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A ${S3_CERTS_DIR})" ]; then
     for filename in ${S3_CERTS_DIR}/*; do
         echo "Importing $filename into Java truststore..."
         ${JAVA_HOME}/bin/keytool -importcert \
@@ -38,5 +30,4 @@ if [ -n "${S3_CERTS_DIR}" ] && [[ "$(ls -A ${S3_CERTS_DIR})" ]]; then
     done
 fi
 
-# Start Spark Operator with tini
 exec /usr/bin/tini -s -- /usr/bin/spark-operator "$@"
