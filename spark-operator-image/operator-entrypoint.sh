@@ -18,16 +18,20 @@ if ! getent passwd "$myuid" >/dev/null 2>&1; then
 fi
 
 if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A ${S3_CERTS_DIR})" ]; then
+    cp ${JAVA_HOME}/lib/security/cacerts /tmp/cacerts
+    chmod 644 /tmp/cacerts
     for filename in ${S3_CERTS_DIR}/*; do
         echo "Importing $filename into Java truststore..."
         ${JAVA_HOME}/bin/keytool -importcert \
           -trustcacerts \
-          -keystore ${JAVA_HOME}/lib/security/cacerts \
+          -keystore /tmp/cacerts \
           -storepass changeit \
           -noprompt \
           -alias "$(basename $filename)" \
           -file "$filename"
     done
+    export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=/tmp/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
 fi
+
 
 exec /usr/bin/tini -s -- /usr/bin/spark-operator "$@"
