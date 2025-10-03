@@ -29,5 +29,3 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
     export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$JAVA_WRITABLE_KEYSTORE -Djavax.net.ssl.trustStorePassword=changeit"
 fi
 
-# Execute the passed command (e.g., spark-submit)
-exec "$@"
