@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3certificates
+  namespace: spark-apps
+type: Opaque
+data:
+  s3.pem: "certificate data in base64 format"
