@@ -29,3 +29,5 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
     export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$JAVA_WRITABLE_KEYSTORE -Djavax.net.ssl.trustStorePassword=changeit"
 fi
 
+# Let the Spark Operator run its intended command
+exec "$@"
