@@ -1,0 +1,74 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: s3-json-read-test
+  namespace: spark-apps
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: ghcr.io/netcracker/qubership-tests-spark-s3-connection:spark_s3_connection
+  imagePullPolicy: Always
+  mainApplicationFile: local:///opt/spark/examples/s3_read_test.py
+  sparkVersion: "4.0.0"
+  restartPolicy:
+    type: Never
+  volumes:
+    - name: s3-certs
+      secret:
+        secretName: s3certificates
+  driver:
+    cores: 1
+    memory: 1g
+    env:
+      - name: TRUST_CERTS_DIR
+        value: /opt/spark/cacerts    
+    volumeMounts:
+      - name: s3-certs
+        mountPath: /opt/spark/cacerts
+        readOnly: true      
+    labels:
+      version: 4.0.0
+    serviceAccount: sparkapps-sa
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+
+  executor:
+    cores: 1
+    instances: 1
+    memory: 1g
+    env:
+      - name: TRUST_CERTS_DIR
+        value: /opt/spark/cacerts    
+    volumeMounts:
+      - name: s3-certs
+        mountPath: /opt/spark/cacerts
+        readOnly: true             
+    labels:
+      version: 4.0.0
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL 
+  deps:
+    pyFiles:
+      - s3a://sparktest/test.JSON
+  sparkConf:
+    spark.hadoop.fs.s3a.access.key: "accesskey"
+    spark.hadoop.fs.s3a.secret.key: "secretkey"
+    spark.hadoop.fs.s3a.endpoint: "https://minio-s3.com"
+    spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.driver.extraJavaOptions: "-Djavax.net.ssl.trustStore=/opt/spark/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+    spark.executor.extraJavaOptions: "-Djavax.net.ssl.trustStore=/opt/spark/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
