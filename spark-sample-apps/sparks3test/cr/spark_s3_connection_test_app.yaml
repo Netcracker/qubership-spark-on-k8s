@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: ghcr.io/netcracker/qubership-tests-spark-s3-connection:spark_s3_connection
+  image: ghcr.io/netcracker/qubership-tests-spark-s3-connection:main
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/spark/examples/s3_read_test.py
   sparkVersion: "4.0.0"
@@ -22,7 +22,19 @@ spec:
     memory: 1g
     env:
       - name: TRUST_CERTS_DIR
-        value: /opt/spark/cacerts    
+        value: /opt/spark/cacerts
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: s3-credentials
+            key: AWS_ACCESS_KEY_ID
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: s3-credentials
+            key: AWS_SECRET_ACCESS_KEY
+      - name: S3_JSON_FILE
+        value: s3a://sparktest/test.JSON            
     volumeMounts:
       - name: s3-certs
         mountPath: /opt/spark/cacerts
@@ -46,7 +58,19 @@ spec:
     memory: 1g
     env:
       - name: TRUST_CERTS_DIR
-        value: /opt/spark/cacerts    
+        value: /opt/spark/cacerts  
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: s3-credentials
+            key: AWS_ACCESS_KEY_ID
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: s3-credentials
+            key: AWS_SECRET_ACCESS_KEY
+      - name: S3_JSON_FILE
+        value: s3a://sparktest/test.JSON            
     volumeMounts:
       - name: s3-certs
         mountPath: /opt/spark/cacerts
@@ -66,8 +90,6 @@ spec:
     pyFiles:
       - s3a://sparktest/test.JSON
   sparkConf:
-    spark.hadoop.fs.s3a.access.key: "accesskey"
-    spark.hadoop.fs.s3a.secret.key: "secretkey"
     spark.hadoop.fs.s3a.endpoint: "https://minio-s3.com"
     spark.hadoop.fs.s3a.path.style.access: "true"
     spark.driver.extraJavaOptions: "-Djavax.net.ssl.trustStore=/opt/spark/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
