@@ -34,9 +34,6 @@ jobs:
           - name: qubership-tests-spark-hive-connection
             file: spark-sample-apps/hive-connection-test/Dockerfile
             context: spark-sample-apps/hive-connection-test
-          - name: qubership-tests-spark-s3-connection
-            file: spark-sample-apps/sparks3test/Dockerfile
-            context: spark-sample-apps/sparks3test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
