@@ -86,7 +86,7 @@ spec:
           - ALL 
   deps:
     pyFiles:
-      - s3a://{S3 BUCKET}/test.JSON
+      - s3a://{S3 BUCKET}/test.json
   sparkConf:
     spark.hadoop.fs.s3a.path.style.access: "true"
     spark.archives: s3a://{S3 BUCKET}/app.zip#sparkapp
