@@ -1,44 +1,45 @@
 apiVersion: sparkoperator.k8s.io/v1beta2
 kind: SparkApplication
 metadata:
-  name: s3-json-read-test
+  name: s3-connection-test
   namespace: spark-apps
 spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: ghcr.io/netcracker/qubership-tests-spark-s3-connection:main
+  image: ghcr.io/netcracker/qubership-spark-customized-py:main
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/spark/examples/s3_read_test.py
+  mainApplicationFile: local:////opt/spark/work-dir/sparkapp/app/json_read.py
   sparkVersion: "4.0.0"
   restartPolicy:
     type: Never
   volumes:
-    - name: s3-certs
+    - name: s3-certs-volume
       secret:
-        secretName: s3certificates
+        secretName: s3-certificates
+    - name: s3-connection-config-volume
+      secret:
+        secretName: s3-connection-config
+        defaultMode: 444    
   driver:
     cores: 1
     memory: 1g
     env:
       - name: TRUST_CERTS_DIR
         value: /opt/spark/cacerts
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: s3-credentials
-            key: AWS_ACCESS_KEY_ID
-      - name: AWS_SECRET_ACCESS_KEY
-        valueFrom:
-          secretKeyRef:
-            name: s3-credentials
-            key: AWS_SECRET_ACCESS_KEY
       - name: S3_JSON_FILE
-        value: s3a://sparktest/test.JSON            
+        value: /opt/spark/work-dir/test.json
+      - name: HADOOP_CONF_DIR
+        value: /opt/spark/s3config
+      - name: SPARK_CONF_DIR
+        value: /opt/spark/s3config         
     volumeMounts:
-      - name: s3-certs
+      - name: s3-certs-volume
         mountPath: /opt/spark/cacerts
-        readOnly: true      
+        readOnly: true
+      - name: s3-connection-config-volume
+        mountPath: /opt/spark/s3config
+        readOnly: true        
     labels:
       version: 4.0.0
     serviceAccount: sparkapps-sa
@@ -59,22 +60,19 @@ spec:
     env:
       - name: TRUST_CERTS_DIR
         value: /opt/spark/cacerts  
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: s3-credentials
-            key: AWS_ACCESS_KEY_ID
-      - name: AWS_SECRET_ACCESS_KEY
-        valueFrom:
-          secretKeyRef:
-            name: s3-credentials
-            key: AWS_SECRET_ACCESS_KEY
       - name: S3_JSON_FILE
-        value: s3a://sparktest/test.JSON            
+        value: /opt/spark/work-dir/test.json
+      - name: HADOOP_CONF_DIR
+        value: /opt/spark/s3config
+      - name: SPARK_CONF_DIR
+        value: /opt/spark/s3config        
     volumeMounts:
-      - name: s3-certs
+      - name: s3-certs-volume
         mountPath: /opt/spark/cacerts
-        readOnly: true             
+        readOnly: true
+      - name: s3-connection-config-volume
+        mountPath: /opt/spark/s3config
+        readOnly: true          
     labels:
       version: 4.0.0
     securityContext:
@@ -88,9 +86,9 @@ spec:
           - ALL 
   deps:
     pyFiles:
-      - s3a://sparktest/test.JSON
+      - s3a://{S3 BUCKET}/test.JSON
   sparkConf:
-    spark.hadoop.fs.s3a.endpoint: "https://minio-s3.com"
     spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.archives: s3a://{S3 BUCKET}/app.zip#sparkapp
     spark.driver.extraJavaOptions: "-Djavax.net.ssl.trustStore=/opt/spark/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
     spark.executor.extraJavaOptions: "-Djavax.net.ssl.trustStore=/opt/spark/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
