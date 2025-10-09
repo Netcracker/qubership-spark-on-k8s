@@ -4,6 +4,12 @@ spark-operator:
     repository: netcracker/qubership-spark-operator
     tag: main
   controller:
+    volumes:
+      - name: tmp-volume
+        emptyDir: {}
+    volumeMounts:
+      - name: tmp-volume
+        mountPath: /tmp    
     podSecurityContext:
       runAsNonRoot: true
       seccompProfile:

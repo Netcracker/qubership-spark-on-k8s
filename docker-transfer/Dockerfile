@@ -15,6 +15,7 @@ RUN mkdir -p chart/helm/spark-on-k8s/charts && \
     tar xvz -C chart/helm/spark-on-k8s/charts
 
 COPY chart /app/chart
+COPY spark-operator-image/chart/helm/spark-operator/templates /app/chart/helm/spark-on-k8s/charts/spark-operator/templates
 COPY spark-history-server/chart/helm /app/chart/helm/spark-on-k8s/charts
 COPY spark-service-integration-tests/chart/helm /app/chart/helm/spark-on-k8s/charts
 COPY spark-thrift-server/chart/helm /app/chart/helm/spark-on-k8s/charts
