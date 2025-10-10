@@ -36,7 +36,7 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
           -file "$filename"
     done
 
-    if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
+    if [ -n "${TRUST_CERTS_DIR}" ] && [ -n "$(ls -A "${TRUST_CERTS_DIR}" 2>/dev/null)" ]; then
 
       for filename in "${TRUST_CERTS_DIR}"/*; do
           echo "Import $filename certificate to Java cacerts"
