@@ -45,7 +45,7 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
           -keystore "$JAVA_WRITABLE_KEYSTORE" \
           -storepass changeit \
           -noprompt \
-          -alias "${filename}" \
+          -alias "$(basename "$filename")" \
           -file "${filename}"
       done;
 
