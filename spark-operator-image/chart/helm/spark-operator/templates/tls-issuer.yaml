@@ -1,4 +1,4 @@
-{{- if .Values.spark-operator.certManagerInegration.enabled }}
+{{- if .Values.certManagerIntegration.enabled }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:

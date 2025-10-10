@@ -1,16 +1,16 @@
 {{- define "sparkOperatorCertDnsNames" -}}
   {{- $dnsNames := list "localhost" "spark-operator" (printf "%s.%s" "spark-operator" .Release.Namespace) (printf "%s.%s.svc" "spark-operator" .Release.Namespace) -}}
-    {{- $dnsNames = concat $dnsNames .Values.spark-operator.certManagerIntegration.subjectAlternativeName.additionalDnsNames -}}
+    {{- $dnsNames = concat $dnsNames .Values.certManagerIntegration.subjectAlternativeName.additionalDnsNames -}}
   {{- $dnsNames | toYaml -}}
 {{- end -}}
 
 {{- define "sparkOperatorCertIpAddresses" -}}
   {{- $ipAddresses := list "127.0.0.1" -}}
-  {{- $ipAddresses = concat $ipAddresses .Values.spark-operator.certManagerIntegration.subjectAlternativeName.additionalIpAddresses -}}
+  {{- $ipAddresses = concat $ipAddresses .Values.certManagerIntegration.subjectAlternativeName.additionalIpAddresses -}}
   {{- $ipAddresses | toYaml -}}
 {{- end -}}
 
-{{- if .Values.spark-operator.certManagerIntegration.enabled }}
+{{- if .Values.certManagerIntegration.enabled }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
@@ -23,8 +23,8 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation,hook-failed
     "helm.sh/hook-weight": "-11"
 spec:
-  secretName: {{ .Values.spark-operator.certManagerIntegration.secretName }}
-  duration: {{ default 365 .Values.spark-operator.certManagerIntegration.duration | mul 24 }}h
+  secretName: {{ .Values.certManagerIntegration.secretName }}
+  duration: {{ default 365 .Values.certManagerIntegration.duration | mul 24 }}h
   commonName: spark-operator.svc
   isCA: true
   privateKey:
@@ -37,8 +37,8 @@ spec:
 {{ ( include "sparkOperatorCertIpAddresses" . | indent 4 ) }}
   issuerRef:
     group: cert-manager.io
-  {{- if .Values.spark-operator.certManagerIntegration.clusterIssuerName }}
-    name: {{ .Values.spark-operator.certManagerIntegration.clusterIssuerName }}
+  {{- if .Values.certManagerIntegration.clusterIssuerName }}
+    name: {{ .Values.certManagerIntegration.clusterIssuerName }}
     kind: ClusterIssuer
   {{- else }}
     name: spark-operator-tls-issuer
