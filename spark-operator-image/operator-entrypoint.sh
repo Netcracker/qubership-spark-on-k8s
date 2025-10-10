@@ -36,6 +36,22 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
           -file "$filename"
     done
 
+    if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
+
+      for filename in "${TRUST_CERTS_DIR}"/*; do
+          echo "Import $filename certificate to Java cacerts"
+          "${JAVA_HOME}/bin/keytool" -import \
+          -trustcacerts \
+          -keystore "$JAVA_WRITABLE_KEYSTORE" \
+          -storepass changeit \
+          -noprompt \
+          -alias "${filename}" \
+          -file "${filename}"
+      done;
+
+    fi
+        
+
     export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$JAVA_WRITABLE_KEYSTORE -Djavax.net.ssl.trustStorePassword=changeit"
 fi
 
