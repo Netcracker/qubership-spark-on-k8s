@@ -1183,9 +1183,9 @@ S3 certificates can be mounted in the following ways:
               secretName: s3-connection-config
               defaultMode: 400
         volumeMounts:
-          - name: s3-certificates-volume
-            mountPath: /opt/spark/s3certificates
-            readOnly: true
+           - name: s3-certificates-volume
+            mountPath: /opt/spark/tlscerts/ca.crt
+            subPath: ca.crt 
           - name: writable-volume
             mountPath: /opt/spark/writable
           - name: tmp-volume
