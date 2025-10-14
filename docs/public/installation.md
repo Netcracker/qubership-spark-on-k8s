@@ -1074,14 +1074,14 @@ For the application's high availability settings, refer to the Configuring Autom
 Spark Operator supports deployment in the Active-Active DR scheme.  
 Independent instances of Spark Operator are installed on each site.
 
-
 ## Spark Operator S3 Connectivity Support
 
 To connect the Spark Operator to a secure S3 endpoint, it is necessary to import the S3 certificates into the Java truststore.
 The Spark Operator image entrypoint automatically imports all certificates found in the TRUST_CERTS_DIR directory into the writable truststore specified by JAVA_WRITABLE_KEYSTORE.
 
 ### Mounting S3 Certificates
-S3 certificates can be mounted in the following ways:
+
+You can mount S3 certificates by the following ways:
 
 1. Using `extraSecrets` : You can create a secret containing the S3 certificates using extraSecrets and mount it into the operator pod at TRUST_CERTS_DIR.TRUST_CERTS_DIR.
     
