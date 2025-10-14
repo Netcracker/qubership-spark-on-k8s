@@ -2,14 +2,14 @@ Running Spark Application with S3 Connectivity
 
 This guide explains how to run a Spark job on Kubernetes using the Spark Operator, configured to securely connect to an S3 endpoint.
 
-## 1. Prerequisites
+## Prerequisites
 
-Login to the S3 web console and create a bucket with name `sparktest`
+Login to the S3 web console and create a bucket with name `sparktest`.
 Archive the app folder, select ZIP archive while archiving.
 Upload app.zip and test.json into the created bucket.
 Configure s3-connection-config.yaml and s3-certificates.yaml and apply in K8s.
 
-configure the creates S3 bucket name in the spark application at 
+Configure the created S3 bucket name in the spark application at 
 
 ```yaml
  deps:
@@ -19,12 +19,11 @@ configure the creates S3 bucket name in the spark application at
     spark.archives: s3a://{S3 BUCKET}/app.zip#sparkapp     
 ```
 
-## 2. Application Code
+## Application Code
 
-Spark job (json_read.py) reads a JSON file from S3 and prints its content:
+Spark job (json_read.py) reads a JSON file from S3 and prints its content.
 
-
-## 3. SparkApplication Manifest
+## SparkApplication Manifest
 
 Below is the SparkApplication manifest (s3-connection-test.yaml) that configures the Spark Operator to run this job:
 
@@ -126,35 +125,35 @@ spec:
 
 ```    
 
-## 4. Deployment
+## Deployment
 
 Apply the manifest:
 
 kubectl apply -f s3-connection-test.yaml
 
-## 5. Verify Job Status
+## Verify Job Status
 
 Check if the Spark job is running:
 
+```
 kubectl get sparkapplications -n spark-apps
+```
+Inspect the driver pod logs:
 
-
-Inspect driver pod logs:
-
+```
 kubectl logs -n spark-apps <driver-pod-name>
+```
 
+You should check the JSON file content read from S3 printed in the logs.
 
-You should see the JSON file content read from S3 printed in the logs.
-
-## 6. Summary
+## Summary
 
 Secrets provide S3 certificates and access configs.
 
-Volumes and mounts inject them into Spark driver and executors.
+Volumes and mounts inject them into the Spark driver and executors.
 
 Environment variables point Spark to the right config paths.
 
-Truststore setup ensures secure TLS communication with S3.
+Truststore setup ensures the secure TLS communication with S3.
 
-With this configuration, Spark Operator can run jobs that securely connect to and read data from S3.
-
+With this configuration, Spark Operator can run the jobs that securely connect to and read data from S3.
