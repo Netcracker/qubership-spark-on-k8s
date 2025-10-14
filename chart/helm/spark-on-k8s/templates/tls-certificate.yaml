@@ -16,8 +16,8 @@ kind: Certificate
 metadata:
   name: spark-operator-tls-certificate
   labels:
-    {{- include "all_objects_labels_shs" . | nindent 4 }}
-    {{- include "cert_manager_label_shs" . | nindent 4 }}
+    {{- include "all_objects_labels" . | nindent 4 }}
+    {{- include "cert_manager_label" . | nindent 4 }}
   annotations:
     "helm.sh/hook": "pre-install,pre-upgrade"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-failed

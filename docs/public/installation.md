@@ -1077,76 +1077,219 @@ Independent instances of Spark Operator are installed on each site.
 
 ## Spark Operator S3 Connectivity Support
 
-To connect Spark Operator to a secure S3 endpoint, it is necessary to import the S3 certificates into the Java truststore. The Spark Operator image entrypoint imports all certificates found in the S3_CERTS_DIR directory into the writable truststore specified by JAVA_WRITABLE_KEYSTORE.
+To connect the Spark Operator to a secure S3 endpoint, it is necessary to import the S3 certificates into the Java truststore.
+The Spark Operator image entrypoint automatically imports all certificates found in the TRUST_CERTS_DIR directory into the writable truststore specified by JAVA_WRITABLE_KEYSTORE.
 
-The secret containing the S3 certificates can be created using `extraSecrets` and then mounted into the operator pod. The S3 access credentials (Hadoop/Spark configs) are mounted from a separate secret created by using `extraSecrets` into the paths specified by HADOOP_CONF_DIR and SPARK_CONF_DIR.
+### Mounting S3 Certificates
+S3 certificates can be mounted in the following ways:
+
+1. Using `extraSecrets` : You can create a secret containing the S3 certificates using extraSecrets and mount it into the operator pod at TRUST_CERTS_DIR.TRUST_CERTS_DIR.
+    
+    For example:
+    ```yaml
+    extraSecrets:
+      s3-connection-config:
+        stringData: >
+          core-site.xml: |
+            <configuration>
+              <property>
+                  <name>fs.s3a.access.key</name>
+                  <value>ACCESS_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.secret.key</name>
+                  <value>SECRET_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.endpoint</name>
+                  <value>S3_ENDPOINT_URL</value>
+              </property>
+            </configuration>
+      s3-certificates:
+        stringData: |
+          s3.pem: |
+            -----BEGIN CERTIFICATE-----
+            Certificate content goes here
+            -----END CERTIFICATE-----
+    spark-operator:
+      controller:
+        volumes:
+          - name: s3-certificates-volume
+            secret:
+              secretName: s3-certificates
+          - name: writable-volume
+            emptyDir: {}
+          - name: tmp-volume
+            emptyDir: {}
+          - name: s3-connection-config-volume
+            secret:
+              secretName: s3-connection-config
+              defaultMode: 400
+        volumeMounts:
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/s3certificates
+            readOnly: true
+          - name: writable-volume
+            mountPath: /opt/spark/writable
+          - name: tmp-volume
+            mountPath: /tmp
+          - name: s3-connection-config-volume
+            mountPath: /opt/spark/s3config
+            readOnly: true
+        env:
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/s3certificates
+          - name: JAVA_WRITABLE_KEYSTORE
+            value: /opt/spark/writable/cacerts
+          - name: HADOOP_CONF_DIR
+            value: /opt/spark/s3config
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/s3config
+    ```      
+2. Using an existing secret: If the Spark namespace already contains a pre-created secret with the S3 certificates (for example, stored in ca.crt), such as my-s3-certs, this secret can be mounted into the operator pod at TRUST_CERTS_DIR.
+
+    For example:
+    ```yaml
+    extraSecrets:
+      s3-connection-config:
+        stringData: >
+          core-site.xml: |
+            <configuration>
+              <property>
+                  <name>fs.s3a.access.key</name>
+                  <value>ACCESS_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.secret.key</name>
+                  <value>SECRET_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.endpoint</name>
+                  <value>S3_ENDPOINT_URL</value>
+              </property>
+            </configuration>
+    spark-operator:
+      controller:
+        volumes:
+          - name: s3-certificates-volume
+            secret:
+              secretName: my-s3-certs
+          - name: writable-volume
+            emptyDir: {}
+          - name: tmp-volume
+            emptyDir: {}
+          - name: s3-connection-config-volume
+            secret:
+              secretName: s3-connection-config
+              defaultMode: 400
+        volumeMounts:
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/s3certificates
+            readOnly: true
+          - name: writable-volume
+            mountPath: /opt/spark/writable
+          - name: tmp-volume
+            mountPath: /tmp
+          - name: s3-connection-config-volume
+            mountPath: /opt/spark/s3config
+            readOnly: true
+        env:
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/s3certificates
+          - name: JAVA_WRITABLE_KEYSTORE
+            value: /opt/spark/writable/cacerts
+          - name: HADOOP_CONF_DIR
+            value: /opt/spark/s3config
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/s3config
+    ```
+3. Using Cert-Manager integration: S3 certificates can also be managed using Cert-Manager. The certificates can be stored in a secret generated by certmanager, which can then be mounted into the operator pod at TRUST_CERTS_DIR.
+
+    For example:
+    ```yaml
+    extraSecrets:
+      s3-connection-config:
+        stringData: >
+          core-site.xml: |
+            <configuration>
+              <property>
+                  <name>fs.s3a.access.key</name>
+                  <value>ACCESS_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.secret.key</name>
+                  <value>SECRET_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.endpoint</name>
+                  <value>S3_ENDPOINT_URL</value>
+              </property>
+            </configuration>
+    certManagerIntegration:
+        enabled: true
+        secretName: spark-operator-tls-cm
+        duration: 365
+        subjectAlternativeName:
+          additionalDnsNames: []
+          additionalIpAddresses: []
+        clusterIssuerName: common-cluster-issuer        
+    spark-operator:
+      controller:
+      volumes:
+          - name: s3-certificates-volume
+            secret:
+              secretName: spark-operator-tls-cm
+          - name: tmp-volume
+            emptyDir: {}
+          - name: writable-volume
+            emptyDir: {}
+          - name: s3-connection-config-volume
+            secret:
+              secretName: s3-connection-config
+              defaultMode: 400
+        volumeMounts:
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/tlscerts/ca.crt
+            subPath: ca.crt
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/servercerts/tls.key
+            subPath: tls.key
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/servercerts/tls.crt
+            subPath: tls.crt
+          - name: tmp-volume
+            mountPath: /tmp
+          - name: writable-volume
+            mountPath: /opt/spark/writable
+          - name: s3-connection-config-volume
+            mountPath: /opt/spark/s3config
+            readOnly: true
+        env:
+          - name: JAVA_WRITABLE_KEYSTORE
+            value: /opt/spark/writable/cacerts
+          - name: HADOOP_CONF_DIR
+            value: /opt/spark/s3config
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/s3config
+          - name: TLS_KEY_PATH
+            value: /opt/spark/servercerts/tls.key
+          - name: TLS_CERT_PATH
+            value: /opt/spark/servercerts/tls.crt
+          - name: TLS_KEYSTORE_DIR
+            value: /tmp
+          - name: TLS_KEYSTORE_PASSWORD
+            value: keystorepassword
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/tlscerts
+    ```
+
+The S3 access credentials (Hadoop/Spark configs) are mounted from a separate secret created by using `extraSecrets` into the paths specified by HADOOP_CONF_DIR and SPARK_CONF_DIR.
 
 Writable and temporary directories are provisioned through emptyDir mounts, which allow the truststore and runtime files to be created during container startup.
 
 With this configuration in place, the Spark Operator is able to securely authenticate and communicate with S3.  
 
-For example:
-
-```yaml
-extraSecrets:
-  s3-connection-config:
-    stringData: >
-      core-site.xml: |
-        <configuration>
-           <property>
-              <name>fs.s3a.access.key</name>
-              <value>ACCESS_KEY</value>
-           </property>
-           <property>
-              <name>fs.s3a.secret.key</name>
-              <value>SECRET_KEY</value>
-           </property>
-           <property>
-              <name>fs.s3a.endpoint</name>
-              <value>S3_ENDPOINT_URL</value>
-           </property>
-        </configuration>
-  s3-certificates:
-    stringData: |
-      s3.pem: |
-        -----BEGIN CERTIFICATE-----
-        Certificate content goes here
-        -----END CERTIFICATE-----
-spark-operator:
-  controller:
-    volumes:
-      - name: s3-certificates-volume
-        secret:
-          secretName: s3-certificates
-      - name: writable-volume
-        emptyDir: {}
-      - name: tmp-volume
-        emptyDir: {}
-      - name: s3-connection-config-volume
-        secret:
-          secretName: s3-connection-config
-          defaultMode: 400
-    volumeMounts:
-      - name: s3-certificates-volume
-        mountPath: /opt/spark/s3certificates
-        readOnly: true
-      - name: writable-volume
-        mountPath: /opt/spark/writable
-      - name: tmp-volume
-        mountPath: /tmp
-      - name: s3-connection-config-volume
-        mountPath: /opt/spark/s3config
-        readOnly: true
-    env:
-      - name: S3_CERTS_DIR
-        value: /opt/spark/s3certificates
-      - name: JAVA_WRITABLE_KEYSTORE
-        value: /opt/spark/writable/cacerts
-      - name: HADOOP_CONF_DIR
-        value: /opt/spark/s3config
-      - name: SPARK_CONF_DIR
-        value: /opt/spark/s3config
-```
+**Note**: Defining custom volumes in the Spark Operator pod configuration overrides the default volumes provided by the chart.
 
 ## Spark History Server Deployment
 

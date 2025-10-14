@@ -4,3 +4,4 @@ build/_output
 extras/target/*
 /spark-sample-apps/spark-streaming-word-count/target/
 /target/
+

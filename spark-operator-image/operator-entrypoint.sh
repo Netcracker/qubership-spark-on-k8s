@@ -17,7 +17,7 @@ if ! getent passwd "$myuid" >/dev/null 2>&1; then
     done
 fi
 
-if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
+if [ -n "${TRUST_CERTS_DIR}" ] && [ "$(ls -A "${TRUST_CERTS_DIR}")" ]; then
     : "${JAVA_WRITABLE_KEYSTORE:?Environment variable JAVA_WRITABLE_KEYSTORE must be set}"
 
     if [ ! -f "$JAVA_WRITABLE_KEYSTORE" ]; then
@@ -25,7 +25,7 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
         chmod 644 "$JAVA_WRITABLE_KEYSTORE"
     fi
 
-    for filename in "${S3_CERTS_DIR}"/*; do
+    for filename in "${TRUST_CERTS_DIR}"/*; do
         echo "Importing $filename into Java truststore..."
         "${JAVA_HOME}/bin/keytool" -importcert \
           -trustcacerts \
@@ -35,21 +35,6 @@ if [ -n "${S3_CERTS_DIR}" ] && [ "$(ls -A "${S3_CERTS_DIR}")" ]; then
           -alias "$(basename "$filename")" \
           -file "$filename"
     done
-
-    if [ -n "${TRUST_CERTS_DIR}" ] && [ -n "$(ls -A "${TRUST_CERTS_DIR}" 2>/dev/null)" ]; then
-
-      for filename in "${TRUST_CERTS_DIR}"/*; do
-          echo "Import $filename certificate to Java cacerts"
-          "${JAVA_HOME}/bin/keytool" -import \
-          -trustcacerts \
-          -keystore "$JAVA_WRITABLE_KEYSTORE" \
-          -storepass changeit \
-          -noprompt \
-          -alias "$(basename "$filename")" \
-          -file "${filename}"
-      done;
-
-    fi
         
 
     export JAVA_TOOL_OPTIONS="-Djavax.net.ssl.trustStore=$JAVA_WRITABLE_KEYSTORE -Djavax.net.ssl.trustStorePassword=changeit"
