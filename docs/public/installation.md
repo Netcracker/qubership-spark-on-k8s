@@ -1251,12 +1251,6 @@ S3 certificates can be mounted in the following ways:
           - name: s3-certificates-volume
             mountPath: /opt/spark/tlscerts/ca.crt
             subPath: ca.crt
-          - name: s3-certificates-volume
-            mountPath: /opt/spark/servercerts/tls.key
-            subPath: tls.key
-          - name: s3-certificates-volume
-            mountPath: /opt/spark/servercerts/tls.crt
-            subPath: tls.crt
           - name: tmp-volume
             mountPath: /tmp
           - name: writable-volume
@@ -1265,25 +1259,19 @@ S3 certificates can be mounted in the following ways:
             mountPath: /opt/spark/s3config
             readOnly: true
         env:
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/tlscerts
           - name: JAVA_WRITABLE_KEYSTORE
             value: /opt/spark/writable/cacerts
           - name: HADOOP_CONF_DIR
             value: /opt/spark/s3config
           - name: SPARK_CONF_DIR
             value: /opt/spark/s3config
-          - name: TLS_KEY_PATH
-            value: /opt/spark/servercerts/tls.key
-          - name: TLS_CERT_PATH
-            value: /opt/spark/servercerts/tls.crt
-          - name: TLS_KEYSTORE_DIR
-            value: /tmp
-          - name: TLS_KEYSTORE_PASSWORD
-            value: keystorepassword
-          - name: TRUST_CERTS_DIR
-            value: /opt/spark/tlscerts
     ```
 
-The S3 access credentials (Hadoop/Spark configs) are mounted from a separate secret created by using `extraSecrets` into the paths specified by HADOOP_CONF_DIR and SPARK_CONF_DIR.
+The S3 access credentials (Hadoop/Spark configuration files) are mounted from a separate secret created using extraSecrets into the paths specified by HADOOP_CONF_DIR and SPARK_CONF_DIR for security reasons.
+
+Alternatively, the S3 access credentials can also be passed as environment variables to the Spark Operator pod.
 
 Writable and temporary directories are provisioned through emptyDir mounts, which allow the truststore and runtime files to be created during container startup.
 
