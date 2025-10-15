@@ -22,6 +22,7 @@ The following topics are covered in the document:
     * [Manual Deployment](#manual-deployment)
     * [HA Scheme](#ha-scheme)
     * [Non-HA Scheme](#non-ha-scheme-not-recommended)
+    * [Spark Operator S3 Connectivity Support](#spark-operator-s3-connectivity-support)
     * [Spark History Server Deployment](#spark-history-server-deployment) 
         * [Using Secure S3 Endpoint for Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) 
         * [Enabling HTTPS for Spark History Server Ingresses](#enabling-https-for-spark-history-server-ingresses)
@@ -828,8 +829,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.priorityClassName`               | false                                        | string, null      | `~`                                                                                                                       | Priority class name for spark history server pods.                                                                                                                                                                                                                                       |
 | `spark-history-server.extraEnv`                        | false                                        | object, null      | `~`                                                                                                                       | Extra environment variables for spark-history-server.                                                                                                                                                                                                                                    |
 | `spark-history-server.extraVolumes`                    | false                                        | object, null      | `~`                                                                                                                       | Extra volumes for spark-history-server.                                                                                                                                                                                                                                                  |
-| `spark-history-server.extraVolumeMounts`               | false                                        | object, null      | `~`                                                                                                                       | Extra volumeMounts for spark-history-server.                                                                                                                                                                                                                                             |
-| `spark-history-server.extraSecrets`                    | false                                        | object, null      | `~`                                                                                                                       | Extra secrets that can be created by spark-history-server chart.                                                                                                                                                                                                                         
+| `spark-history-server.extraVolumeMounts`               | false                                        | object, null      | `~`                                                                                                                       | Extra volumeMounts for spark-history-server.                                                                                                                                                                                                                                             |                                                                                     
 | `spark-history-server.affinity`                        | false                                        | object            | `{}`                                                                                                                         | The parameter specifies the affinity scheduling rules.                                                                                                                                                                                                                                   |
 | `spark-history-server.livenessProbe.enabled`            | No        | Boolean | `true` | Enables or disables the liveness probe.                                     |
 | `spark-history-server.livenessProbe.initialDelaySeconds`| No        | Integer | `0`     | Number of seconds after the container has started before liveness probes are initiated. |
@@ -1074,6 +1074,211 @@ For the application's high availability settings, refer to the Configuring Autom
 Spark Operator supports deployment in the Active-Active DR scheme.  
 Independent instances of Spark Operator are installed on each site.
 
+## Spark Operator S3 Connectivity Support
+
+To connect the Spark Operator to a secure S3 endpoint, it is necessary to import the S3 certificates into the Java truststore.
+The Spark Operator image entrypoint automatically imports all certificates found in the TRUST_CERTS_DIR directory into the writable truststore specified by JAVA_WRITABLE_KEYSTORE.
+
+### Mounting S3 Certificates
+
+You can mount S3 certificates by the following ways:
+
+1. Using `extraSecrets` : You can create a secret containing the S3 certificates using extraSecrets and mount it into the operator pod at TRUST_CERTS_DIR.TRUST_CERTS_DIR.
+    
+    For example:
+    ```yaml
+    extraSecrets:
+      s3-connection-config:
+        stringData: >
+          core-site.xml: |
+            <configuration>
+              <property>
+                  <name>fs.s3a.access.key</name>
+                  <value>ACCESS_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.secret.key</name>
+                  <value>SECRET_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.endpoint</name>
+                  <value>S3_ENDPOINT_URL</value>
+              </property>
+            </configuration>
+      s3-certificates:
+        stringData: |
+          s3.pem: |
+            -----BEGIN CERTIFICATE-----
+            Certificate content goes here
+            -----END CERTIFICATE-----
+    spark-operator:
+      controller:
+        volumes:
+          - name: s3-certificates-volume
+            secret:
+              secretName: s3-certificates
+          - name: writable-volume
+            emptyDir: {}
+          - name: tmp-volume
+            emptyDir: {}
+          - name: s3-connection-config-volume
+            secret:
+              secretName: s3-connection-config
+              defaultMode: 400
+        volumeMounts:
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/s3certificates
+            readOnly: true
+          - name: writable-volume
+            mountPath: /opt/spark/writable
+          - name: tmp-volume
+            mountPath: /tmp
+          - name: s3-connection-config-volume
+            mountPath: /opt/spark/s3config
+            readOnly: true
+        env:
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/s3certificates
+          - name: JAVA_WRITABLE_KEYSTORE
+            value: /opt/spark/writable/cacerts
+          - name: HADOOP_CONF_DIR
+            value: /opt/spark/s3config
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/s3config
+    ```      
+2. Using an existing secret: If the Spark namespace already contains a pre-created secret with the S3 certificates (for example, stored in ca.crt), such as my-s3-certs, this secret can be mounted into the operator pod at TRUST_CERTS_DIR.
+
+    For example:
+    ```yaml
+    extraSecrets:
+      s3-connection-config:
+        stringData: >
+          core-site.xml: |
+            <configuration>
+              <property>
+                  <name>fs.s3a.access.key</name>
+                  <value>ACCESS_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.secret.key</name>
+                  <value>SECRET_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.endpoint</name>
+                  <value>S3_ENDPOINT_URL</value>
+              </property>
+            </configuration>
+    spark-operator:
+      controller:
+        volumes:
+          - name: s3-certificates-volume
+            secret:
+              secretName: my-s3-certs
+          - name: writable-volume
+            emptyDir: {}
+          - name: tmp-volume
+            emptyDir: {}
+          - name: s3-connection-config-volume
+            secret:
+              secretName: s3-connection-config
+              defaultMode: 400
+        volumeMounts:
+           - name: s3-certificates-volume
+            mountPath: /opt/spark/tlscerts/ca.crt
+            subPath: ca.crt 
+          - name: writable-volume
+            mountPath: /opt/spark/writable
+          - name: tmp-volume
+            mountPath: /tmp
+          - name: s3-connection-config-volume
+            mountPath: /opt/spark/s3config
+            readOnly: true
+        env:
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/s3certificates
+          - name: JAVA_WRITABLE_KEYSTORE
+            value: /opt/spark/writable/cacerts
+          - name: HADOOP_CONF_DIR
+            value: /opt/spark/s3config
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/s3config
+    ```
+3. Using Cert-Manager integration: S3 certificates can also be managed using Cert-Manager. The certificates can be stored in a secret generated by certmanager, which can then be mounted into the operator pod at TRUST_CERTS_DIR.
+
+    For example:
+    ```yaml
+    extraSecrets:
+      s3-connection-config:
+        stringData: >
+          core-site.xml: |
+            <configuration>
+              <property>
+                  <name>fs.s3a.access.key</name>
+                  <value>ACCESS_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.secret.key</name>
+                  <value>SECRET_KEY</value>
+              </property>
+              <property>
+                  <name>fs.s3a.endpoint</name>
+                  <value>S3_ENDPOINT_URL</value>
+              </property>
+            </configuration>
+    certManagerIntegration:
+        enabled: true
+        secretName: spark-operator-tls-cm
+        duration: 365
+        subjectAlternativeName:
+          additionalDnsNames: []
+          additionalIpAddresses: []
+        clusterIssuerName: common-cluster-issuer        
+    spark-operator:
+      controller:
+      volumes:
+          - name: s3-certificates-volume
+            secret:
+              secretName: spark-operator-tls-cm
+          - name: tmp-volume
+            emptyDir: {}
+          - name: writable-volume
+            emptyDir: {}
+          - name: s3-connection-config-volume
+            secret:
+              secretName: s3-connection-config
+              defaultMode: 400
+        volumeMounts:
+          - name: s3-certificates-volume
+            mountPath: /opt/spark/tlscerts/ca.crt
+            subPath: ca.crt
+          - name: tmp-volume
+            mountPath: /tmp
+          - name: writable-volume
+            mountPath: /opt/spark/writable
+          - name: s3-connection-config-volume
+            mountPath: /opt/spark/s3config
+            readOnly: true
+        env:
+          - name: TRUST_CERTS_DIR
+            value: /opt/spark/tlscerts
+          - name: JAVA_WRITABLE_KEYSTORE
+            value: /opt/spark/writable/cacerts
+          - name: HADOOP_CONF_DIR
+            value: /opt/spark/s3config
+          - name: SPARK_CONF_DIR
+            value: /opt/spark/s3config
+    ```
+
+The S3 access credentials (Hadoop/Spark configuration files) are mounted from a separate secret created using extraSecrets into the paths specified by HADOOP_CONF_DIR and SPARK_CONF_DIR for security reasons.
+
+Alternatively, the S3 access credentials can also be passed as environment variables to the Spark Operator pod.
+
+Writable and temporary directories are provisioned through emptyDir mounts, which allow the truststore and runtime files to be created during container startup.
+
+With this configuration in place, the Spark Operator is able to securely authenticate and communicate with S3.  
+
+**Note**: Defining custom volumes in the Spark Operator pod configuration overrides the default volumes provided by the chart.
+
 ## Spark History Server Deployment
 
 Spark History Server deployment can be enabled by the qubership-spark-on-k8s `spark-history-server.enabled` deployment parameter.
@@ -1098,11 +1303,19 @@ spark-history-server:
 
 ### Using Secure S3 Endpoint for Spark History Server
 
-To connect to secure S3 endpoint, it is necessary to import S3 certificate to java truststore. Platform spark image entrypoint at the start of the image imports all certificates found in `TRUST_CERTS_DIR` directory into java truststore. The secret with certificate can be requested from cert-manager (using `spark-history-server.certManagerInegration.*`) parameters or created by the chart using `spark-history-server.extraSecrets` parameter. To mount the secret, the `spark-history-server.extraVolumeMounts` and `spark-history-server.extraVolumes` parameters must be used (the pre-created secret can also be mounted).  
+To connect to secure S3 endpoint, it is necessary to import S3 certificate to java truststore. Platform spark image entrypoint at the start of the image imports all certificates found in `TRUST_CERTS_DIR` directory into java truststore. The secret with certificate can be requested from cert-manager (using `spark-history-server.certManagerInegration.*`) parameters or created by the chart using `extraSecrets` parameter. To mount the secret, the `spark-history-server.extraVolumeMounts` and `spark-history-server.extraVolumes` parameters must be used (the pre-created secret can also be mounted).  
 
 For example:
 
 ```yaml
+extraSecrets:
+    s3Cert:
+      stringData: >
+        s3Cert.crt: -----BEGIN CERTIFICATE-----
+
+                       cert content goes here
+
+                       -----END CERTIFICATE-----
 spark-history-server:
   extraEnv:
     - name: TRUST_CERTS_DIR
@@ -1118,14 +1331,6 @@ spark-history-server:
     - name: s3-tls-cert
       secret:
         secretName: s3Cert
-  extraSecrets:
-    s3Cert:
-      stringData: >
-        s3Cert.crt: -----BEGIN CERTIFICATE-----
-
-                       cert content goes here
-
-                       -----END CERTIFICATE-----
   replicaCount: "1"
 ```
 
