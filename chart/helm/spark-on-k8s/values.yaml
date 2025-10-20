@@ -122,3 +122,5 @@ statusProvisioner:
   podReadinessTimeout: 300
   integrationTestsTimeout: 2000
   labels: {}
+certManagerIntegration:
+  enabled: false
