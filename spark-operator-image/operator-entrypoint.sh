@@ -21,18 +21,30 @@ if [ -n "${TRUST_CERTS_DIR}" ] && [ "$(ls -A "${TRUST_CERTS_DIR}")" ]; then
     : "${JAVA_WRITABLE_KEYSTORE:?Environment variable JAVA_WRITABLE_KEYSTORE must be set}"
 
     if [ ! -f "$JAVA_WRITABLE_KEYSTORE" ]; then
+        echo "Creating writable Java truststore..."
         cp "${JAVA_HOME}/lib/security/cacerts" "$JAVA_WRITABLE_KEYSTORE"
         chmod 644 "$JAVA_WRITABLE_KEYSTORE"
     fi
 
     for filename in "${TRUST_CERTS_DIR}"/*; do
-        echo "Importing $filename into Java truststore..."
+        alias_name="$(basename "$filename")"
+        echo "Processing certificate: $filename"
+
+        if "${JAVA_HOME}/bin/keytool" -list -keystore "$JAVA_WRITABLE_KEYSTORE" \
+            -storepass changeit -alias "$alias_name" > /dev/null 2>&1; then
+            echo "Removing existing alias $alias_name..."
+            "${JAVA_HOME}/bin/keytool" -delete -alias "$alias_name" \
+              -keystore "$JAVA_WRITABLE_KEYSTORE" \
+              -storepass changeit || true
+        fi
+
+        echo "Importing $alias_name into Java truststore..."
         "${JAVA_HOME}/bin/keytool" -importcert \
           -trustcacerts \
           -keystore "$JAVA_WRITABLE_KEYSTORE" \
           -storepass changeit \
           -noprompt \
-          -alias "$(basename "$filename")" \
+          -alias "$alias_name" \
           -file "$filename"
     done
         
