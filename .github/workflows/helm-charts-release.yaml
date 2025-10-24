@@ -191,7 +191,7 @@ jobs:
           echo "IMAGE_VERSION=${{ fromJson(needs.chart-release-prepare.outputs.images-versions)[matrix.component.name] || inputs.release }}" >> $GITHUB_ENV
 
       - name: Docker build
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@v2.0.1
         with:
           ref: release-${{ inputs.release }}
           download-artifact: false
@@ -215,7 +215,7 @@ jobs:
           echo "IMAGE_VERSION=${{ fromJson(needs.chart-release-prepare.outputs.images-versions)[matrix.component.name] || inputs.release }}" >> $GITHUB_ENV
 
       - name: Docker build
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@v2.0.1
         with:
           ref: release-${{ inputs.release }}
           download-artifact: false
