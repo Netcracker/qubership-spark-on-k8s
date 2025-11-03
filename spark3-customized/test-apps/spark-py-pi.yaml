@@ -9,7 +9,7 @@ spec:
   image: "ghcr.io/netcracker/qubership-spark3-customized-py:main"
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/spark/examples/src/main/python/pi.py
-  sparkVersion: "3.5.6"
+  sparkVersion: "3.5.7"
   sparkConf:
     "spark.jars.ivy": "/tmp/.ivy"
   #"spark.kubernetes.local.dirs.tmpfs": "true"
@@ -30,7 +30,7 @@ spec:
     coreLimit: "1200m"
     memory: "512m"
     labels:
-      version: 3.5.6
+      version: 3.5.7
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -46,7 +46,7 @@ spec:
     instances: 1
     memory: "512m"
     labels:
-      version: 3.5.6
+      version: 3.5.7
     securityContext:
       seccompProfile:
         type: RuntimeDefault
