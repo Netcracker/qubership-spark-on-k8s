@@ -12,9 +12,9 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/com/google/guava/guava/32.0.1-jre/guava-32.0.1-jre.jar --output $SPARK_JARS_DIR/guava-32.0.1-jre.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-all/4.1.118.Final/netty-all-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-all-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-buffer/4.1.118.Final/netty-buffer-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-buffer-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-codec/4.1.118.Final/netty-codec-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-4.1.118.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-codec/4.1.125.Final/netty-codec-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-4.1.125.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec-http2/4.1.124.Final/netty-codec-http2-4.1.124.Final.jar --output $SPARK_JARS_DIR/netty-codec-http2-4.1.124.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-codec-http/4.1.118.Final/netty-codec-http-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-http-4.1.118.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-codec-http/4.1.125.Final/netty-codec-http-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-http-4.1.125.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec-socks/4.1.118.Final/netty-codec-socks-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-socks-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-common/4.1.118.Final/netty-common-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-common-4.1.118.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-handler/4.1.118.Final/netty-handler-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-handler-4.1.118.Final.jar && \
