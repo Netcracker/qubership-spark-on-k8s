@@ -43,15 +43,14 @@ RUN chmod 777 /opt/spark/work-dir \
     # Add permissions to add certs
     && chown spark ${JAVA_HOME}/lib/security/cacerts && chgrp root ${JAVA_HOME}/lib/security/cacerts \
     && chmod ug+rw ${JAVA_HOME}/lib/security/cacerts
-
+    
 # Use noble ubuntu repo to upgrade curl to 8.5.0, since jammy ubuntu curl version is 7.81
-RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/apt/sources.list \
+    RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/apt/sources.list \
     && echo 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main' >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get --only-upgrade install -y curl=8.5.0-2ubuntu10 --no-install-recommends \
     \
-    && apt-get install -y wget gnupg \
-    && wget -O /usr/local/bin/gosu https://github.com/tianon/gosu/releases/download/1.19/gosu-amd64 \
+    && curl -fsSL -o /usr/local/bin/gosu https://github.com/tianon/gosu/releases/download/1.19/gosu-amd64 \
     && chmod +x /usr/local/bin/gosu \
     \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -61,7 +60,27 @@ RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/
 COPY --chmod=0777 ./entrypoint.sh /opt/
 COPY --chmod=0777 ./thrift-server-entrypoint.sh /opt/
 
-RUN rm $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13.jar $SPARK_JARS_DIR/ivy-2.5.1.jar $SPARK_JARS_DIR/guava-14.0.1.jar $SPARK_JARS_DIR/netty-all-4.1.96.Final.jar $SPARK_JARS_DIR/netty-buffer-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-http2-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-http-4.1.96.Final.jar $SPARK_JARS_DIR/netty-codec-socks-4.1.96.Final.jar $SPARK_JARS_DIR/netty-common-4.1.96.Final.jar $SPARK_JARS_DIR/netty-handler-4.1.96.Final.jar $SPARK_JARS_DIR/netty-handler-proxy-4.1.96.Final.jar $SPARK_JARS_DIR/netty-resolver-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-classes-epoll-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-classes-kqueue-4.1.96.Final.jar $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.96.Final-linux-aarch_64.jar $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.96.Final-linux-x86_64.jar $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.96.Final-osx-aarch_64.jar $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.96.Final-osx-x86_64.jar $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.96.Final.jar
+RUN rm $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13.jar \
+    $SPARK_JARS_DIR/ivy-2.5.1.jar \
+    $SPARK_JARS_DIR/guava-14.0.1.jar \
+    $SPARK_JARS_DIR/netty-all-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-buffer-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-codec-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-codec-http2-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-codec-http-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-codec-socks-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-common-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-handler-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-handler-proxy-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-resolver-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-transport-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-transport-classes-epoll-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-transport-classes-kqueue-4.1.96.Final.jar \
+    $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.96.Final-linux-aarch_64.jar \
+    $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.96.Final-linux-x86_64.jar \
+    $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.96.Final-osx-aarch_64.jar \
+    $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.96.Final-osx-x86_64.jar \
+    $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.96.Final.jar
 
 COPY --from=unpacker --chmod=0777 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
 
