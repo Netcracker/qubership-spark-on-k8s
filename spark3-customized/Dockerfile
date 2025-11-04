@@ -45,7 +45,7 @@ RUN chmod 777 /opt/spark/work-dir \
     && chmod ug+rw ${JAVA_HOME}/lib/security/cacerts
     
 # Use noble ubuntu repo to upgrade curl to 8.5.0, since jammy ubuntu curl version is 7.81
-    RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/apt/sources.list \
+RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/apt/sources.list \
     && echo 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main' >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get --only-upgrade install -y curl=8.5.0-2ubuntu10 --no-install-recommends \
