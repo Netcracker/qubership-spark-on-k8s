@@ -10,24 +10,24 @@ RUN mkdir -p /opt/spark/jars/ && \
         curl -k -L https://repository.cloudera.com/repository/cloudera-repos/org/codehaus/jackson/jackson-mapper-asl/1.9.13-cloudera.4/jackson-mapper-asl-1.9.13-cloudera.4.jar --output $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13-cloudera.4.jar && \
     curl -k -L $MAVEN_REPO/org/apache/ivy/ivy/2.5.2/ivy-2.5.2.jar --output $SPARK_JARS_DIR/ivy-2.5.2.jar && \
     curl -k -L $MAVEN_REPO/com/google/guava/guava/32.0.1-jre/guava-32.0.1-jre.jar --output $SPARK_JARS_DIR/guava-32.0.1-jre.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-all/4.1.118.Final/netty-all-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-all-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-buffer/4.1.118.Final/netty-buffer-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-buffer-4.1.118.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-all/4.1.125.Final/netty-all-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-all-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-buffer/4.1.125.Final/netty-buffer-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-buffer-4.1.125.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec/4.1.125.Final/netty-codec-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-4.1.125.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-codec-http2/4.1.124.Final/netty-codec-http2-4.1.124.Final.jar --output $SPARK_JARS_DIR/netty-codec-http2-4.1.124.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-codec-http2/4.1.125.Final/netty-codec-http2-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-http2-4.1.125.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-codec-http/4.1.125.Final/netty-codec-http-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-http-4.1.125.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-codec-socks/4.1.118.Final/netty-codec-socks-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-codec-socks-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-common/4.1.118.Final/netty-common-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-common-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-handler/4.1.118.Final/netty-handler-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-handler-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-handler-proxy/4.1.118.Final/netty-handler-proxy-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-handler-proxy-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-resolver/4.1.118.Final/netty-resolver-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-resolver-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport/4.1.118.Final/netty-transport-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-transport-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-classes-epoll/4.1.118.Final/netty-transport-classes-epoll-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-transport-classes-epoll-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-classes-kqueue/4.1.118.Final/netty-transport-classes-kqueue-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-transport-classes-kqueue-4.1.118.Final.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/4.1.118.Final/netty-transport-native-epoll-4.1.118.Final-linux-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-aarch_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/4.1.118.Final/netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/4.1.118.Final/netty-transport-native-kqueue-4.1.118.Final-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-aarch_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/4.1.118.Final/netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/4.1.118.Final/netty-transport-native-unix-common-4.1.118.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.118.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-codec-socks/4.1.125.Final/netty-codec-socks-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-socks-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-common/4.1.125.Final/netty-common-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-common-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-handler/4.1.125.Final/netty-handler-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-handler-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-handler-proxy/4.1.125.Final/netty-handler-proxy-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-handler-proxy-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-resolver/4.1.125.Final/netty-resolver-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-resolver-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport/4.1.125.Final/netty-transport-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-classes-epoll/4.1.125.Final/netty-transport-classes-epoll-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-classes-epoll-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-classes-kqueue/4.1.125.Final/netty-transport-classes-kqueue-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-classes-kqueue-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/4.1.125.Final/netty-transport-native-epoll-4.1.125.Final-linux-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.125.Final-linux-aarch_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/4.1.125.Final/netty-transport-native-epoll-4.1.125.Final-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.125.Final-linux-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/4.1.125.Final/netty-transport-native-kqueue-4.1.125.Final-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.125.Final-osx-aarch_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/4.1.125.Final/netty-transport-native-kqueue-4.1.125.Final-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.125.Final-osx-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/4.1.125.Final/netty-transport-native-unix-common-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.125.Final.jar && \
     curl -k -L $MAVEN_REPO/io/delta/delta-storage/3.2.1/delta-storage-3.2.1.jar --output $SPARK_JARS_DIR/delta-storage-3.2.1.jar && \
     curl -k -L $MAVEN_REPO/io/delta/delta-spark_2.12/3.2.1/delta-spark_2.12-3.2.1.jar --output $SPARK_JARS_DIR/delta-spark_2.12-3.2.1.jar
 
