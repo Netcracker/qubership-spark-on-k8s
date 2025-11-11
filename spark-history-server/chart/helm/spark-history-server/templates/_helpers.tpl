@@ -71,7 +71,7 @@ Deployment only labels
 app.kubernetes.io/instance: {{ cat .Release.Name "-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
 app.kubernetes.io/component: spark-history-server
 app.kubernetes.io/version: {{ splitList ":" ( include "spark-history-server.image" . ) | last }}
-app.kubernetes.io/technology: java
+app.kubernetes.io/technology: java-others
 {{- end }}
 
 
