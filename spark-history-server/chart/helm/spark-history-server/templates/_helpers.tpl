@@ -87,6 +87,13 @@ app.kubernetes.io/name: {{ template "spark-history-server.fullname" . }}
 All object labels
 */}}
 {{- define "all_objects_labels_shs" -}}
+{{ include "part_of_label_shs" . }}
+{{- end }}
+
+{{/*
+Part of label
+*/}}
+{{- define "part_of_label_shs" -}}
 app.kubernetes.io/part-of: spark-operator
 {{- end }}
 
