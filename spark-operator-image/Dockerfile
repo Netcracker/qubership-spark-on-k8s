@@ -1,5 +1,5 @@
 FROM alpine:latest AS unpacker
-ENV HADOOP_VERSION=3.4.1
+ENV HADOOP_VERSION=3.4.2
 ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
