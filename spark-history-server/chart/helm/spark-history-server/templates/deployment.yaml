@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "all_objects_labels_shs" . | nindent 8 }}
+        {{- include "part_of_label_shs" . | nindent 8 }}
         {{- include "deployment_and_service_only_labels_shs" . | nindent 8 }}
         {{- include "deployment_only_labels_shs" . | nindent 8 }}
     spec:

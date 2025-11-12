@@ -71,7 +71,7 @@ Deployment only labels
 app.kubernetes.io/instance: {{ cat .Release.Name "-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
 app.kubernetes.io/component: spark-history-server
 app.kubernetes.io/version: {{ splitList ":" ( include "spark-history-server.image" . ) | last }}
-app.kubernetes.io/technology: java
+app.kubernetes.io/technology: java-others
 {{- end }}
 
 
@@ -87,6 +87,13 @@ app.kubernetes.io/name: {{ template "spark-history-server.fullname" . }}
 All object labels
 */}}
 {{- define "all_objects_labels_shs" -}}
+{{ include "part_of_label_shs" . }}
+{{- end }}
+
+{{/*
+Part of label
+*/}}
+{{- define "part_of_label_shs" -}}
 app.kubernetes.io/part-of: spark-operator
 {{- end }}
 
