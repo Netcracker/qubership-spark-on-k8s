@@ -18,7 +18,7 @@ home: https://github.com/Netcracker/qubership-spark-on-k8s
 
 dependencies:
   - name: spark-operator
-    version: "2.3.0"
+    version: "2.4.0-rc.0"
     repository: "file://charts/spark-operator"
   - name: spark-history-server
     condition: spark-history-server.enabled
