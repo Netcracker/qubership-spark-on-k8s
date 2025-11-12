@@ -54,7 +54,6 @@ COPY --chmod=0777 ./entrypoint.sh /opt/
 COPY --chmod=0777 ./thrift-server-entrypoint.sh /opt/
 
 RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar \
-    $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13.jar \
     $SPARK_JARS_DIR/netty-all-4.1.118.Final.jar \
     $SPARK_JARS_DIR/netty-buffer-4.1.118.Final.jar \
     $SPARK_JARS_DIR/netty-codec-4.1.118.Final.jar \
