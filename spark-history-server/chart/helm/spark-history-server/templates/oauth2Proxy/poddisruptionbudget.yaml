@@ -1,5 +1,9 @@
 {{- if .Values.oauth2Proxy.enabled }}
-{{- if and .Values.oauth2Proxy.podDisruptionBudget.enabled (gt (.Values.oauth2Proxy.replicas | int) 1) }}
+{{- $replicaCount := .Values.oauth2Proxy.replicas | default 1 | int }}
+{{- if .Values.oauth2Proxy.autoscaling.enabled }}
+  {{- $replicaCount = .Values.oauth2Proxy.autoscaling.minReplicas | default 1 | int }}
+{{- end }}
+{{- if and .Values.oauth2Proxy.podDisruptionBudget.enabled (gt $replicaCount 1) }}
 apiVersion: {{ include "capabilities.podDisruptionBudget.apiVersion" . }}
 kind: PodDisruptionBudget
 metadata:
@@ -12,6 +16,14 @@ spec:
   selector:
     matchLabels:
       {{- include "oauth2-proxy.selectorLabels" . | indent 6 }}
-  minAvailable: {{ .Values.oauth2Proxy.podDisruptionBudget.minAvailable }}
+  {{- with .Values.oauth2Proxy.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ . }}
+  {{- end }}
+  {{- with .Values.oauth2Proxy.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ . }}
+  {{- end }}
+  {{- with .Values.oauth2Proxy.podDisruptionBudget.unhealthyPodEvictionPolicy }}
+  unhealthyPodEvictionPolicy: {{ . }}
+  {{- end }}
 {{- end }}
 {{- end }}

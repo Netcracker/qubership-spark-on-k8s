@@ -94,7 +94,7 @@ Redis subcharts fullname
 */}}
 {{- define "oauth2-proxy.redis.fullname" -}}
 {{- if .Values.oauth2Proxy.redis.enabled -}}
-{{- include "common.names.fullname" (dict "Chart" (dict "Name" "redis") "Release" .Release "Values" .Values.oauth2Proxy.redis) -}}
+{{- include "redis-ha.fullname" (dict "Chart" (dict "Name" "redis") "Release" .Release "Values" .Values.oauth2Proxy.redis) -}}
 {{- else -}}
 {{ fail "attempting to use redis subcharts fullname, even though the subchart is not enabled. This will lead to misconfiguration" }}
 {{- end -}}
@@ -107,7 +107,7 @@ Compute the redis url if not set explicitly.
 {{- if .Values.oauth2Proxy.sessionStorage.redis.standalone.connectionUrl -}}
 {{ .Values.oauth2Proxy.sessionStorage.redis.standalone.connectionUrl }}
 {{- else if .Values.oauth2Proxy.redis.enabled -}}
-{{- printf "redis://%s-master:%.0f" (include "oauth2-proxy.redis.fullname" .) .Values.oauth2Proxy.redis.master.service.ports.redis -}}
+{{- printf "redis://%s:%.0f" (include "oauth2-proxy.redis.fullname" .) .Values.oauth2Proxy.redis.redis.port -}}
 {{- else -}}
 {{ fail "please set sessionStorage.redis.standalone.connectionUrl or enable the redis subchart via redis.enabled" }}
 {{- end -}}
