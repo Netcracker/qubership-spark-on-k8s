@@ -72,3 +72,4 @@ spec:
 {{- if .Values.oauth2Proxy.service.trafficDistribution }}
   trafficDistribution: {{ .Values.oauth2Proxy.service.trafficDistribution }}
 {{- end }}
+{{- end }}
