@@ -18,14 +18,14 @@
 Main components of spark-on-k8s distribution are:
 
 * [Spark-operator](https://github.com/kubeflow/spark-operator). Consists of controller and webhook. For more information refer to https://www.kubeflow.org/docs/components/spark-operator/getting-started/.
-* `Spark-history-server` - Spark tool that can be used to view logs of spark applications. For more information refer to https://spark.apache.org/docs/4.0.0/monitoring.html .
-* `Spark-thrift-server` - Spark tool to execute SQL queries. For more information refer to https://spark.apache.org/docs/4.0.0/sql-distributed-sql-engine.html .
+* `Spark-history-server` - Spark tool that can be used to view logs of spark applications. For more information refer to https://spark.apache.org/docs/4.0.1/monitoring.html .
+* `Spark-thrift-server` - Spark tool to execute SQL queries. For more information refer to https://spark.apache.org/docs/4.0.1/sql-distributed-sql-engine.html .
 
 Spark-on-k8s distribution includes the following images:
 
-* [Qubership spark image](/spark-customized/Dockerfile): image based on [official spark-java 21 image](https://github.com/apache/spark-docker/tree/master/4.0.0/scala2.13-java21-ubuntu) with patch version updates of some jars to reduce vulnerabilities. Includes some additional jars, for example, to work with S3 and [profiler Jars](https://github.com/Netcracker/qubership-profiler-agent). Additionally contains modified entrypoint to support working with certificates and with [qubership profilier](https://github.com/Netcracker/qubership-profiler-agent). Also includes custom entrypoint for spark-thrift service. The image is used in spark-history-server, spark-thrift-server and can be used to create custom spark applications(also can be used to run example spark applications).
+* [Qubership spark image](/spark-customized/Dockerfile): image based on [official spark-java 21 image](https://github.com/apache/spark-docker/tree/master/4.0.1/scala2.13-java21-ubuntu) with patch version updates of some jars to reduce vulnerabilities. Includes some additional jars, for example, to work with S3 and [profiler Jars](https://github.com/Netcracker/qubership-profiler-agent). Additionally contains modified entrypoint to support working with certificates and with [qubership profilier](https://github.com/Netcracker/qubership-profiler-agent). Also includes custom entrypoint for spark-thrift service. The image is used in spark-history-server, spark-thrift-server and can be used to create custom spark applications(also can be used to run example spark applications).
 * [Qubership spark python image](/spark-customized/py/Dockerfile): image based on spark image that adds python into the image. The image is used custom python spark applications. Can be used to run python example spark applications.
-* [Qubership spark operator image](/spark-operator-image/Dockerfile): image based on the [official spark operator image](https://hub.docker.com/r/kubeflow/spark-operator/). Includes custom entrypoint based on spark image to be able to run the image under any user. Note, that official spark operator image is based on [official spark-java 21 image](https://github.com/apache/spark-docker/tree/master/4.0.0/scala2.13-java21-ubuntu) .
+* [Qubership spark operator image](/spark-operator-image/Dockerfile): image based on the [official spark operator image](https://hub.docker.com/r/kubeflow/spark-operator/). Includes custom entrypoint based on spark image to be able to run the image under any user. Note, that official spark operator image is based on [official spark-java 21 image](https://github.com/apache/spark-docker/tree/master/4.0.1/scala2.13-java21-ubuntu) .
 * [integration tests image](/spark-service-integration-tests/docker/Dockerfile): image used to run qubership spark-on-k8s integration tests. It is based on qubership [integration tests image](https://github.com/Netcracker/qubership-docker-integration-tests)
 * [Oauth2 proxy image](https://github.com/oauth2-proxy/oauth2-proxy/blob/master/Dockerfile): image used to set up a proxy with authentication for spark history sever.
 * [Status provisioner image](https://github.com/Netcracker/qubership-deployment-status-provisioner): Qubership status provisioner image that is used to report deploy status for application deployer.
@@ -104,8 +104,8 @@ Spark images are pretty large and include pretty big JARs. To avoid unnecessary 
 * https://github.com/apache/spark-docker spark docker repository
 * https://hub.docker.com/r/apache/spark spark docker image
 * https://spark.apache.org/documentation.html spark documentation
-* https://spark.apache.org/docs/4.0.0/monitoring.html#spark-history-server-configuration-options spark history documentation
-* https://spark.apache.org/docs/4.0.0/sql-distributed-sql-engine.html spark thrift server documentation
+* https://spark.apache.org/docs/4.0.1/monitoring.html#spark-history-server-configuration-options spark history documentation
+* https://spark.apache.org/docs/4.0.1/sql-distributed-sql-engine.html spark thrift server documentation
 * https://issues.apache.org/jira/projects/SPARK/issues apache spark jira
 * https://github.com/oauth2-proxy/oauth2-proxy oauth2 proxy repository
 * https://github.com/oauth2-proxy/manifests/tree/main/helm/oauth2-proxy oauth2 proxy chart

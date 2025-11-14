@@ -1,0 +1,49 @@
+{{- if .Values.oauth2Proxy.autoscaling.enabled }}
+apiVersion: {{ include "capabilities.horizontalPodAutoscaler.apiVersion" . }}
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: {{ template "oauth2-proxy.name" . }}
+{{- include "oauth2-proxy.labels" . | indent 4 }}
+  {{- with .Values.oauth2Proxy.autoscaling.annotations }}
+  annotations:
+{{ tpl ( toYaml . ) $ | indent 8 }}
+  {{- end }}
+  name: {{ template "oauth2-proxy.fullname" . }}
+  namespace: {{ template "oauth2-proxy.namespace" $ }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ template "oauth2-proxy.fullname" . }}
+  minReplicas: {{ .Values.oauth2Proxy.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.oauth2Proxy.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.oauth2Proxy.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.oauth2Proxy.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.oauth2Proxy.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.oauth2Proxy.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+  {{- if .Values.oauth2Proxy.autoscaling.behavior }}
+  behavior:
+    {{- with .Values.oauth2Proxy.autoscaling.behavior.scaleDown }}
+    scaleDown:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.oauth2Proxy.autoscaling.behavior.scaleUp }}
+    scaleUp:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

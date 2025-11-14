@@ -1,0 +1,35 @@
+{{- if .Values.oauth2Proxy.networkPolicy.create }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "oauth2-proxy.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "oauth2-proxy.labels" . | nindent 4 }}
+    {{- with .Values.oauth2Proxy.commonLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.oauth2Proxy.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  policyTypes:
+    {{- if .Values.oauth2Proxy.networkPolicy.ingress }}
+    - Ingress
+    {{- end }}
+    {{- if .Values.oauth2Proxy.networkPolicy.egress }}
+    - Egress
+    {{- end }}
+  podSelector:
+    matchLabels:
+      {{- include "oauth2-proxy.selectorLabels" . | nindent 6 }}
+  {{- if .Values.oauth2Proxy.networkPolicy.ingress }}
+  ingress:
+    {{- toYaml .Values.oauth2Proxy.networkPolicy.ingress | nindent 4 }}
+  {{- end }}
+  {{- if .Values.oauth2Proxy.networkPolicy.egress }}
+  egress:
+    {{- toYaml .Values.oauth2Proxy.networkPolicy.egress | nindent 4 }}
+  {{- end }}
+{{- end }}
