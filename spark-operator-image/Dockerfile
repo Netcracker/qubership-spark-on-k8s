@@ -29,15 +29,8 @@ FROM ghcr.io/kubeflow/spark-operator/controller:2.3.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 USER root
 
-RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/apt/sources.list \
-    && echo 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main' >> /etc/apt/sources.list \
-    && apt-get update \
-    && apt-get --only-upgrade install -y curl=8.5.0-2ubuntu10 --no-install-recommends \
-    \
-    && curl -fsSL -o /usr/local/bin/gosu https://github.com/tianon/gosu/releases/download/1.19/gosu-amd64 \
-    && chmod +x /usr/local/bin/gosu \
-    \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL -o /usr/local/bin/gosu https://github.com/tianon/gosu/releases/download/1.19/gosu-amd64 \
+    && chmod +x /usr/local/bin/gosu
 
 RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar \
     $SPARK_JARS_DIR/netty-all-4.1.118.Final.jar \
