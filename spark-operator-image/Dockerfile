@@ -4,7 +4,7 @@ ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
 RUN mkdir -p /opt/spark/jars/ && \
-    curl -k -L $MAVEN_REPO/software/amazon/awssdk/bundle/2.32.14/bundle-2.32.14.jar --output $SPARK_JARS_DIR/bundle-2.32.14.jar && \
+    curl -k -L $MAVEN_REPO/software/amazon/awssdk/bundle/2.38.5/bundle-2.38.5.jar --output $SPARK_JARS_DIR/bundle-2.38.5.jar && \
     curl -k -L $MAVEN_REPO/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar --output $SPARK_JARS_DIR/hadoop-aws-$HADOOP_VERSION.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-all/4.1.125.Final/netty-all-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-all-4.1.125.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-buffer/4.1.125.Final/netty-buffer-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-buffer-4.1.125.Final.jar && \
