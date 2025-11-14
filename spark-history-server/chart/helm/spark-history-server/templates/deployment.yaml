@@ -413,7 +413,7 @@ spec:
             secretName: {{ template "oauth2-proxy.fullname" . }}-accesslist
         {{- end }}
         {{- end }}
-        {{- if and .Values.redis.enabled .Values.initContainers.waitForRedis.enabled }}
+        {{- if and .Values.oauth2Proxy.redis.enabled .Values.oauth2Proxy.initContainers.waitForRedis.enabled }}
               - name: redis-script
               configMap:
                 name: {{ template "oauth2-proxy.fullname" . }}-wait-for-redis
