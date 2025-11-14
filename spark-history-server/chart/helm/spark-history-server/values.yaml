@@ -140,6 +140,22 @@ hdfs:
 
 oauth2Proxy:
   enabled: false
+  autoscaling:
+    enabled: false
+  service:
+    trafficDistribution: ""
+    ipDualStack:
+      enabled: false
+    externalTrafficPolicy: ""  
+    internalTrafficPolicy: ""
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: null
+    minAvailable: 1
+    # Policy for when unhealthy pods should be considered for eviction.
+    # Valid values are "IfHealthyBudget" and "AlwaysAllow".
+    # Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy
+    unhealthyPodEvictionPolicy: ""    
 
   image:
     repository: "quay.io/oauth2-proxy/oauth2-proxy"
