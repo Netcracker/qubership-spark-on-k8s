@@ -287,7 +287,7 @@ spec:
           - containerPort: 4443
         {{- else }}
         {{- end}}
-            name: {{ .Values.oauth2Proxy.httpScheme }}
+            name: {{ .Values.oauth2Proxy.service.portName }}
             protocol: TCP
         {{- if .Values.oauth2Proxy.metrics.enabled }}
           - containerPort: 44180
@@ -298,7 +298,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /ping
-            port: {{ .Values.oauth2Proxy.httpScheme }}
+            name: {{ .Values.oauth2Proxy.service.portName }}
             scheme: {{ .Values.oauth2Proxy.httpScheme | upper }}
           initialDelaySeconds: {{ .Values.oauth2Proxy.livenessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.oauth2Proxy.livenessProbe.timeoutSeconds }}
@@ -307,7 +307,7 @@ spec:
         readinessProbe:
           httpGet:
             path: {{ if gt (include "oauth2-proxy.version" .) "7.4.0" }}/ready{{ else }}/ping{{ end }}
-            port: {{ .Values.oauth2Proxy.httpScheme }}
+            name: {{ .Values.oauth2Proxy.service.portName }}
             scheme: {{ .Values.oauth2Proxy.httpScheme | upper }}
           initialDelaySeconds: {{ .Values.oauth2Proxy.readinessProbe.initialDelaySeconds }}
           timeoutSeconds: {{ .Values.oauth2Proxy.readinessProbe.timeoutSeconds }}
