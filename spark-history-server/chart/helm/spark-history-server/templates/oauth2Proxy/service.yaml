@@ -64,7 +64,6 @@ spec:
   selector:
 # modification to support labels
     {{- include "selector_labels_shs" . | nindent 4 }}
-    {{- include "oauth2-proxy.selectorLabels" . | indent 4 }}
 {{- if .Values.oauth2Proxy.service.ipDualStack.enabled }}
   ipFamilies: {{ toYaml .Values.oauth2Proxy.service.ipDualStack.ipFamilies | nindent 4 }}
   ipFamilyPolicy: {{ .Values.oauth2Proxy.service.ipDualStack.ipFamilyPolicy }}
