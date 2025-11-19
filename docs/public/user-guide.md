@@ -101,8 +101,8 @@ For more information on how to enable the mutating admission webhook, see [Quick
      image: "ghcr.io/netcracker/qubership-spark-customized:main"
      imagePullPolicy: Always
      mainClass: org.apache.spark.examples.SparkPi
-     mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.0.jar"
-     sparkVersion: "4.0.0"
+     mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.1.jar"
+     sparkVersion: "4.0.1"
      restartPolicy:
        type: Never
      driver:
@@ -110,14 +110,14 @@ For more information on how to enable the mutating admission webhook, see [Quick
        coreLimit: "1200m"
        memory: "512m"
        labels:
-         version: 4.0.0
+         version: 4.0.1
        serviceAccount: sparkoperator-spark
      executor:
        cores: 1
        instances: 1
        memory: "512m"
        labels:
-         version: 4.0.0
+         version: 4.0.1
    ```
    **Note**: It is possible to add labels to the CR. For example, for Qubership Cloud release recommends adding the following labels to the CR:
    
@@ -400,8 +400,8 @@ spec:
   image: "ghcr.io/netcracker/qubership-spark-customized:main"
   imagePullPolicy: Always
   mainClass: org.apache.spark.examples.SparkPi
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.0.jar"
-  sparkVersion: "4.0.0"
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.1.jar"
+  sparkVersion: "4.0.1"
   arguments:
     - "200"
   restartPolicy:
@@ -426,7 +426,7 @@ spec:
     instances: 1
     memory: "1G"
     labels:
-      version: 4.0.0
+      version: 4.0.1
     configMaps:
       - name: metricspropertiesconfigmap
         path: /etc/metrics/conf

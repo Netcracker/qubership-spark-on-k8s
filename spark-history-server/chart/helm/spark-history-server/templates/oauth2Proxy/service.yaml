@@ -30,6 +30,12 @@ spec:
 {{- else }}
   type: {{ .Values.oauth2Proxy.service.type }}
 {{- end }}
+{{- if .Values.oauth2Proxy.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.oauth2Proxy.service.externalTrafficPolicy }}
+{{- end }}
+{{- if .Values.oauth2Proxy.service.internalTrafficPolicy }}
+  internalTrafficPolicy: {{ .Values.oauth2Proxy.service.internalTrafficPolicy }}
+{{- end }}
   ports:
     - port: {{ .Values.oauth2Proxy.service.portNumber }}
 #     diff from community oauth2proxy chart to pick right port name
@@ -58,4 +64,11 @@ spec:
   selector:
 # modification to support labels
     {{- include "selector_labels_shs" . | nindent 4 }}
+{{- if .Values.oauth2Proxy.service.ipDualStack.enabled }}
+  ipFamilies: {{ toYaml .Values.oauth2Proxy.service.ipDualStack.ipFamilies | nindent 4 }}
+  ipFamilyPolicy: {{ .Values.oauth2Proxy.service.ipDualStack.ipFamilyPolicy }}
+{{- end }}
+{{- if .Values.oauth2Proxy.service.trafficDistribution }}
+  trafficDistribution: {{ .Values.oauth2Proxy.service.trafficDistribution }}
+{{- end }}
 {{- end }}

@@ -140,10 +140,11 @@ hdfs:
 
 oauth2Proxy:
   enabled: false
+      
 
   image:
     repository: "quay.io/oauth2-proxy/oauth2-proxy"
-    tag: "v7.11.0"
+    tag: "v7.13.0"
     pullPolicy: "IfNotPresent"
     command: []
 
@@ -268,7 +269,22 @@ oauth2Proxy:
     appProtocol: http
     annotations: {}
     # foo.io/bar: "true"
-
+    # configure externalTrafficPolicy
+    externalTrafficPolicy: ""
+    # configure internalTrafficPolicy
+    internalTrafficPolicy: ""
+    # configure service target port
+    targetPort: ""
+    # Configures the service to use IPv4/IPv6 dual-stack.
+    # Ref: https://kubernetes.io/docs/concepts/services-networking/dual-stack/
+    ipDualStack:
+      enabled: false
+      ipFamilies: ["IPv6", "IPv4"]
+      ipFamilyPolicy: "PreferDualStack"
+    # Configure traffic distribution for the service
+    # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#traffic-distribution
+    trafficDistribution: ""
+  ## Create or use ServiceAccount
   ## Create or use ServiceAccount
   serviceAccount:
     ## Specifies whether a ServiceAccount should be created
@@ -278,6 +294,14 @@ oauth2Proxy:
     name: spark-history-auth
     automountServiceAccountToken: true
     annotations: {}
+    ## imagePullSecrets for the service account
+    imagePullSecrets: []
+    # - name: myRegistryKeySecretName
+  # Network policy settings.
+  networkPolicy:
+    create: false
+    ingress: []
+    egress: []  
 
   fullnameOverride: oauth2-proxy-history
 
@@ -331,6 +355,14 @@ oauth2Proxy:
     #   cpu: 100m
     #   memory: 300Mi
 
+  # Container resize policy for runtime resource updates
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/resize-container-resources/
+  resizePolicy: []
+    # - resourceName: cpu
+    #   restartPolicy: NotRequired
+    # - resourceName: memory
+    #   restartPolicy: RestartContainer  
+
   extraVolumes: []
     # - name: ca-bundle-cert
     #   secret:
@@ -344,6 +376,15 @@ oauth2Proxy:
   extraContainers: []
     #  - name: my-sidecar
     #    image: nginx:latest
+
+  # Additional Init containers to be added to the pod.
+  extraInitContainers: []
+    #  - name: wait-for-idp
+    #    image: my-idp-wait:latest
+    #    command:
+    #    - sh
+    #    - -c
+    #    - wait-for-idp.sh  
 
   priorityClassName: ""
 
@@ -404,6 +445,43 @@ oauth2Proxy:
   podDisruptionBudget:
     enabled: true
     minAvailable: 1
+    maxUnavailable: null
+    # Policy for when unhealthy pods should be considered for eviction.
+    # Valid values are "IfHealthyBudget" and "AlwaysAllow".
+    # Ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy
+    unhealthyPodEvictionPolicy: ""
+
+  ## Horizontal Pod Autoscaling
+  ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+    annotations: {}
+    # Configure HPA behavior policies for scaling if needed
+    # Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#configuring-scaling-behavior
+    behavior:
+      {}
+      # scaleDown:
+      #   stabilizationWindowSeconds: 300
+      #   policies:
+      #   - type: Percent
+      #     value: 100
+      #     periodSeconds: 15
+      #   selectPolicy: Min
+      # scaleUp:
+      #   stabilizationWindowSeconds: 0
+      #   policies:
+      #   - type: Percent
+      #     value: 100
+      #     periodSeconds: 15
+      #   - type: Pods
+      #     value: 4
+      #     periodSeconds: 15
+      #   selectPolicy: Max
+    
 
   # Configure Kubernetes security context for pod
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -419,6 +497,10 @@ oauth2Proxy:
     # if service account is enabled
     waitForRedis:
       enabled: true
+      image:
+        repository: "alpine"
+        tag: "latest"
+        pullPolicy: "IfNotPresent"
       # uses the kubernetes version of the cluster
       # the chart is deployed on, if not set
       kubectlVersion: ""
@@ -435,6 +517,14 @@ oauth2Proxy:
         seccompProfile:
           type: RuntimeDefault
       timeout: 180
+      resources:
+        {}
+        # limits:
+        #   cpu: 100m
+        #   memory: 300Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 300Mi
 
   # Additionally authenticate against a htpasswd file. Entries must be created with "htpasswd -B" for bcrypt encryption.
   # Alternatively supply an existing secret which contains the required information.
@@ -523,6 +613,38 @@ oauth2Proxy:
       scrapeTimeout: 30s
       # Add custom labels to the ServiceMonitor resource
       labels: {}
+
+      ## scheme: HTTP scheme to use for scraping. Can be used with `tlsConfig` for example if using istio mTLS.
+      scheme: ""
+
+      ## tlsConfig: TLS configuration to use when scraping the endpoint. For example if using istio mTLS.
+      ## Of type: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#tlsconfig
+      tlsConfig: {}
+
+      ## bearerTokenFile: Path to bearer token file.
+      bearerTokenFile: ""
+
+      ## Used to pass annotations that are used by the Prometheus installed in your cluster to select Service Monitors to work with
+      ## ref: https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#prometheusspec
+      annotations: {}
+
+      ## Metric relabel configs to apply to samples before ingestion.
+      ## [Metric Relabeling](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#metric_relabel_configs)
+      metricRelabelings: []
+      # - action: keep
+      #   regex: 'kube_(daemonset|deployment|pod|namespace|node|statefulset).+'
+      #   sourceLabels: [__name__]
+
+      ## Relabel configs to apply to samples before ingestion.
+      ## [Relabeling](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#relabel_config)
+      relabelings: []
+      # - sourceLabels: [__meta_kubernetes_pod_node_name]
+      #   separator: ;
+      #   regex: ^(.*)$
+      #   targetLabel: nodename
+      #   replacement: $1
+      #   action: replace
+
 
   # Extra K8s manifests to deploy
   extraObjects: []

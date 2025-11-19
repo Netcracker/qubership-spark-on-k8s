@@ -94,8 +94,8 @@ spec:
  image: "ghcr.io/netcracker/qubership-spark-customized:main"
  imagePullPolicy: Always
  mainClass: org.apache.spark.examples.SparkPi
- mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.0.jar"
- sparkVersion: "4.0.0"
+ mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.1.jar"
+ sparkVersion: "4.0.1"
  sparkConf:
   "spark.kubernetes.submission.connectionTimeout": "60000000"
   "spark.kubernetes.submission.requestTimeout": "60000000"
@@ -110,7 +110,7 @@ spec:
   coreLimit: "1200m"
   memory: "512m"
   labels:
-   version: 4.0.0
+   version: 4.0.1
   serviceAccount: sparkoperator-spark
   securityContext:
    seccompProfile:
@@ -125,7 +125,7 @@ spec:
   instances: 1
   memory: "512m"
   labels:
-   version: 4.0.0
+   version: 4.0.1
   securityContext:
    seccompProfile:
     type: RuntimeDefault
@@ -173,7 +173,7 @@ There is an open issue in Airflow github community related to this - [Allow dele
 # Applications Auto-Recovery Using Checkpoints
 
 For stateful streaming applications, Spark provides a `Checkpointing` mechanism to recover the application after a failure. This allows the application to periodically save its state and use it to recover. The S3 storage can be used to store the checkpoints.    
-For more information, refer to the _Official Spark Documentation_ at [https://spark.apache.org/docs/4.0.0/streaming-programming-guide.html#checkpointing](https://spark.apache.org/docs/4.0.0/streaming-programming-guide.html#checkpointing).
+For more information, refer to the _Official Spark Documentation_ at [https://spark.apache.org/docs/4.0.1/streaming-programming-guide.html#checkpointing](https://spark.apache.org/docs/4.0.1/streaming-programming-guide.html#checkpointing).
 
 The Spark Operator's `Restart Policies` can be used to automate the recovery process.  
 For more information about configuring automatic application restart and failure handling, refer to [https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/user-guide.md#configuring-automatic-application-restart-and-failure-handling](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/user-guide.md#configuring-automatic-application-restart-and-failure-handling).
@@ -207,7 +207,7 @@ Refer to the following documentation:
 
 # Python Applications
 
-It is also possible to run Spark applications with the Spark Operator. For applications, it is necessary to use the [spark python image](/spark-customized/py). This image also includes python3.11 and pyspark 4.0.0. `spark-py-pi` application. An example can be found [here](/docs/public/examples/app-crs/spark-py-pi.yaml).
+It is also possible to run Spark applications with the Spark Operator. For applications, it is necessary to use the [spark python image](/spark-customized/py). This image also includes python3.11 and pyspark 4.0.1. `spark-py-pi` application. An example can be found [here](/docs/public/examples/app-crs/spark-py-pi.yaml).
 
 # S3 Storage
 
