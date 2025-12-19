@@ -43,7 +43,7 @@ RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/
     && echo 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main' >> /etc/apt/sources.list \
     && echo 'deb [arch=amd64] http://security.ubuntu.com/ubuntu noble-security main' >> /etc/apt/sources.list \
     && apt-get update \
-    && apt-get --only-upgrade install -y curl=8.5.0-2ubuntu10.6 --no-install-recommends \
+    && apt-get --only-upgrade install -y curl=8.5.0-2ubuntu10 --no-install-recommends \
     \
     && curl -fsSL -o /usr/local/bin/gosu https://github.com/tianon/gosu/releases/download/1.19/gosu-amd64 \
     && chmod +x /usr/local/bin/gosu \
