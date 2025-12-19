@@ -42,6 +42,7 @@ RUN chmod 777 /opt/spark/work-dir \
 RUN echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble main' >> /etc/apt/sources.list \
     && echo 'deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main' >> /etc/apt/sources.list \
     && echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-updates main' >> /etc/apt/sources.list \
+     && echo 'deb [arch=amd64] http://archive.ubuntu.com/ubuntu noble-security main' >> /etc/apt/sources.list \
     && apt-get update \
     && apt-get --only-upgrade install -y curl=8.5.0-2ubuntu10.6 --no-install-recommends \
     \
