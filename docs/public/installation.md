@@ -1982,6 +1982,7 @@ securityContext:
  |:-------------:|:---------:|:------------:|:------------:|
  | common-volume | /tmp | tmp | Provides a writable area for temporary files, and general OS-level buffers. |
  | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
+ | java-cacerts-dir| /java-security | java-security | Used specifically for managing Java truststores and security certificates at runtime. |
  
 
 

@@ -32,10 +32,21 @@ attempt_setup_fake_passwd_entry() {
 # QB change: patch certs
 
 if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
+
+    ORIGINAL_CACERTS="${JAVA_HOME}/lib/security/cacerts"
+    WRITABLE_CACERTS="/java-security/cacerts"
+
+    if [  ! -f "$WRITABLE_CACERTS" ]; then
+      cp "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
+    fi
+
     for filename in ${TRUST_CERTS_DIR}/*; do
         echo "Import $filename certificate to Java cacerts"
-        ${JAVA_HOME}/bin/keytool -import -trustcacerts -keystore ${JAVA_HOME}/lib/security/cacerts -storepass changeit -noprompt -alias ${filename} -file ${filename}
+        ${JAVA_HOME}/bin/keytool -import -trustcacerts -keystore "$WRITABLE_CACERTS" -storepass changeit -noprompt -alias "$(basename ${filename})" -file "${filename}"
     done;
+    export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
+    export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit"
 fi
 
 if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then
