@@ -31,19 +31,28 @@ attempt_setup_fake_passwd_entry() {
 
 # QB change: patch certs
 
-if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
+# 1. MOVE THIS UP from the bottom of the script
+if [ -z "$JAVA_HOME" ]; then
+  JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
+fi
 
+# 2. Now define paths using the detected JAVA_HOME
+if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
     ORIGINAL_CACERTS="${JAVA_HOME}/lib/security/cacerts"
     WRITABLE_CACERTS="/java-security/cacerts"
 
-    if [  ! -f "$WRITABLE_CACERTS" ]; then
+    if [ ! -f "$WRITABLE_CACERTS" ]; then
+      echo "Copying $ORIGINAL_CACERTS to $WRITABLE_CACERTS"
       cp "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
     fi
-
+    
     for filename in ${TRUST_CERTS_DIR}/*; do
         echo "Import $filename certificate to Java cacerts"
+        # We target the WRITABLE_CACERTS specifically
         ${JAVA_HOME}/bin/keytool -import -trustcacerts -keystore "$WRITABLE_CACERTS" -storepass changeit -noprompt -alias "$(basename ${filename})" -file "${filename}"
     done;
+    
+    # 3. Tell Java to use the new file
     export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
     export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit"
