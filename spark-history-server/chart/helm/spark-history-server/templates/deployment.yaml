@@ -82,6 +82,12 @@ spec:
           {{- end }}
           {{- end }}
         volumeMounts:
+          - name: common-volume
+            mountPath: /tmp
+            subPath: tmp
+          - name: common-volume
+            mountPath: /opt/spark/logs
+            subPath: logs 
           {{- if .Values.certManagerInegration.enabled }}
           {{- range .Values.certManagerInegration.secretMounts }}
           - name: {{ $.Values.certManagerInegration.secretName }}-volume
@@ -360,6 +366,8 @@ spec:
         {{- end }}
 {{ end }}
       volumes:
+        - name: common-volume
+          emptyDir: {}
         {{- if .Values.certManagerInegration.enabled }}
         - name: {{.Values.certManagerInegration.secretName }}-volume
           secret:

@@ -36,6 +36,7 @@ The following topics are covered in the document:
         * [S3 Initialization Job](#s3-initialization-job)
           * [AWS V4 Signature Configuration](#aws-v4-signature-configuration)
           * [TLS](#tls)
+        * [Security Hardening for History Server](#security-hardening-for-history-server)  
     * [Spark Thrift Server Deployment](#spark-thrift-server-deployment)
 * [Upgrade](#upgrade)
   * [Spark Upgrade](#spark-upgrade)
@@ -1965,6 +1966,24 @@ Configuration string format: <provider1[:prvdr2[:reg[:srv]]]>
 ### TLS
 
 TLS configuration is described in the [Using Secure S3 Endpoint For Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) section.
+
+### Security Hardening for History Server
+
+To improve the security posture of the application, the deployment is configured with a read-only root filesystem. This prevents the container process from writing to any location on the disk except for specifically designated volumes.
+The following settings are applied:
+```
+securityContext:
+  readOnlyRootFilesystem: true
+```  
+ Since the root filesystem is locked, we use emptyDir volumes to provide writable space for temporary operations and for certificates storage. Automated Volume Mounts so no need to manually configure additional storage. 
+ The following volumes are already provisioned in the deployment to handle standard application requirements:
+
+ | Volume Name | Mount Path | sub path | Purpose | 
+ |:-------------:|:---------:|:------------:|:------------:|
+ | common-volume | /tmp | tmp | Provides a writable area for temporary files, and general OS-level buffers. |
+ | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
+ 
+
 
 ## Spark Thrift Server Deployment
 
