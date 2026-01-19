@@ -53,21 +53,24 @@ if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
     
     for filename in "${TRUST_CERTS_DIR}"/*; do
         if [ -f "$filename" ]; then
+            alias_name=$(basename "$filename")
+            
+            echo "Checking if alias $alias_name exists in $WRITABLE_CACERTS"
 
             if "${JAVA_HOME}/bin/keytool" -list -keystore "$WRITABLE_CACERTS" \
-            -storepass changeit -alias "$alias_name" > /dev/null 2>&1; then
-            echo "Removing existing alias $alias_name..."
-            "${JAVA_HOME}/bin/keytool" -delete -alias "$alias_name" \
-              -keystore "$WRITABLE_CACERTS" \
-              -storepass changeit || true
+                -storepass changeit -alias "$alias_name" > /dev/null 2>&1; then
+                echo "Alias $alias_name already exists. Removing before re-import..."
+                "${JAVA_HOME}/bin/keytool" -delete -alias "$alias_name" \
+                  -keystore "$WRITABLE_CACERTS" \
+                  -storepass changeit \
+                  -J-Djava.io.tmpdir=/tmp || true
             fi   
-            echo "Importing: $(basename "$filename")"
 
-            
+            echo "Importing: $alias_name"
           
             "${JAVA_HOME}/bin/keytool" -import \
                 -trustcacerts \
-                -alias "$(basename "${filename}")" \
+                -alias "$alias_name" \
                 -file "${filename}" \
                 -keystore "$WRITABLE_CACERTS" \
                 -storepass changeit \
