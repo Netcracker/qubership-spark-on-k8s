@@ -1539,7 +1539,7 @@ sparkProperties: |
   spark.ssl.historyServer.enabled=true
   spark.ssl.historyServer.protocol=tls
   spark.ssl.historyServer.port=6044
-  spark.ssl.historyServer.trustStore=/opt/java/openjdk/lib/security/cacerts
+  spark.ssl.historyServer.trustStore=/java-security/cacerts
   spark.ssl.historyServer.keyStore=<keystor_dir>/keystore.p12
   spark.ssl.historyServer.trustStorePassword=changeit
   spark.ssl.historyServer.keyStorePassword=<set_keystore_password>
