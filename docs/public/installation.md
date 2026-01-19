@@ -1530,7 +1530,7 @@ extraEnv:
 ```
 `TLS_KEY_PATH` contains TLS private key location.  
 `TLS_CERT_PATH` contains TLS server side certificate location.  
-`TLS_KEYSTORE_DIR` writable directoy that contains the location of keystore used by Spart History server to store private key and server side certificate.  
+`TLS_KEYSTORE_DIR` A writable directory that contains the keystore used by the Spark History Server to store its private key and server-side certificate for TLS/SSL termination.
 `TLS_KEYSTORE_PASSWORD` contains password for the keystore.
 
 3. Add Spark properties to enable TLS for Spark History server:
@@ -1552,6 +1552,7 @@ service:
   internalPort: 6044
   type: ClusterIP
 ```
+**Note** : In environments with a read-only root filesystem, `TLS_KEYSTORE_DIR` must point to a writable volume mount.
 
 ### Enabling TLS on Spark History Server UI Inside Kubernetes
 

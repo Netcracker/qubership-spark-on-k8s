@@ -131,7 +131,45 @@ For more information on how to enable the mutating admission webhook, see [Quick
        app.kubernetes.io/processed-by-operator: spark-operator
        app.kubernetes.io/managed-by: the-tool-used-to-create-this-cr
    ```
-   
+### Support for Read-Only Root Filesystem
+When running Spark applications in hardened environments with `readOnlyRootFilesystem: true`, the default Java truststore (cacerts) is not modifiable. Our image supports a writable truststore using environment variables and volume mounts..
+
+Configuration Steps:
+
+Define Writable Volumes: Mount an emptyDir volume to a path  /java-security and another emptyDir volume to a path /tmp
+
+```YAML
+spec:
+  volumes:
+     - name: common-volume
+         emptyDir: {}
+     - name: java-cacerts-dir
+         emptyDir: {}
+  driver:
+    volumeMounts:
+      - name: common-volume
+        mountPath: /tmp
+        subPath: tmp
+      - name: java-cacerts-dir     
+        mountPath: /java-security
+        subPath: java-security
+    env:
+       - name: TLS_KEYSTORE_DIR
+         value: /tmp    
+   executor:
+     volumeMounts:
+       - name: common-volume
+         mountPath: /tmp
+         subPath: tmp
+       - name: java-cacerts-dir     
+         mountPath: /java-security
+         subPath: java-security
+     env:
+       - name: TLS_KEYSTORE_DIR
+         value: /tmp               
+```            
+
+
 #### Main Parameters of Application
 
 The full list of parameters can be found in the GCP Spark operator [api-docs](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/api-docs.md).
