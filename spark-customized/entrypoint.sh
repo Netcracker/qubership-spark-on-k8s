@@ -31,19 +31,16 @@ attempt_setup_fake_passwd_entry() {
 
 # QB change: patch certs
 
-# 1. Resolve JAVA_HOME accurately
 if [ -z "$JAVA_HOME" ]; then
     JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
 fi
 
-# 2. Define and Verify Writable Paths
 if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
     ORIGINAL_CACERTS="${JAVA_HOME}/lib/security/cacerts"
     WRITABLE_CACERTS="/java-security/cacerts"
 
     echo "Initial Setup: Checking writability of /java-security..."
     
-    # Check if the directory is actually writable before proceeding
     if [ ! -w "/java-security" ]; then
         echo "ERROR: /java-security is NOT writable. Check your K8s volumeMounts."
     fi
@@ -51,19 +48,23 @@ if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
     if [ ! -f "$WRITABLE_CACERTS" ]; then
         echo "Copying system cacerts to writable volume..."
         cp "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
-        # Ensure the 'spark' user owns the file in the volume
         chmod 664 "$WRITABLE_CACERTS"
     fi
     
     for filename in "${TRUST_CERTS_DIR}"/*; do
         if [ -f "$filename" ]; then
+
+            if "${JAVA_HOME}/bin/keytool" -list -keystore "$WRITABLE_CACERTS" \
+            -storepass changeit -alias "$alias_name" > /dev/null 2>&1; then
+            echo "Removing existing alias $alias_name..."
+            "${JAVA_HOME}/bin/keytool" -delete -alias "$alias_name" \
+              -keystore "$WRITABLE_CACERTS" \
+              -storepass changeit || true
+            fi   
             echo "Importing: $(basename "$filename")"
+
             
-            # THE FIX: 
-            # 1. We use -keystore "$WRITABLE_CACERTS" EXPLICITLY.
-            # 2. We add -J-Djava.io.tmpdir=/tmp because keytool creates 
-            #    temporary files during import. Since / is read-only, 
-            #    it MUST use the writable /tmp volume.
+          
             "${JAVA_HOME}/bin/keytool" -import \
                 -trustcacerts \
                 -alias "$(basename "${filename}")" \
@@ -76,8 +77,6 @@ if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
         fi
     done;
     
-    # 3. Apply Environment Variables
-    # We set -Djavax.net.ssl.trustStore so Java ignores the read-only default
     export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
     export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
     export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit -Djava.io.tmpdir=/tmp"
