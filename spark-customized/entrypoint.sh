@@ -31,31 +31,58 @@ attempt_setup_fake_passwd_entry() {
 
 # QB change: patch certs
 
-# 1. MOVE THIS UP from the bottom of the script
+# 1. Resolve JAVA_HOME accurately
 if [ -z "$JAVA_HOME" ]; then
-  JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
+    JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
 fi
 
-# 2. Now define paths using the detected JAVA_HOME
-if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
+# 2. Define and Verify Writable Paths
+if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
     ORIGINAL_CACERTS="${JAVA_HOME}/lib/security/cacerts"
     WRITABLE_CACERTS="/java-security/cacerts"
 
+    echo "Initial Setup: Checking writability of /java-security..."
+    
+    # Check if the directory is actually writable before proceeding
+    if [ ! -w "/java-security" ]; then
+        echo "ERROR: /java-security is NOT writable. Check your K8s volumeMounts."
+    fi
+
     if [ ! -f "$WRITABLE_CACERTS" ]; then
-      echo "Copying $ORIGINAL_CACERTS to $WRITABLE_CACERTS"
-      cp "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
+        echo "Copying system cacerts to writable volume..."
+        cp "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
+        # Ensure the 'spark' user owns the file in the volume
+        chmod 664 "$WRITABLE_CACERTS"
     fi
     
-    for filename in ${TRUST_CERTS_DIR}/*; do
-        echo "Import $filename certificate to Java cacerts"
-        # We target the WRITABLE_CACERTS specifically
-        ${JAVA_HOME}/bin/keytool -import -trustcacerts -keystore "$WRITABLE_CACERTS" -storepass changeit -noprompt -alias "$(basename ${filename})" -file "${filename}"
+    for filename in "${TRUST_CERTS_DIR}"/*; do
+        if [ -f "$filename" ]; then
+            echo "Importing: $(basename "$filename")"
+            
+            # THE FIX: 
+            # 1. We use -keystore "$WRITABLE_CACERTS" EXPLICITLY.
+            # 2. We add -J-Djava.io.tmpdir=/tmp because keytool creates 
+            #    temporary files during import. Since / is read-only, 
+            #    it MUST use the writable /tmp volume.
+            "${JAVA_HOME}/bin/keytool" -import \
+                -trustcacerts \
+                -alias "$(basename "${filename}")" \
+                -file "${filename}" \
+                -keystore "$WRITABLE_CACERTS" \
+                -storepass changeit \
+                -noprompt \
+                -J-Djava.io.tmpdir=/tmp \
+                -storetype JKS
+        fi
     done;
     
-    # 3. Tell Java to use the new file
+    # 3. Apply Environment Variables
+    # We set -Djavax.net.ssl.trustStore so Java ignores the read-only default
     export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
     export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit -Djava.io.tmpdir=/tmp"
+    
+    echo "Certs successfully patched in writable volume."
 fi
 
 if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then
