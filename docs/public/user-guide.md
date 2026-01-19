@@ -132,7 +132,7 @@ For more information on how to enable the mutating admission webhook, see [Quick
        app.kubernetes.io/managed-by: the-tool-used-to-create-this-cr
    ```
 ### Support for Read-Only Root Filesystem
-When running Spark applications in hardened environments with `readOnlyRootFilesystem: true`, the default Java truststore (cacerts) is not modifiable. Our image supports a writable truststore using environment variables and volume mounts..
+If the TRUST_CERTS_DIR environment variable is specified, certificates will be imported to /java-security/cacerts. So a writable volume (e.g., an emptyDir) should be mounted with path /java-security/ to support Read only Root filesystem.
 
 Configuration Steps:
 
@@ -154,8 +154,8 @@ spec:
         mountPath: /java-security
         subPath: java-security
     env:
-       - name: TLS_KEYSTORE_DIR
-         value: /tmp    
+       - name: TRUST_CERTS_DIR
+         value: /spark/customcerts    
    executor:
      volumeMounts:
        - name: common-volume
@@ -165,8 +165,8 @@ spec:
          mountPath: /java-security
          subPath: java-security
      env:
-       - name: TLS_KEYSTORE_DIR
-         value: /tmp               
+       - name: TRUST_CERTS_DIR
+         value: /spark/customcerts               
 ```            
 
 
