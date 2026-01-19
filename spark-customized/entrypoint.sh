@@ -45,27 +45,13 @@ if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
         echo "ERROR: /java-security is NOT writable. Check your K8s volumeMounts."
     fi
 
-    if [ ! -f "$WRITABLE_CACERTS" ]; then
-        echo "Copying system cacerts to writable volume..."
-        cp "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
-        chmod 664 "$WRITABLE_CACERTS"
-    fi
+    echo "Refreshing writable cacerts from system..."
+    cp -f "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
+    chmod 664 "$WRITABLE_CACERTS"
     
     for filename in "${TRUST_CERTS_DIR}"/*; do
         if [ -f "$filename" ]; then
             alias_name=$(basename "$filename")
-            
-            echo "Checking if alias $alias_name exists in $WRITABLE_CACERTS"
-
-            if "${JAVA_HOME}/bin/keytool" -list -keystore "$WRITABLE_CACERTS" \
-                -storepass changeit -alias "$alias_name" > /dev/null 2>&1; then
-                echo "Alias $alias_name already exists. Removing before re-import..."
-                "${JAVA_HOME}/bin/keytool" -delete -alias "$alias_name" \
-                  -keystore "$WRITABLE_CACERTS" \
-                  -storepass changeit \
-                  -J-Djava.io.tmpdir=/tmp || true
-            fi   
-
             echo "Importing: $alias_name"
           
             "${JAVA_HOME}/bin/keytool" -import \
@@ -94,10 +80,6 @@ if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then
   fi
   echo "Adding to keystore"
   openssl pkcs12 -export -in ${TLS_CERT_PATH} -inkey ${TLS_KEY_PATH} -out ${TLS_KEYSTORE_DIR}/keystore.p12 -passout pass:${TLS_KEYSTORE_PASSWORD}
-fi
-
-if [ -z "$JAVA_HOME" ]; then
-  JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
 fi
 
 SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*"
