@@ -703,7 +703,7 @@ The profile resources are given below:
 | Status-provisioner  (`**`)            | 0.2  | 200     | 1                    |
 | Integration tests   (`*`)(`**`)       | 0.2  | 256     | 1                    |
 
-Here `*` - optional container based on configuration, `**` - temporary container.
+Here, `*` - optional container based on configuration, `**` - temporary container.
 
 ### Medium
 
@@ -720,7 +720,7 @@ The profile resources are given below:
 | Status-provisioner  (`**`)            | 0.2  | 200     | 1                    |
 | Integration tests   (`*`)(`**`)       | 0.4  | 256     | 1                    |
 
-Here `*` - optional container based on configuration, `**` - temporary container.
+Here, `*` - optional container based on configuration, `**` - temporary container.
 
 ### Large
 
@@ -737,7 +737,7 @@ The profile resources are shown below:
 | Status-provisioner  (`**`)            | 0.2  | 200     | 1                    |
 | Integration tests   (`*`)(`**`)       | 0.4  | 256     | 1                    |
 
-Here `*` - optional container based on configuration, `**` - temporary container.
+Here, `*` - optional container based on configuration, `**` - temporary container.
 
 # Parameters
 
@@ -842,7 +842,6 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.readinessProbe.timeoutSeconds`     | No        | Integer | `1`     | Number of seconds after which the probe times out.                          |
 | `spark-history-server.readinessProbe.failureThreshold`   | No        | Integer | `3`     | Minimum consecutive failures for the probe to be considered failed, marking the container as **Not Ready**. |
 | `spark-history-server.readinessProbe.periodSeconds`      | No        | Integer | `10`    | The time interval in seconds denoting how often to perform the probe.                                                     |
-
 
 ## Spark Thrift Server
 
@@ -1976,8 +1975,8 @@ The following settings are applied:
 securityContext:
   readOnlyRootFilesystem: true
 ```  
- Since the root filesystem is locked, we use emptyDir volumes to provide writable space for temporary operations and for certificates storage. Automated Volume Mounts so no need to manually configure additional storage. 
- The following volumes are already provisioned in the deployment to handle standard application requirements:
+Since the root filesystem is locked, we use emptyDir volumes to provide writable space for temporary operations and for certificates storage. Automated Volume mounts, so you do not need to manually configure the additional storage. 
+The following volumes are already provisioned in the deployment to handle the standard application requirements:
 
  | Volume Name | Mount Path | sub path | Purpose | 
  |:-------------:|:---------:|:------------:|:------------:|
@@ -1985,8 +1984,6 @@ securityContext:
  | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
  | java-cacerts-dir| /java-security | java-security | Used specifically for managing Java truststores and security certificates at runtime. |
  
-
-
 ## Spark Thrift Server Deployment
 
 You can enable the Spark Thrift Server deployment by the Spark Operator GCP `spark-thrift-server.enabled` deployment parameter.
