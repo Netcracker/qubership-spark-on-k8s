@@ -31,11 +31,46 @@ attempt_setup_fake_passwd_entry() {
 
 # QB change: patch certs
 
-if [ -n "${TRUST_CERTS_DIR}" ] && [[ "$(ls ${TRUST_CERTS_DIR})" ]]; then
-    for filename in ${TRUST_CERTS_DIR}/*; do
-        echo "Import $filename certificate to Java cacerts"
-        ${JAVA_HOME}/bin/keytool -import -trustcacerts -keystore ${JAVA_HOME}/lib/security/cacerts -storepass changeit -noprompt -alias ${filename} -file ${filename}
+if [ -z "$JAVA_HOME" ]; then
+    JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
+fi
+
+if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
+    ORIGINAL_CACERTS="${JAVA_HOME}/lib/security/cacerts"
+    WRITABLE_CACERTS="/java-security/cacerts"
+
+    echo "Initial Setup: Checking writability of /java-security..."
+    
+    if [ ! -w "/java-security" ]; then
+        echo "ERROR: /java-security is NOT writable. Check your K8s volumeMounts."
+    fi
+
+    echo "Refreshing writable cacerts from system..."
+    cp -f "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
+    chmod 664 "$WRITABLE_CACERTS"
+    
+    for filename in "${TRUST_CERTS_DIR}"/*; do
+        if [ -f "$filename" ]; then
+            alias_name=$(basename "$filename")
+            echo "Importing: $alias_name"
+          
+            "${JAVA_HOME}/bin/keytool" -import \
+                -trustcacerts \
+                -alias "$alias_name" \
+                -file "${filename}" \
+                -keystore "$WRITABLE_CACERTS" \
+                -storepass changeit \
+                -noprompt \
+                -J-Djava.io.tmpdir=/tmp \
+                -storetype JKS
+        fi
     done;
+    
+    export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
+    export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit -Djava.io.tmpdir=/tmp"
+    
+    echo "Certs successfully patched in writable volume."
 fi
 
 if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then
@@ -45,10 +80,6 @@ if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then
   fi
   echo "Adding to keystore"
   openssl pkcs12 -export -in ${TLS_CERT_PATH} -inkey ${TLS_KEY_PATH} -out ${TLS_KEYSTORE_DIR}/keystore.p12 -passout pass:${TLS_KEYSTORE_PASSWORD}
-fi
-
-if [ -z "$JAVA_HOME" ]; then
-  JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')
 fi
 
 SPARK_CLASSPATH="$SPARK_CLASSPATH:${SPARK_HOME}/jars/*"

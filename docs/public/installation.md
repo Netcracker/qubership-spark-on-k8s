@@ -36,6 +36,7 @@ The following topics are covered in the document:
         * [S3 Initialization Job](#s3-initialization-job)
           * [AWS V4 Signature Configuration](#aws-v4-signature-configuration)
           * [TLS](#tls)
+        * [Security Hardening for History Server](#security-hardening-for-history-server)  
     * [Spark Thrift Server Deployment](#spark-thrift-server-deployment)
 * [Upgrade](#upgrade)
   * [Spark Upgrade](#spark-upgrade)
@@ -702,7 +703,7 @@ The profile resources are given below:
 | Status-provisioner  (`**`)            | 0.2  | 200     | 1                    |
 | Integration tests   (`*`)(`**`)       | 0.2  | 256     | 1                    |
 
-Here `*` - optional container based on configuration, `**` - temporary container.
+Here, `*` - optional container based on configuration, `**` - temporary container.
 
 ### Medium
 
@@ -719,7 +720,7 @@ The profile resources are given below:
 | Status-provisioner  (`**`)            | 0.2  | 200     | 1                    |
 | Integration tests   (`*`)(`**`)       | 0.4  | 256     | 1                    |
 
-Here `*` - optional container based on configuration, `**` - temporary container.
+Here, `*` - optional container based on configuration, `**` - temporary container.
 
 ### Large
 
@@ -736,7 +737,7 @@ The profile resources are shown below:
 | Status-provisioner  (`**`)            | 0.2  | 200     | 1                    |
 | Integration tests   (`*`)(`**`)       | 0.4  | 256     | 1                    |
 
-Here `*` - optional container based on configuration, `**` - temporary container.
+Here, `*` - optional container based on configuration, `**` - temporary container.
 
 # Parameters
 
@@ -841,7 +842,6 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.readinessProbe.timeoutSeconds`     | No        | Integer | `1`     | Number of seconds after which the probe times out.                          |
 | `spark-history-server.readinessProbe.failureThreshold`   | No        | Integer | `3`     | Minimum consecutive failures for the probe to be considered failed, marking the container as **Not Ready**. |
 | `spark-history-server.readinessProbe.periodSeconds`      | No        | Integer | `10`    | The time interval in seconds denoting how often to perform the probe.                                                     |
-
 
 ## Spark Thrift Server
 
@@ -1529,7 +1529,7 @@ extraEnv:
 ```
 `TLS_KEY_PATH` contains TLS private key location.  
 `TLS_CERT_PATH` contains TLS server side certificate location.  
-`TLS_KEYSTORE_DIR` contains the location of keystore used by Spart History server to store private key and server side certificate.  
+`TLS_KEYSTORE_DIR` A writable directory that contains the keystore used by the Spark History Server to store its private key and server-side certificate for TLS/SSL termination.
 `TLS_KEYSTORE_PASSWORD` contains password for the keystore.
 
 3. Add Spark properties to enable TLS for Spark History server:
@@ -1538,7 +1538,7 @@ sparkProperties: |
   spark.ssl.historyServer.enabled=true
   spark.ssl.historyServer.protocol=tls
   spark.ssl.historyServer.port=6044
-  spark.ssl.historyServer.trustStore=/opt/java/openjdk/lib/security/cacerts
+  spark.ssl.historyServer.trustStore=/java-security/cacerts
   spark.ssl.historyServer.keyStore=<keystor_dir>/keystore.p12
   spark.ssl.historyServer.trustStorePassword=changeit
   spark.ssl.historyServer.keyStorePassword=<set_keystore_password>
@@ -1551,6 +1551,7 @@ service:
   internalPort: 6044
   type: ClusterIP
 ```
+**Note** : In environments with a read-only root filesystem, `TLS_KEYSTORE_DIR` must point to a writable volume mount.
 
 ### Enabling TLS on Spark History Server UI Inside Kubernetes
 
@@ -1966,6 +1967,23 @@ Configuration string format: <provider1[:prvdr2[:reg[:srv]]]>
 
 TLS configuration is described in the [Using Secure S3 Endpoint For Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) section.
 
+### Security Hardening for History Server
+
+To improve the security posture of the application, the deployment is configured with a read-only root filesystem. This prevents the container process from writing to any location on the disk except for specifically designated volumes.
+The following settings are applied:
+```
+securityContext:
+  readOnlyRootFilesystem: true
+```  
+Since the root filesystem is locked, we use emptyDir volumes to provide writable space for temporary operations and for certificates storage. Automated Volume mounts, so you do not need to manually configure the additional storage. 
+The following volumes are already provisioned in the deployment to handle the standard application requirements:
+
+ | Volume Name | Mount Path | sub path | Purpose | 
+ |:-------------:|:---------:|:------------:|:------------:|
+ | common-volume | /tmp | tmp | Provides a writable area for temporary files, and general OS-level buffers. |
+ | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
+ | java-cacerts-dir| /java-security | java-security | Used specifically for managing Java truststores and security certificates at runtime. |
+ 
 ## Spark Thrift Server Deployment
 
 You can enable the Spark Thrift Server deployment by the Spark Operator GCP `spark-thrift-server.enabled` deployment parameter.
