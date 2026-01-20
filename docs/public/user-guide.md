@@ -132,11 +132,12 @@ For more information on how to enable the mutating admission webhook, see [Quick
        app.kubernetes.io/managed-by: the-tool-used-to-create-this-cr
    ```
 ### Support for Read-Only Root Filesystem
-If the TRUST_CERTS_DIR environment variable is specified, certificates will be imported to /java-security/cacerts. So a writable volume (e.g., an emptyDir) should be mounted with path /java-security/ to support Read only Root filesystem.
+
+If the `TRUST_CERTS_DIR` environment variable is specified, certificates will be imported to `/java-security/cacerts`. Hence, a writable volume such as an emptyDir should be mounted with path `/java-security/` to support Read only Root filesystem.
 
 Configuration Steps:
 
-Define Writable Volumes: Mount an emptyDir volume to a path  /java-security and another emptyDir volume to a path /tmp
+Define the Writable Volumes: Mount an emptyDir volume to a path `/java-security` and another emptyDir volume to a path `/tmp`.
 
 ```YAML
 spec:
@@ -167,8 +168,7 @@ spec:
      env:
        - name: TRUST_CERTS_DIR
          value: /spark/customcerts               
-```            
-
+```
 
 #### Main Parameters of Application
 
