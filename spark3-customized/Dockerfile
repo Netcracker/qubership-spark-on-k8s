@@ -9,6 +9,7 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar --output $SPARK_JARS_DIR/hadoop-aws-$HADOOP_VERSION.jar && \
         curl -k -L https://repository.cloudera.com/repository/cloudera-repos/org/codehaus/jackson/jackson-mapper-asl/1.9.13-cloudera.4/jackson-mapper-asl-1.9.13-cloudera.4.jar --output $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13-cloudera.4.jar && \
     curl -k -L $MAVEN_REPO/org/apache/ivy/ivy/2.5.2/ivy-2.5.2.jar --output $SPARK_JARS_DIR/ivy-2.5.2.jar && \
+    curl -k -L $MAVEN_REPO/at/yawk/lz4/lz4-java/1.8.1/lz4-java-1.8.1.jar --output $SPARK_JARS_DIR/lz4-java-1.8.1.jar && \
     curl -k -L $MAVEN_REPO/com/google/guava/guava/32.0.1-jre/guava-32.0.1-jre.jar --output $SPARK_JARS_DIR/guava-32.0.1-jre.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-all/4.1.130.Final/netty-all-4.1.130.Final.jar --output $SPARK_JARS_DIR/netty-all-4.1.130.Final.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-buffer/4.1.130.Final/netty-buffer-4.1.130.Final.jar --output $SPARK_JARS_DIR/netty-buffer-4.1.130.Final.jar && \
@@ -63,6 +64,7 @@ COPY --chmod=0777 ./thrift-server-entrypoint.sh /opt/
 
 RUN rm $SPARK_JARS_DIR/jackson-mapper-asl-1.9.13.jar \
     $SPARK_JARS_DIR/ivy-2.5.1.jar \
+    $SPARK_JARS_DIR/lz4-java-1.8.0.jar \
     $SPARK_JARS_DIR/guava-14.0.1.jar \
     $SPARK_JARS_DIR/netty-all-4.1.96.Final.jar \
     $SPARK_JARS_DIR/netty-buffer-4.1.96.Final.jar \
