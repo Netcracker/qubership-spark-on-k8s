@@ -1,4 +1,4 @@
-ARG spark3_base_img=ghcr.io/netcracker/qubership-spark3-customized:main
+ARG spark3_base_img=ghcr.io/netcracker/qubership-spark3-customized:spark3update
 
 FROM $spark3_base_img
 
