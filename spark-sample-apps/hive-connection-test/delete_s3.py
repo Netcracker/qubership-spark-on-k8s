@@ -7,6 +7,12 @@ def main():
     aws_access_key = os.getenv("AWS_ACCESS_KEY_ID")
     aws_secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
     s3_endpoint_url = os.getenv("S3_ENDPOINT_URL")
+    bucket_name = os.getenv("BUCKET_NAME")
+    prefix = os.getenv("S3_PREFIX", "warehouse/mysparkdb2.db/")
+
+    if not all([aws_access_key, aws_secret_key, s3_endpoint_url, bucket_name]):
+        print("Missing required environment variables for S3 connection.")
+        exit(1)
 
     s3_w = boto3.client(
         "s3",
@@ -15,10 +21,6 @@ def main():
         aws_access_key_id=aws_access_key,
         aws_secret_access_key=aws_secret_key,
     )
-
-    # Define the S3 path
-    bucket_name = "hive"
-    prefix = "warehouse/mysparkdb2.db/"
 
     # Delete S3 files one by one (avoids Content-MD5 error)
     response = s3_w.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
