@@ -147,11 +147,22 @@ hdfs:
 
 oauth2Proxy:
   enabled: false
+  gateway:
+    enabled: false
+    hostnames: []
+    parentRefs: []
+    rules: []
+    backendTLSPolicy:
+      enabled: false
+      caCertificateRefs: []
+      hostname: ''
+      wellKnownCACertificates: ""
+      subjectAltNames: []                
       
 
   image:
     repository: "quay.io/oauth2-proxy/oauth2-proxy"
-    tag: "v7.13.0"
+    tag: "v7.14.2"
     pullPolicy: "IfNotPresent"
     command: []
 
@@ -682,3 +693,12 @@ oauth2Proxy:
     #         objectName: cookie-secret
     #       secretName: oauth2-proxy-secrets-store
     #       type: Opaque
+gateway:
+    enabled: false
+    hostnames: []
+    parentRefs: []
+    rules: [] 
+    redirectRoute:
+      enabled: false
+      parentRefs: []
+    
