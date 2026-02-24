@@ -1,6 +1,7 @@
 #################################################
 ## Qubership custom template. HTTPRoute for oauth2Proxy
 #################################################
+
 {{- if .Values.oauth2Proxy.enabled -}}
 {{- if .Values.oauth2Proxy.gateway.enabled -}}
 {{- $fullname := (include "oauth2-proxy.fullname" .) }}
@@ -65,6 +66,7 @@ spec:
 ## Qubership custom template. BackendTLSPolicy
 #################################################
 {{- if .Values.oauth2Proxy.gateway.backendTLSPolicy.enabled -}}
+{{- $fullname := (include "oauth2-proxy.fullname" .) }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: BackendTLSPolicy
 metadata:
@@ -101,6 +103,47 @@ spec:
     {{- if .Values.oauth2Proxy.gateway.backendTLSPolicy.wellKnownCACertificates }}
     wellKnownCACertificates: {{ tpl .Values.oauth2Proxy.gateway.backendTLSPolicy.wellKnownCACertificates $Global | quote }}
     {{- end }}
+{{- end }}
+
+---
+#################################################
+## Qubership custom template. HTTPRoute for redirecting HTTP traffic to HTTPS if TLS is enabled on the gateway.
+#################################################
+{{ if  .Values.oauth2Proxy.gateway.redirectRoute.enabled -}}
+{{- $fullname := (include "oauth2-proxy.fullname" .) }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullname }}-redirect
+  namespace: {{ .Release.Namespace }}
+  labels:
+    tier: oauth2Proxy
+    component: oauth2Proxy-httproute
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- include "oauth2-proxy.labels" $Global | nindent 4 }}
+    {{- if .Values.oauth2Proxy.gateway.labels }}
+    {{- tpl (toYaml .Values.oauth2Proxy.gateway.labels) . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.oauth2Proxy.gateway.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.oauth2Proxy.gateway.redirectRoute.parentRefs }}
+  parentRefs:
+    {{- tpl (toYaml .) $Global  | nindent 4 }}
+  {{- end }}
+  {{- with .Values.oauth2Proxy.gateway.redirectRoute.hostnames }}
+  hostnames:
+    {{- tpl (toYaml .) $Global  | nindent 4 }}
+  {{- end }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
 {{- end }}
 {{- end }}
 {{- end }}

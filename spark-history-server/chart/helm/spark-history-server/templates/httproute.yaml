@@ -89,7 +89,7 @@ spec:
   parentRefs:
     {{- tpl (toYaml .) $Global  | nindent 4 }}
   {{- end }}
-  {{- with .Values.gateway.hostnames }}
+  {{- with .Values.gateway.redirectRoute.hostnames }}
   hostnames:
     {{- tpl (toYaml .) $Global  | nindent 4 }}
   {{- end }}

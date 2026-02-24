@@ -157,7 +157,11 @@ oauth2Proxy:
       caCertificateRefs: []
       hostname: ''
       wellKnownCACertificates: ""
-      subjectAltNames: []                
+      subjectAltNames: []
+    redirectRoute:
+        enabled: false
+        parentRefs: []
+        hostnames: []                   
       
 
   image:
@@ -694,11 +698,12 @@ oauth2Proxy:
     #       secretName: oauth2-proxy-secrets-store
     #       type: Opaque
 gateway:
+  enabled: false
+  hostnames: []
+  parentRefs: []
+  rules: [] 
+  redirectRoute:
     enabled: false
-    hostnames: []
     parentRefs: []
-    rules: [] 
-    redirectRoute:
-      enabled: false
-      parentRefs: []
+    hostnames: []
     
