@@ -3,8 +3,8 @@
 #################################################
 {{- if .Values.oauth2Proxy.enabled -}}
 {{- if .Values.oauth2Proxy.gateway.enabled -}}
-{{- $fullname := (include "oauth2-proxy.fullname" .) -}}
-{{- $Global := . -}}
+{{- $fullname := (include "oauth2-proxy.fullname" .) }}
+{{- $Global := . }}
 
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
