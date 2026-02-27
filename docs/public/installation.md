@@ -1994,7 +1994,7 @@ The following settings are applied:
 securityContext:
   readOnlyRootFilesystem: true
 ```  
-Since the root filesystem is locked, we use emptyDir volumes to provide writable space for temporary operations and for certificates storage. Automated Volume mounts, so you do not need to manually configure the additional storage. 
+Since the root filesystem is locked, we use emptyDir volumes to provide the writable space for temporary operations and for certificates storage. Automated Volume mounts, so you do not need to manually configure the additional storage. 
 The following volumes are already provisioned in the deployment to handle the standard application requirements:
 
  | Volume Name | Mount Path | sub path | Purpose | 
@@ -2009,11 +2009,11 @@ Qubership platform provides an option to deploy HTTPRoute to expose spark-histor
 
 It is possible to deploy the following four objects: 
 * Main HTTPRoute - It is required to replicate the main ingress logic.
-* Redirect HTTPRoute - It can be used for redirecting spark-history-server user interface client from HTTP to HTTPS when using gateway with custom certificate.
-* Redirect to oauth HTTPRoute - It can be used for redirecting from spark-history-server to oauth2Proxy login page when using oauth2Proxy for authentication
-* BackendTLSPolicy - It is required for verifying oauth2Proxy certificate, when TLS is enabled on oauth2Proxy server inside K8S.
+* Redirect HTTPRoute - It can be used to redirect the spark-history-server user interface client from HTTP to HTTPS, when using gateway with custom certificate.
+* Redirect to oauth HTTPRoute - It can be used to redirect from spark-history-server to oauth2Proxy login page, when using oauth2Proxy for authentication.
+* BackendTLSPolicy - It is required to verify the oauth2Proxy certificate, when TLS is enabled on oauth2Proxy server inside K8S.
 
-Configuration examples can be found below:
+The Configuration examples are as follows:
 
 Non tls and without Oauth2Proxy:
 ```yaml
