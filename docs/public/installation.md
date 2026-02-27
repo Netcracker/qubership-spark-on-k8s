@@ -829,6 +829,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.oauth2Proxy.ingress.path`        | Mandatory if oauth2Proxy ingress is enabled. | string            | -                                                                                                                         | It should be set to '/'.                                                                                                                                                                                                                                                                 |
 |`spark-history-server.oauth2Proxy.gateway.enabled`|`boolean`|`false`|Specifies if HTTPRoute for trino server is deployed|
 |`spark-history-server.oauth2Proxy.gateway.annotations`|`object`|`{}`|Annotations for HTTPRoute and related objects|
+|`spark-history-server.oauth2Proxy.gateway.labels`|`object`|`{}`|Labels for HTTPRoute and related objects|
 |`spark-history-server.oauth2Proxy.gateway.parentRefs`|`array`|`[]`|parentRefs for HTTPRoute|
 |`spark-history-server.oauth2Proxy.gateway.hostnames`|`array`|`[]`|hostnames for HTTPRoute|
 |`spark-history-server.oauth2Proxy.gateway.rules`|`array`|`[]`|rules for HTTPRoute. When `rules[].matches` is not set, it defaults to `path.type=PathPrefix` and `path.value=/`. `backendRefs` in the rule will point to trino server service, but the weight can be configured if needed.|
@@ -854,6 +855,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.readinessProbe.periodSeconds`      | No        | Integer | `10`    | The time interval in seconds denoting how often to perform the probe.                                                     |
 |`spark-history-server.gateway.enabled`|`boolean`|`false`|Specifies if HTTPRoute for trino server is deployed|
 |`spark-history-server.gateway.annotations`|`object`|`{}`|Annotations for HTTPRoute and related objects|
+|`spark-history-server.gateway.labels`|`object`|`{}`|Labels for HTTPRoute and related objects|
 |`spark-history-server.gateway.parentRefs`|`array`|`[]`|parentRefs for HTTPRoute|
 |`spark-history-server.gateway.hostnames`|`array`|`[]`|hostnames for HTTPRoute|
 |`spark-history-server.gateway.rules`|`array`|`[]`|rules for HTTPRoute. When `rules[].matches` is not set, it defaults to `path.type=PathPrefix` and `path.value=/`. `backendRefs` in the rule will point to trino server service, but the weight can be configured if needed.|

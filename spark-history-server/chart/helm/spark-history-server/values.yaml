@@ -152,6 +152,7 @@ oauth2Proxy:
     hostnames: []
     parentRefs: []
     rules: []
+    labels: {}
     backendTLSPolicy:
       enabled: false
       caCertificateRefs: []
@@ -702,6 +703,7 @@ gateway:
   hostnames: []
   parentRefs: []
   rules: [] 
+  labels: {} 
   redirectRoute:
     enabled: false
     parentRefs: []
