@@ -827,6 +827,17 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.oauth2Proxy.ingress.enabled`     | Mandatory if oauth2Proxy is enabled.         | bool              | false                                                                                                                     | It enables the OAuth2 Proxy ingress.                                                                                                                                                                                                                                                     |
 | `spark-history-server.oauth2Proxy.ingress.host`        | Mandatory if oauth2Proxy ingress is enabled  | string            | -                                                                                                                         | It is the ingress host and should be compatible with the cluster's ingress URL routing rules.                                                                                                                                                                                            |
 | `spark-history-server.oauth2Proxy.ingress.path`        | Mandatory if oauth2Proxy ingress is enabled. | string            | -                                                                                                                         | It should be set to '/'.                                                                                                                                                                                                                                                                 |
+|`spark-history-server.oauth2Proxy.gateway.enabled`|`boolean`|`false`|Specifies if HTTPRoute for trino server is deployed|
+|`spark-history-server.oauth2Proxy.gateway.annotations`|`object`|`{}`|Annotations for HTTPRoute and related objects|
+|`spark-history-server.oauth2Proxy.gateway.labels`|`object`|`{}`|Labels for HTTPRoute and related objects|
+|`spark-history-server.oauth2Proxy.gateway.parentRefs`|`array`|`[]`|parentRefs for HTTPRoute|
+|`spark-history-server.oauth2Proxy.gateway.hostnames`|`array`|`[]`|hostnames for HTTPRoute|
+|`spark-history-server.oauth2Proxy.gateway.rules`|`array`|`[]`|rules for HTTPRoute. When `rules[].matches` is not set, it defaults to `path.type=PathPrefix` and `path.value=/`. `backendRefs` in the rule will point to trino server service, but the weight can be configured if needed.|
+|`spark-history-server.oauth2Proxy.gateway.backendTLSPolicy.enabled`|`boolean`|`false`|Specifies if the backendTLSPolicy should be deployed|
+|`spark-history-server.oauth2Proxy.gateway.backendTLSPolicy.hostname`|`string`|`''`|Hostname for backendTLSPolicy|
+|`spark-history-server.oauth2Proxy.gateway.backendTLSPolicy.caCertificateRefs`|`array`|`[]`|caCertificateRefs for backendTLSPolicy|
+|`spark-history-server.oauth2Proxy.gateway.backendTLSPolicy.wellKnownCACertificates`|`string`|`""`|wellKnownCACertificates for backendTLSPolicy|
+|`spark-history-server.oauth2Proxy.gateway.backendTLSPolicy.subjectAltNames`|`array`|`[]`|subjectAltNames for backendTLSPolicy|
 | `spark-history-server.priorityClassName`               | false                                        | string, null      | `~`                                                                                                                       | Priority class name for spark history server pods.                                                                                                                                                                                                                                       |
 | `spark-history-server.extraEnv`                        | false                                        | object, null      | `~`                                                                                                                       | Extra environment variables for spark-history-server.                                                                                                                                                                                                                                    |
 | `spark-history-server.extraVolumes`                    | false                                        | object, null      | `~`                                                                                                                       | Extra volumes for spark-history-server.                                                                                                                                                                                                                                                  |
@@ -842,6 +853,14 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 | `spark-history-server.readinessProbe.timeoutSeconds`     | No        | Integer | `1`     | Number of seconds after which the probe times out.                          |
 | `spark-history-server.readinessProbe.failureThreshold`   | No        | Integer | `3`     | Minimum consecutive failures for the probe to be considered failed, marking the container as **Not Ready**. |
 | `spark-history-server.readinessProbe.periodSeconds`      | No        | Integer | `10`    | The time interval in seconds denoting how often to perform the probe.                                                     |
+|`spark-history-server.gateway.enabled`|`boolean`|`false`|Specifies if HTTPRoute for trino server is deployed|
+|`spark-history-server.gateway.annotations`|`object`|`{}`|Annotations for HTTPRoute and related objects|
+|`spark-history-server.gateway.labels`|`object`|`{}`|Labels for HTTPRoute and related objects|
+|`spark-history-server.gateway.parentRefs`|`array`|`[]`|parentRefs for HTTPRoute|
+|`spark-history-server.gateway.hostnames`|`array`|`[]`|hostnames for HTTPRoute|
+|`spark-history-server.gateway.rules`|`array`|`[]`|rules for HTTPRoute. When `rules[].matches` is not set, it defaults to `path.type=PathPrefix` and `path.value=/`. `backendRefs` in the rule will point to trino server service, but the weight can be configured if needed.|
+|`spark-history-server.gateway.redirectRoute.enabled`|`boolean`|`false`|Specifies if redirect HTTPRoute for trino server is deployed|
+|`spark-history-server.gateway.redirectRoute.parentRefs`|`array`|`[]`|parentRefs for redirect HTTPRoute|
 
 ## Spark Thrift Server
 
@@ -1975,7 +1994,7 @@ The following settings are applied:
 securityContext:
   readOnlyRootFilesystem: true
 ```  
-Since the root filesystem is locked, we use emptyDir volumes to provide writable space for temporary operations and for certificates storage. Automated Volume mounts, so you do not need to manually configure the additional storage. 
+Since the root filesystem is locked, we use emptyDir volumes to provide the writable space for temporary operations and for certificates storage. Automated Volume mounts, so you do not need to manually configure the additional storage. 
 The following volumes are already provisioned in the deployment to handle the standard application requirements:
 
  | Volume Name | Mount Path | sub path | Purpose | 
@@ -1984,6 +2003,87 @@ The following volumes are already provisioned in the deployment to handle the st
  | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
  | java-cacerts-dir| /java-security | java-security | Used specifically for managing Java truststores and security certificates at runtime. |
  
+### HTTPRoute for K8S Gateway API Support
+
+Qubership platform provides an option to deploy HTTPRoute to expose spark-history-server using K8S gateway API as an alternative to ingress. For more information about k8s Gateway API and HTTPRoute, please refer to the _Official Kubernetes Documentation_ at https://gateway-api.sigs.k8s.io/ and https://gateway-api.sigs.k8s.io/guides/http-routing/.
+
+It is possible to deploy the following four objects: 
+* Main HTTPRoute - It is required to replicate the main ingress logic.
+* Redirect HTTPRoute - It can be used to redirect the spark-history-server user interface client from HTTP to HTTPS, when using gateway with custom certificate.
+* Redirect to oauth HTTPRoute - It can be used to redirect from spark-history-server to oauth2Proxy login page, when using oauth2Proxy for authentication.
+* BackendTLSPolicy - It is required to verify the oauth2Proxy certificate, when TLS is enabled on oauth2Proxy server inside K8S.
+
+The Configuration examples are as follows:
+
+Non tls and without Oauth2Proxy:
+```yaml
+spark-history-server:
+  gateway:
+    enabled: true
+    parentRefs:
+      - group: gateway.networking.k8s.io
+        kind: Gateway
+        name: default-external-gateway
+        namespace: envoy-api-gateway
+    hostnames:
+      - spark-history-server-gateway.your.k8s.hostname
+    rules:
+      - path: {}
+        backendRefs:
+        - name: spark-history
+          port: {port_number}
+```
+
+with TLS and Oauth2Proxy:
+```yaml
+spark-history-server:
+  gateway:
+    enabled: true
+    parentRefs:
+      - group: gateway.networking.k8s.io
+        kind: Gateway
+        name: tls-envoy-gateway
+        namespace: envoy-api-gateway
+    hostnames:
+      - spark-history.tls-gateway.your.k8s.hostname
+    rules:
+      - path:
+        type: PathPrefix
+        value: /
+        - filters:
+        type: RequestRedirect
+        requestRedirect:
+          scheme: https
+          hostname: spark-history-oauth.tls-gateway.your.k8s.hostname
+          statusCode: 302
+  oauth2Proxy:        
+    gateway:
+      enabled: true
+      parentRefs:
+        - group: gateway.networking.k8s.io
+          kind: Gateway
+          name: tls-envoy-gateway
+          namespace: envoy-api-gateway
+      hostnames:
+        - spark-history-oauth.tls-gateway.your.k8s.hostname
+      rules:
+        - path:
+          type: PathPrefix
+          value: /
+          backendRefs:
+            - name: oauth2-proxy-history
+              port: {port_number}      
+      backendTLSPolicy:
+        enabled: true
+        caCertificateRefs:
+          - group: ""
+            kind: Secret
+            name: oauth-server-tls-cert
+        hostname: oauth2-proxy-history.spark.svc
+        wellKnownCACertificates: ""
+        subjectAltNames: []
+```
+
 ## Spark Thrift Server Deployment
 
 You can enable the Spark Thrift Server deployment by the Spark Operator GCP `spark-thrift-server.enabled` deployment parameter.

@@ -1,0 +1,104 @@
+#################################################
+## Qubership custom template. HTTPRoute for spark-history-server when using a Kubernetes Gateway instead of an Ingress.
+#################################################
+{{- if  .Values.gateway.enabled -}}
+{{- $fullname := (include "spark-history-server.fullname" .) }}
+{{- $Global := . }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullname }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    tier: spark-history-server
+    component: spark-history-server-httproute
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- include "all_objects_labels_shs" $Global  | nindent 4 }}
+    {{- if .Values.gateway.labels }}
+    {{- tpl (toYaml .Values.gateway.labels) . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.gateway.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.gateway.parentRefs }}
+  parentRefs:
+    {{- tpl (toYaml .) $Global | nindent 4 }}
+  {{- end }}
+  {{- with .Values.gateway.hostnames }}
+  hostnames:
+    {{- tpl (toYaml .) $Global | nindent 4 }}
+  {{- end }}
+  rules:
+    {{- range .Values.gateway.rules }}
+    - matches:
+        {{- if .matches }}
+        {{- toYaml .matches | nindent 8 }}
+        {{- else }}
+        - path:
+            type: {{ .path.type | default "PathPrefix" }}
+            value: {{ .path.value | default "/" }}
+        {{- end }}
+      {{- if .filters }}
+      filters:
+        {{- toYaml .filters | nindent 8 }}
+      {{- end }}
+      {{- if .backendRefs }}
+      backendRefs:
+        - group: ''
+          kind: Service
+          name: {{ $fullname }}
+          port: {{ (index .backendRefs 0).port | int }}
+          {{- if .weight }}
+          weight: {{ .weight }}
+          {{- else }}
+          weight: 1
+          {{- end }}
+      {{- end }}    
+    {{- end }}
+
+---
+
+#################################################
+## Qubership custom template. HTTPRoute for redirecting HTTP traffic to HTTPS if TLS is enabled on the gateway.
+#################################################
+{{ if  .Values.gateway.redirectRoute.enabled -}}
+{{- $fullname := (include "spark-history-server.fullname" .) }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullname }}-redirect
+  namespace: {{ .Release.Namespace }}
+  labels:
+    tier: spark-history-server
+    component: spark-history-server-httproute
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    {{- include "all_objects_labels_shs" $Global  | nindent 4 }}
+    {{- if .Values.gateway.labels }}
+    {{- tpl (toYaml .Values.gateway.labels) . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.gateway.annotations }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.gateway.redirectRoute.parentRefs }}
+  parentRefs:
+    {{- tpl (toYaml .) $Global  | nindent 4 }}
+  {{- end }}
+  {{- with .Values.gateway.redirectRoute.hostnames }}
+  hostnames:
+    {{- tpl (toYaml .) $Global  | nindent 4 }}
+  {{- end }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301
+{{- end }}
+{{- end -}}
+
