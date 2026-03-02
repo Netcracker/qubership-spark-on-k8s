@@ -635,8 +635,8 @@ During the deployment, `spark-operator.controller.rbac.create`,  `spark-operator
 * If you are using the OpenShift cloud with restricted SCC, the Spark and Spark applications' namespaces must have specific annotations:
 
 ```bash
-oc annotate --overwrite namespace airflow openshift.io/sa.scc.uid-range="185/185"
-oc annotate --overwrite namespace airflow openshift.io/sa.scc.supplemental-groups="185/185"
+oc annotate --overwrite namespace spark-operator openshift.io/sa.scc.uid-range="185/185"
+oc annotate --overwrite namespace spark-operator openshift.io/sa.scc.supplemental-groups="185/185"
 ```
 * If setting annotations is not allowed and default SCC is used, it is necessary to set the spark operator and thrift server securityContext `runAsUser` parameter to `~`, for example, for spark operator:
 
