@@ -25,8 +25,8 @@ spec:
   image: "ghcr.io/netcracker/qubership-spark-customized:main"
   imagePullPolicy: Always
   mainClass: org.apache.spark.examples.SparkPi
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.1.jar"
-  sparkVersion: "4.0.1"
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.0.2.jar"
+  sparkVersion: "4.0.2"
   restartPolicy:
     type: Never
   sparkConf:
@@ -55,7 +55,7 @@ spec:
     coreLimit: "1200m"
     memory: "512m"
     labels:
-      version: 4.0.1
+      version: 4.0.2
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -71,7 +71,7 @@ spec:
     instances: 1
     memory: "512m"
     labels:
-      version: 4.0.1
+      version: 4.0.2
     securityContext:
       seccompProfile:
         type: RuntimeDefault
