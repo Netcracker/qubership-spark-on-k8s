@@ -55,6 +55,8 @@ ingress:
   # nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
   # host: 'spark-history-server.your.cloud.qubership.org'
   # path: '/'
+  annotations:
+    gateway-api-converter.netcracker.com/ignore: "true"
   tls:
     # Enable TLS termination for the web Ingress
     enabled: false
@@ -360,6 +362,9 @@ oauth2Proxy:
     #       name: ssl-redirect
     #       port:
     #         name: use-annotation
+    annotations:
+      gateway-api-converter.netcracker.com/ignore: "true"
+
     labels: {}
     # annotations:
     #   kubernetes.io/ingress.class: nginx
