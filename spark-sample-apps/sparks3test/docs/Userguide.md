@@ -40,7 +40,7 @@ spec:
   image: ghcr.io/netcracker/qubership-spark-customized-py:main
   imagePullPolicy: Always
   mainApplicationFile: local:////opt/spark/work-dir/sparkapp/app/json_read.py
-  sparkVersion: "4.0.1"
+  sparkVersion: "4.0.2"
   restartPolicy:
     type: Never
   volumes:
@@ -71,7 +71,7 @@ spec:
         mountPath: /opt/spark/s3config
         readOnly: true        
     labels:
-      version: 4.0.1
+      version: 4.0.2
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -104,7 +104,7 @@ spec:
         mountPath: /opt/spark/s3config
         readOnly: true          
     labels:
-      version: 4.0.1
+      version: 4.0.2
     securityContext:
       seccompProfile:
         type: RuntimeDefault
