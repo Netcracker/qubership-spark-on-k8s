@@ -3,6 +3,7 @@ spark-operator:
     registry: ghcr.io
     repository: netcracker/qubership-spark-operator
     tag: main
+    pullPolicy: Always
   controller:
     podSecurityContext:
       runAsNonRoot: true
