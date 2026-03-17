@@ -34,7 +34,7 @@ Create CR For Spark Application
 Get CR In Namespace
     ${custom_resource} =  Get Custom Resource  ${GROUP}/${VERSION}  ${KIND}  ${SPARK_APPS_NAMESPACE}  ${APP_NAME}
     Log To Console  ${custom_resource}
-    [Return]  ${custom_resource}
+    RETURN  ${custom_resource}
 
 Delete CR
     [Arguments]  ${APP_NAME}
