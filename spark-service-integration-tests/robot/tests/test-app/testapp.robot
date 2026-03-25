@@ -111,8 +111,7 @@ Run History-Server Spark Application
 
 Run Spark to Hive Connection Application
     [Tags]  hive-connection  test_app
-    [Teardown]  Run Keywords
-    ...  Delete CR  spark-hive-test-integration-tests
+    [Teardown]  Delete CR  spark-hive-test-integration-tests
     Create CR For Spark Application  ${SPARK_HIVE_IMAGE}  tests/test-app/spark-hive-connection-app.yaml
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-hive-test-integration-tests  RUNNING
@@ -124,9 +123,7 @@ Run Spark to Hive Connection Application
 
 Run Dual Volcano Scheduled Applications
     [Tags]    volcano    dual_test
-    [Teardown]    Run Keywords    
-    ...    Delete CR    spark-pi-integration-tests    AND    
-    ...    Delete CR    spark-pi-long-run-integration-tests
+    [Teardown]    Run Keywords    Delete CR    spark-pi-integration-tests    AND    Delete CR    spark-pi-long-run-integration-tests
 
     # 1. Create both applications quickly
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi.yaml    VOLCANO=True
