@@ -28,4 +28,14 @@ rules:
       - delete
       - create
       - update
+  - apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - roles
+    resourceNames:
+      - {{ .Values.serviceAccount.name }}-service-operator
+    verbs:
+      - get
+      - patch
+      - update    
 {{- end }}
