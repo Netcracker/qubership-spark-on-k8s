@@ -1,18 +1,23 @@
 import yaml
 from PlatformLibrary import PlatformLibrary
-from kubernetes import client
+from kubernetes import client, config
 
+try:
+    config.load_incluster_config()
+except:
+    config.load_kube_config()
+
+rbac_api = client.RbacAuthorizationV1Api()
 core_v1 = client.CoreV1Api()
-
 custom_api = client.CustomObjectsApi()
 
 
 def delete_k8s_secret(name, namespace):
     try:
         core_v1.delete_namespaced_secret(name, namespace)
-        print(f"Secret {name} deleted successfully.")
-    except Exception as e:
-        print(f"Failed to delete secret: {e}")
+    except client.exceptions.ApiException as e:
+        if e.status != 404:
+            raise e
 
 
 def delete_volcano_queue(name):
@@ -20,9 +25,9 @@ def delete_volcano_queue(name):
         custom_api.delete_cluster_custom_object(
             group="scheduling.volcano.sh", version="v1beta1", plural="queues", name=name
         )
-        print(f"Queue {name} deleted successfully.")
-    except Exception as e:
-        print(f"Failed to delete queue: {e}")
+    except client.exceptions.ApiException as e:
+        if e.status != 404:
+            raise e
 
 
 def parse_yaml_from_file(file_path):
@@ -136,28 +141,25 @@ def patch_role_secret_access(role_name, namespace, allow=True):
 def patch_role_resource_access(
     role_name, namespace, resource_type, api_group="", allow=True
 ):
-    """
-    Dynamically toggles delete permissions for a specific resource in a Role.
-    resource_type: "secrets" or "queues"
-    api_group: "" for core, "scheduling.volcano.sh" for Volcano
-    """
-    role = pl_lib.get_role(role_name, namespace)
+
+    role = rbac_api.read_namespaced_role(role_name, namespace)
+
     if role.rules is None:
         role.rules = []
 
-    new_rule = {
-        "apiGroups": [api_group],
-        "resources": [resource_type],
-        "verbs": ["delete", "get", "list"],
-    }
+    rule_obj = client.V1PolicyRule(
+        api_groups=[api_group],
+        resources=[resource_type],
+        verbs=["delete", "get", "list"],
+    )
 
     if allow:
-        exists = any(rule.get("resources") == [resource_type] for rule in role.rules)
+        
+        exists = any(resource_type in (r.resources or []) for r in role.rules)
         if not exists:
-            role.rules.append(new_rule)
+            role.rules.append(rule_obj)
     else:
-        role.rules = [
-            rule for rule in role.rules if rule.get("resources") != [resource_type]
-        ]
+        
+        role.rules = [r for r in role.rules if resource_type not in (r.resources or [])]
 
-    pl_lib.patch_namespaced_role(role_name, namespace, role)
+    rbac_api.patch_namespaced_role(role_name, namespace, role)
