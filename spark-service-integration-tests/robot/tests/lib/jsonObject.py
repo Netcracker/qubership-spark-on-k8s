@@ -154,12 +154,12 @@ def patch_role_resource_access(
     )
 
     if allow:
-        
+
         exists = any(resource_type in (r.resources or []) for r in role.rules)
         if not exists:
             role.rules.append(rule_obj)
     else:
-        
+
         role.rules = [r for r in role.rules if resource_type not in (r.resources or [])]
 
     rbac_api.patch_namespaced_role(role_name, namespace, role)

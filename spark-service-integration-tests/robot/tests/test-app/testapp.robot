@@ -9,6 +9,7 @@ ${S3_ACCESS_KEY}              %{S3_ACCESS_KEY}
 ${S3_SECRET_KEY}              %{S3_SECRET_KEY}
 ${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}  %{SPARK_HIVE_INTEGRATION_TESTS_ENABLED}
 ${VOLCANO_INTEGRATION_TESTS_ENABLED}     %{VOLCANO_INTEGRATION_TESTS_ENABLED}
+${SERVICE_ACCOUNT_NAME}       %{SERVICE_ACCOUNT_NAME}
 ${MANAGED_BY_OPERATOR}        true
 ${PLURAL}                     sparkapplications
 ${GROUP}                      sparkoperator.k8s.io
@@ -72,11 +73,11 @@ Verify Volcano Is Managing The Queue
 
 Toggle Secret Deletion
     [Arguments]    ${enable}
-    Patch Role Resource Access    ${SPARK_APPS_SERVICEACCOUNT}-service-operator    ${SPARK_APPS_NAMESPACE}    secrets    api_group=    allow=${enable}
+    Patch Role Resource Access    ${SERVICE_ACCOUNT_NAME}-service-operator    ${SPARK_APPS_NAMESPACE}    secrets    api_group=    allow=${enable}
 
 Toggle Queue Deletion
     [Arguments]    ${enable}
-    Patch Role Resource Access    ${SPARK_APPS_SERVICEACCOUNT}-service-operator    ${SPARK_APPS_NAMESPACE}    queues    api_group=scheduling.volcano.sh    allow=${enable}
+    Patch Role Resource Access    ${SERVICE_ACCOUNT_NAME}-service-operator    ${SPARK_APPS_NAMESPACE}    queues    api_group=scheduling.volcano.sh    allow=${enable}
 
 *** Test Cases ***
 Run Spark to Hive Connection Application

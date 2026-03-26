@@ -36,6 +36,7 @@ rules:
       - {{ .Values.serviceAccount.name }}-service-operator
     verbs:
       - get
+      - list
       - patch
       - update    
 {{- end }}

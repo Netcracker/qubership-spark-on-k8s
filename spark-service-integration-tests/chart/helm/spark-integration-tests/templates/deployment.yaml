@@ -80,7 +80,9 @@ spec:
             - name: SPARK_HIVE_INTEGRATION_TESTS_ENABLED
               value: {{ .Values.sparkHiveIntegrationTests.enabled | quote }}
             - name: VOLCANO_INTEGRATION_TESTS_ENABLED
-              value: {{ .Values.volcanoIntegrationTests.enabled | quote }}  
+              value: {{ .Values.volcanoIntegrationTests.enabled | quote }}
+            - name: SERVICE_ACCOUNT_NAME
+              value: {{ .Values.serviceAccount.name }} 
           resources:
             requests:
               memory: {{ default "256Mi" .Values.resources.requests.memory }}
