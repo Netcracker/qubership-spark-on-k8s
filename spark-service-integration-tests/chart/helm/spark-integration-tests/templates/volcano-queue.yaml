@@ -1,4 +1,4 @@
-{{- if (include "spark-integration-tests.isVolcanoIntegrationEnabled" .)}}
+{{- if .Values.volcanoIntegrationTests.enabled }}
 apiVersion: scheduling.volcano.sh/v1beta1
 kind: Queue
 metadata:

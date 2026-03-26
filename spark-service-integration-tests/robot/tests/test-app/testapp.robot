@@ -49,13 +49,15 @@ Check Status Of Pod For App
     ${resp} =  Check Existence And Status Of Pod  ${pod_name}  ${body}  ${state}
     Should Be True  ${resp}
 
-Safe Delete Secret
+Delete Kubernetes Secret
     [Arguments]    ${SECRET_NAME}    ${NAMESPACE}=${SPARK_APPS_NAMESPACE}
-    Run Keyword And Ignore Error    Delete K8s Secret    ${SECRET_NAME}    ${NAMESPACE}
+    Run Keyword And Ignore Error  Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Secret    ${NAMESPACE}    ${SECRET_NAME}
+    Log To Console    Secret ${SECRET_NAME} deleted from ${NAMESPACE}.
 
-Safe Delete Queue
+Delete Volcano Queue
     [Arguments]    ${QUEUE_NAME}
-    Run Keyword And Ignore Error    Delete Volcano Queue    ${QUEUE_NAME}
+    Run Keyword And Ignore Error  Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Custom Object    scheduling.volcano.sh    v1beta1    ${SPARK_APPS_NAMESPACE}    queues    ${QUEUE_NAME}
+    Log To Console    Volcano Queue ${QUEUE_NAME} teardown attempted.
 
 Check Status CR
     [Arguments]  ${APP_NAME}  ${status}
@@ -74,7 +76,7 @@ Run Spark to Hive Connection Application
     [Tags]  hive-connection  test_app
     Skip If    '${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Hive integration tests since it is disabled.
     [Teardown]  Run Keywords   Delete CR  spark-hive-test-integration-tests
-    ...    AND    Safe Delete Secret    s3-secrets
+    ...    AND    Delete Kubernetes Secret    s3-secrets
     
     Sleep    100 seconds
     Create CR For Spark Application  ${SPARK_HIVE_IMAGE}  tests/test-app/spark-hive-connection-app.yaml
@@ -91,7 +93,7 @@ Run Dual Volcano Scheduled Applications
     Skip If    '${VOLCANO_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Volcano tests.
     [Teardown]    Run Keywords    Delete CR    spark-pi-integration-tests
     ...    AND    Delete CR    spark-pi-long-run-integration-tests
-    ...    AND    Safe Delete Queue    sparkqueue
+    ...    AND    Delete Volcano Queue    sparkqueue
 
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi.yaml    VOLCANO=True
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi-long-run.yaml    VOLCANO=True
