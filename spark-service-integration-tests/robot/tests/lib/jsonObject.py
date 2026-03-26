@@ -1,5 +1,28 @@
 import yaml
 from PlatformLibrary import PlatformLibrary
+from kubernetes import client
+
+core_v1 = client.CoreV1Api()
+
+custom_api = client.CustomObjectsApi()
+
+
+def delete_k8s_secret(name, namespace):
+    try:
+        core_v1.delete_namespaced_secret(name, namespace)
+        print(f"Secret {name} deleted successfully.")
+    except Exception as e:
+        print(f"Failed to delete secret: {e}")
+
+
+def delete_volcano_queue(name):
+    try:
+        custom_api.delete_cluster_custom_object(
+            group="scheduling.volcano.sh", version="v1beta1", plural="queues", name=name
+        )
+        print(f"Queue {name} deleted successfully.")
+    except Exception as e:
+        print(f"Failed to delete queue: {e}")
 
 
 def parse_yaml_from_file(file_path):
@@ -91,3 +114,50 @@ def check_volcano_pending_status(app_name, namespace):
         return False
     except Exception:
         return False
+
+
+def patch_role_secret_access(role_name, namespace, allow=True):
+
+    role = pl_lib.get_role(role_name, namespace)
+
+    secret_rule = {"apiGroups": [""], "resources": ["secrets"], "verbs": ["delete"]}
+
+    if allow:
+        if secret_rule not in role.rules:
+            role.rules.append(secret_rule)
+    else:
+        role.rules = [
+            rule for rule in role.rules if rule.get("resources") != ["secrets"]
+        ]
+
+    pl_lib.patch_namespaced_role(role_name, namespace, role)
+
+
+def patch_role_resource_access(
+    role_name, namespace, resource_type, api_group="", allow=True
+):
+    """
+    Dynamically toggles delete permissions for a specific resource in a Role.
+    resource_type: "secrets" or "queues"
+    api_group: "" for core, "scheduling.volcano.sh" for Volcano
+    """
+    role = pl_lib.get_role(role_name, namespace)
+    if role.rules is None:
+        role.rules = []
+
+    new_rule = {
+        "apiGroups": [api_group],
+        "resources": [resource_type],
+        "verbs": ["delete", "get", "list"],
+    }
+
+    if allow:
+        exists = any(rule.get("resources") == [resource_type] for rule in role.rules)
+        if not exists:
+            role.rules.append(new_rule)
+    else:
+        role.rules = [
+            rule for rule in role.rules if rule.get("resources") != [resource_type]
+        ]
+
+    pl_lib.patch_namespaced_role(role_name, namespace, role)

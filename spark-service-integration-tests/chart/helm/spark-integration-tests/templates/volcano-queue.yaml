@@ -1,3 +1,4 @@
+{{- if .Values.volcanoIntegrationTests.enabled }}
 apiVersion: scheduling.volcano.sh/v1beta1
 kind: Queue
 metadata:
@@ -11,3 +12,4 @@ spec:
   capability:
     cpu: "3"
     memory: "3G"
+{{- end }}
