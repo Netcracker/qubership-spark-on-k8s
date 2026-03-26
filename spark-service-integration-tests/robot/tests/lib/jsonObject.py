@@ -114,5 +114,3 @@ def check_volcano_pending_status(app_name, namespace):
         return False
     except Exception:
         return False
-
-

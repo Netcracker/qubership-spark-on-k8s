@@ -75,6 +75,8 @@ Run Spark to Hive Connection Application
     Skip If    '${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Hive integration tests since it is disabled.
     [Teardown]  Run Keywords   Delete CR  spark-hive-test-integration-tests
     ...    AND    Safe Delete Secret    s3-secrets
+    
+    Sleep    100 seconds
     Create CR For Spark Application  ${SPARK_HIVE_IMAGE}  tests/test-app/spark-hive-connection-app.yaml
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-hive-test-integration-tests  RUNNING
@@ -119,7 +121,6 @@ Run Dual Volcano Scheduled Applications
 Run JAVA Spark Application
     [Tags]  java  test_app
     [Teardown]  Delete CR  spark-pi-integration-tests
-    Sleep    100 seconds
     Create CR For Spark Application  ${BASE_APP_IMAGE}  tests/test-app/spark-pi.yaml
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-pi-integration-tests  RUNNING
