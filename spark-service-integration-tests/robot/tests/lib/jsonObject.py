@@ -1,13 +1,8 @@
 import yaml
 from PlatformLibrary import PlatformLibrary
-from kubernetes import client, config
+from kubernetes import client
 
-try:
-    config.load_incluster_config()
-except:
-    config.load_kube_config()
 
-rbac_api = client.RbacAuthorizationV1Api()
 core_v1 = client.CoreV1Api()
 custom_api = client.CustomObjectsApi()
 
@@ -121,45 +116,3 @@ def check_volcano_pending_status(app_name, namespace):
         return False
 
 
-def patch_role_secret_access(role_name, namespace, allow=True):
-
-    role = pl_lib.get_role(role_name, namespace)
-
-    secret_rule = {"apiGroups": [""], "resources": ["secrets"], "verbs": ["delete"]}
-
-    if allow:
-        if secret_rule not in role.rules:
-            role.rules.append(secret_rule)
-    else:
-        role.rules = [
-            rule for rule in role.rules if rule.get("resources") != ["secrets"]
-        ]
-
-    pl_lib.patch_namespaced_role(role_name, namespace, role)
-
-
-def patch_role_resource_access(
-    role_name, namespace, resource_type, api_group="", allow=True
-):
-
-    role = rbac_api.read_namespaced_role(role_name, namespace)
-
-    if role.rules is None:
-        role.rules = []
-
-    rule_obj = client.V1PolicyRule(
-        api_groups=[api_group],
-        resources=[resource_type],
-        verbs=["delete", "get", "list"],
-    )
-
-    if allow:
-
-        exists = any(resource_type in (r.resources or []) for r in role.rules)
-        if not exists:
-            role.rules.append(rule_obj)
-    else:
-
-        role.rules = [r for r in role.rules if resource_type not in (r.resources or [])]
-
-    rbac_api.patch_namespaced_role(role_name, namespace, role)

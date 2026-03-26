@@ -78,9 +78,9 @@ spec:
               value: {{ .Values.prometheusUrl }}
             {{- end }}
             - name: SPARK_HIVE_INTEGRATION_TESTS_ENABLED
-              value: {{ .Values.sparkHiveIntegrationTests.enabled | quote }}
+              value: {{ .Values.sparkHiveIntegrationTests.enabled | default "false" | quote }}
             - name: VOLCANO_INTEGRATION_TESTS_ENABLED
-              value: {{ .Values.volcanoIntegrationTests.enabled | quote }}
+              value: {{ include "spark-integration-tests.isVolcanoIntegrationEnabled" . | default "false" | quote }}
             - name: SERVICE_ACCOUNT_NAME
               value: {{ .Values.serviceAccount.name }} 
           resources:

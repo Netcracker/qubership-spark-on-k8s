@@ -9,7 +9,6 @@ ${S3_ACCESS_KEY}              %{S3_ACCESS_KEY}
 ${S3_SECRET_KEY}              %{S3_SECRET_KEY}
 ${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}  %{SPARK_HIVE_INTEGRATION_TESTS_ENABLED}
 ${VOLCANO_INTEGRATION_TESTS_ENABLED}     %{VOLCANO_INTEGRATION_TESTS_ENABLED}
-${SERVICE_ACCOUNT_NAME}       %{SERVICE_ACCOUNT_NAME}
 ${MANAGED_BY_OPERATOR}        true
 ${PLURAL}                     sparkapplications
 ${GROUP}                      sparkoperator.k8s.io
@@ -24,7 +23,6 @@ Library  String
 Library  Collections
 Library  RequestsLibrary
 Library  OperatingSystem
-Library  Process
 Library  PlatformLibrary  managed_by_operator=${MANAGED_BY_OPERATOR}
 Library  ../lib/jsonObject.py
 
@@ -71,22 +69,12 @@ Verify Volcano Is Managing The Queue
     Should Be True    ${status1} or ${status2}
     Log To Console    \nSUCCESS: Volcano is actively managing the resource queue!
 
-Toggle Secret Deletion
-    [Arguments]    ${enable}
-    Patch Role Resource Access    ${SERVICE_ACCOUNT_NAME}-service-operator    ${SPARK_APPS_NAMESPACE}    secrets    api_group=    allow=${enable}
-
-Toggle Queue Deletion
-    [Arguments]    ${enable}
-    Patch Role Resource Access    ${SERVICE_ACCOUNT_NAME}-service-operator    ${SPARK_APPS_NAMESPACE}    queues    api_group=scheduling.volcano.sh    allow=${enable}
-
 *** Test Cases ***
 Run Spark to Hive Connection Application
     [Tags]  hive-connection  test_app
     Skip If    '${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Hive integration tests since it is disabled.
-    [Setup]    Toggle Secret Deletion    enable=True
     [Teardown]  Run Keywords   Delete CR  spark-hive-test-integration-tests
     ...    AND    Safe Delete Secret    s3-secrets
-    ...    AND    Toggle Secret Deletion    enable=False
     Create CR For Spark Application  ${SPARK_HIVE_IMAGE}  tests/test-app/spark-hive-connection-app.yaml
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-hive-test-integration-tests  RUNNING
@@ -99,11 +87,9 @@ Run Spark to Hive Connection Application
 Run Dual Volcano Scheduled Applications
     [Tags]    volcano    dual_test
     Skip If    '${VOLCANO_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Volcano tests.
-    [Setup]    Toggle Queue Deletion    enable=True
     [Teardown]    Run Keywords    Delete CR    spark-pi-integration-tests
     ...    AND    Delete CR    spark-pi-long-run-integration-tests
     ...    AND    Safe Delete Queue    sparkqueue
-    ...    AND    Toggle Queue Deletion    enable=False
 
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi.yaml    VOLCANO=True
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi-long-run.yaml    VOLCANO=True

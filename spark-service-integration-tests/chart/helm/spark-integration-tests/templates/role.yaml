@@ -8,6 +8,28 @@ metadata:
   labels:
     {{- include "all_objects_labels_ssit" . | nindent 4 }}
 rules:
+{{- if .Values.sparkHiveIntegrationTests.enabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames: 
+      - "s3-secrets"      
+    verbs:
+      - get
+      - delete
+{{- end }}      
+{{- if (include "spark-integration-tests.isVolcanoIntegrationEnabled" .) }}
+  - apiGroups: 
+      - scheduling.volcano.sh
+    resources: 
+      - queues
+    resourceNames:
+      - "sparkqueue"
+    verbs: 
+      - get
+      - delete
+{{- end }}      
   - apiGroups:
       - ""
     resources:
@@ -28,15 +50,4 @@ rules:
       - delete
       - create
       - update
-  - apiGroups:
-      - rbac.authorization.k8s.io
-    resources:
-      - roles
-    resourceNames:
-      - {{ .Values.serviceAccount.name }}-service-operator
-    verbs:
-      - get
-      - list
-      - patch
-      - update    
 {{- end }}
