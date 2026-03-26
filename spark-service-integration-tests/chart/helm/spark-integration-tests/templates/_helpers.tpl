@@ -20,7 +20,7 @@ Get image for python base applications
 Get image for spark-hive connection 
 */}}
 {{- define "spark-hive.image" -}}
-    {{- printf "%s" .Values.sparkHiveImage -}}
+    {{- printf "%s" .Values.sparkHiveIntegrationTests.sparkHiveImage -}}
 {{- end -}}    
 
 {{/*

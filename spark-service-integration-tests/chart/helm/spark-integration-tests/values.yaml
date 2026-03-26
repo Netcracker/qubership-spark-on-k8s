@@ -54,4 +54,5 @@ s3:
 volcanoIntegrationTests:
   enabled: false
 sparkHiveIntegrationTests:
-  enabled: false    
+  enabled: false
+  sparkHiveImage: ghcr.io/netcracker/qubership-tests-spark-hive-connection:main

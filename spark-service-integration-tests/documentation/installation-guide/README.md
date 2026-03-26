@@ -94,9 +94,11 @@ spark-operator:
         enable: true
 ```        
 
-The `spark-integration-tests.sparkHiveIntegrationTests.enabled` - parameter specifies if the Spark-to-Hive connection integration test needs to run. The default value is `false`.
+The `spark-integration-tests.sparkHiveIntegrationTests.enabled` - parameter specifies if the Spark-Hive connection integration test needs to run. The default value is `false`.
 
 **Note** Before enabling `sparkHiveIntegrationTests.enabled`, ensure the Hive metastore is accessible and functional within the cluster.
+
+The `spark-integration-tests.sparkHiveIntegrationTests.sparkHiveImage` - paramter specifies the Docker image for Spark-Hive connection integration test.
 
 
 
