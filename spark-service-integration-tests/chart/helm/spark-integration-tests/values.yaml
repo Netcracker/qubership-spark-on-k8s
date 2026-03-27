@@ -43,3 +43,16 @@ securityContext:
 testsS3Endpoint: http://your.minio.endpoint.com
 testsS3AccessKey: miniokey
 testsS3SecretKey: miniopass
+
+s3:
+  endpointUrl: http://your.minio.endpoint.com
+  accessKey: miniokey
+  secretKey: miniopass
+  bucketName: test-bucket
+  dbName: test-db
+  tableName: test-table
+volcanoIntegrationTests:
+  enabled: false
+sparkHiveIntegrationTests:
+  enabled: false
+  sparkHiveImage: ghcr.io/netcracker/qubership-tests-spark-hive-connection:main

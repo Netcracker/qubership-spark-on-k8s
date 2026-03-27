@@ -13,35 +13,52 @@ spec:
   sparkVersion: "4.0.2"
   sparkConf:
     "spark.jars.ivy": "/tmp/.ivy"
-    "spark.kubernetes.submission.connectionTimeout": "60000000"
-    "spark.kubernetes.submission.requestTimeout": "60000000"
-    "spark.kubernetes.driver.connectionTimeout": "60000000"
-    "spark.kubernetes.driver.requestTimeout": "60000000"
-    "spark.sql.warehouse.dir": "s3a://hive/warehouse"
-    "spark.sql.hive.metastore.version": "3.1.3"
+    # --- Hive Metastore Config ---
+    "spark.sql.hive.metastore.version": "4.0.1"
     "spark.sql.hive.metastore.jars": "path"
     "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
     "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.hive-metastore:9083"
     "spark.hadoop.hive.metastore.schema.verification": "false"
     "spark.hadoop.hive.metastore.schema.verification.record.version": "false"
     "spark.hadoop.hive.metastore.use.SSL": "false"
-    "spark.hadoop.fs.s3a.endpoint": "https://test-minio.com"
-    "spark.hadoop.fs.s3.buckets.create.enabled": "true"
-    "spark.hadoop.fs.s3a.fast.upload": "true"
-    "spark.hadoop.fs.s3a.connection.ssl.enabled": "false"
-    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
-    "spark.hadoop.fs.s3a.path.style.access": "true"
-    "spark.hadoop.fs.s3a.committer.magic.enabled": "true"
-    "spark.driver.extraJavaOptions": "-Dcom.amazonaws.sdk.disableCertChecking"
-    "spark.executor.extraJavaOptions": "-Dcom.amazonaws.sdk.disableCertChecking"
     "spark.sql.catalogImplementation": "hive"
     "spark.sql.legacy.createHiveTableByDefault": "false"
+    "spark.sql.streaming.fileSource.log.deletion": "false"
+    "spark.sql.sources.commitProtocolClass": "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol"
+
+    # --- S3A / MinIO Core Config ---
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
+    "spark.hadoop.fs.s3a.fast.upload": "true"
+    "spark.hadoop.fs.s3a.connection.ssl.enabled": "false"
+    "spark.hadoop.fs.s3.buckets.create.enabled": "true"
+    "spark.hadoop.fs.s3a.metadatastore.authoritative": "true"
+
+    # --- S3A Magic Committer & Spark SQL Bridge ---
+    "spark.hadoop.fs.s3a.committer.magic.enabled": "true"
+    "spark.hadoop.fs.s3a.committer.name": "magic"
+    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
+    "spark.sql.parquet.output.committer.class": "org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter"
+
+    # --- Logs and Timeouts ---
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    # Added --add-modules to silence the jdk.incubator.vector warning
+    "spark.driver.extraJavaOptions": "-Dcom.amazonaws.sdk.disableCertChecking --add-modules jdk.incubator.vector -Dlog4j2.logger.fileStreamSink.name=org.apache.spark.sql.execution.streaming.FileStreamSink -Dlog4j2.logger.fileStreamSink.level=error"
+    "spark.executor.extraJavaOptions": "-Dcom.amazonaws.sdk.disableCertChecking --add-modules jdk.incubator.vector -Dlog4j2.logger.fileStreamSink.name=org.apache.spark.sql.execution.streaming.FileStreamSink -Dlog4j2.logger.fileStreamSink.level=error"
+  
   restartPolicy:
     type: Never
     onFailureRetries: 3
     onFailureRetryInterval: 10
     onSubmissionFailureRetries: 5
     onSubmissionFailureRetryInterval: 20
+  
+  volumes:
+    - name: s3-credentials
+      secret:
+        secretName: s3-secrets
+
   driver:
     cores: 1
     coreLimit: "1200m"
@@ -50,63 +67,48 @@ spec:
       version: 4.0.2
     serviceAccount: sparkapps-sa
     securityContext:
-        seccompProfile:
-            type: RuntimeDefault
-        allowPrivilegeEscalation: false
-        runAsNonRoot: true
-        runAsUser: 185
-        capabilities:
-            drop:
-            - ALL
-    initContainers:
-    - name: delete-s3
-      image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
-      command: ["python3", "/opt/spark/examples/delete_s3.py"]
-      resources:
-        requests:
-            cpu: "100m"
-            memory: "128Mi"
-        limits:
-            cpu: "1200m"
-            memory: "512Mi"
-      env:
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: s3-secrets
-              key: AWS_ACCESS_KEY_ID
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: s3-secrets
-              key: AWS_SECRET_ACCESS_KEY
-        - name: S3_ENDPOINT_URL
-          valueFrom:
-            secretKeyRef:
-              name: s3-secrets
-              key: S3_ENDPOINT_URL
-      securityContext:
-        seccompProfile:
-            type: RuntimeDefault
-        allowPrivilegeEscalation: false
-        runAsNonRoot: true
-        runAsUser: 185
-        capabilities:
-            drop:
-            - ALL
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+    volumeMounts:
+      - name: s3-credentials
+        mountPath: "/etc/s3-secrets"
+        readOnly: true
     env:
       - name: PYTHONPATH
-        value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: AWS_ACCESS_KEY_ID
-      - name: AWS_SECRET_ACCESS_KEY
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: AWS_SECRET_ACCESS_KEY
+        value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"    
+    initContainers:
+      - name: delete-s3
+        image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
+        command: ["python3", "/opt/spark/examples/delete_s3.py"]
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "1200m"
+            memory: "512Mi"
+        volumeMounts:
+          - name: s3-credentials
+            mountPath: "/etc/s3-secrets"
+            readOnly: true
+        securityContext:
+          seccompProfile:
+            type: RuntimeDefault
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 185
+          capabilities:
+            drop:
+              - ALL
+        env:
+          - name: PYTHONPATH
+            value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
   executor:
     cores: 1
     instances: 1
@@ -114,25 +116,18 @@ spec:
     labels:
       version: 4.0.2
     securityContext:
-        seccompProfile:
-            type: RuntimeDefault
-        allowPrivilegeEscalation: false
-        runAsNonRoot: true
-        runAsUser: 185
-        capabilities:
-            drop:
-            - ALL
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
     env:
       - name: PYTHONPATH
         value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: AWS_ACCESS_KEY_ID
-      - name: AWS_SECRET_ACCESS_KEY
-        valueFrom:
-          secretKeyRef:
-            name: s3-secrets
-            key: AWS_SECRET_ACCESS_KEY
-
+    volumeMounts:
+      - name: s3-credentials
+        mountPath: "/etc/s3-secrets"
+        readOnly: true
