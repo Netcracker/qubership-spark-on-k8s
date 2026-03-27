@@ -58,9 +58,11 @@ Delete Kubernetes Secret
 
 Delete Volcano Queue
     [Arguments]    ${QUEUE_NAME}
-    ${status}    ${error_msg}=    Run Keyword And Ignore Error    Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Custom Object    scheduling.volcano.sh    v1beta1    ${SPARK_APPS_NAMESPACE}    queues    ${QUEUE_NAME}
-    Run Keyword If    '${status}' == 'PASS'    Log To Console    \nVolcano Queue ${QUEUE_NAME} teardown attempted successfully.
-    Run Keyword If    '${status}' == 'FAIL'    Log To Console    \nWARNING: Failed to teardown Volcano Queue ${QUEUE_NAME}. Error: ${error_msg}
+
+    ${rc}    ${output}=    Run And Return Rc And Output    kubectl delete queue ${QUEUE_NAME} --ignore-not-found
+    
+    Run Keyword If    ${rc} == 0    Log To Console    \nVolcano Queue ${QUEUE_NAME} teardown attempted successfully.
+    Run Keyword If    ${rc} != 0    Log To Console    \nWARNING: Failed to teardown Volcano Queue ${QUEUE_NAME}. Error: ${output}
 
 Check Status CR
     [Arguments]  ${APP_NAME}  ${status}
