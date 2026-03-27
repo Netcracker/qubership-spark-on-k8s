@@ -51,9 +51,9 @@ Check Status Of Pod For App
 
 Delete Kubernetes Secret
     [Arguments]    ${SECRET_NAME}    ${NAMESPACE}=${SPARK_APPS_NAMESPACE}
-    ${status}    ${error_msg}=    Run Keyword And Ignore Error    Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Secret    ${NAMESPACE}    ${SECRET_NAME}
+    ${status}    ${error_msg}=    Run Keyword And Ignore Error    Wait Until Keyword Succeeds    3x    5s    Delete Secret By Name    ${SECRET_NAME}    ${NAMESPACE}
     
-    Run Keyword If    '${status}' == 'PASS'    Log To Console    \nSecret ${SECRET_NAME} deleted successfully from ${NAMESPACE}.
+    Run Keyword If    '${status}' == 'PASS'    Log To Console    \nSecret ${SECRET_NAME} deleted successfully.
     Run Keyword If    '${status}' == 'FAIL'    Log To Console    \nWARNING: Failed to delete ${SECRET_NAME}. Error: ${error_msg}
 
 Delete Volcano Queue
