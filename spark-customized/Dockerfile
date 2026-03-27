@@ -23,7 +23,10 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/4.1.125.Final/netty-transport-native-epoll-4.1.125.Final-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.125.Final-linux-x86_64.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/4.1.125.Final/netty-transport-native-kqueue-4.1.125.Final-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.125.Final-osx-aarch_64.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/4.1.125.Final/netty-transport-native-kqueue-4.1.125.Final-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.125.Final-osx-x86_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/4.1.125.Final/netty-transport-native-unix-common-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.125.Final.jar
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/4.1.125.Final/netty-transport-native-unix-common-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-resolver-dns/4.1.125.Final/netty-resolver-dns-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-resolver-dns-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-codec-dns/4.1.125.Final/netty-codec-dns-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-codec-dns-4.1.125.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/4.1.125.Final/netty-transport-native-epoll-4.1.125.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.125.Final.jar
 
 FROM apache/spark:4.0.2-java21
 ENV SPARK_JARS_DIR=/opt/spark/jars
@@ -73,7 +76,10 @@ RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar \
     $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar \
     $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-aarch_64.jar \
     $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar \
-    $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.118.Final.jar
+    $SPARK_JARS_DIR/netty-transport-native-unix-common-4.1.118.Final.jar \
+    $SPARK_JARS_DIR/netty-resolver-dns-4.1.118.Final.jar \
+    $SPARK_JARS_DIR/netty-codec-dns-4.1.118.Final.jar \
+    $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-riscv64.jar
 
 COPY --from=unpacker --chmod=0777 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
 
