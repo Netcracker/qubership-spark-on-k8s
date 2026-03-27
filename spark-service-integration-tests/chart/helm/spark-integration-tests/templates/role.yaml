@@ -19,7 +19,7 @@ rules:
       - get
       - delete
 {{- end }}      
-{{- if (include "spark-integration-tests.isVolcanoIntegrationEnabled" .) }}
+{{- if .Values.volcanoIntegrationTests.enabled }}
   - apiGroups: 
       - scheduling.volcano.sh
     resources: 

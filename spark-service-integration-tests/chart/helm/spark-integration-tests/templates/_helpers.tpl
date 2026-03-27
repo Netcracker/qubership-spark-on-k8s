@@ -109,18 +109,3 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 {{- end }}
-
-{{/* Checks if spark volcano integration is enabled.
-*/}}
-{{- define "spark-integration-tests.isVolcanoIntegrationEnabled" -}}
-  {{- $sparkOperator := index .Values "spark-operator" -}}
-  {{- if $sparkOperator -}}
-    {{- $webhook := $sparkOperator.webhook | default dict -}}
-    {{- $controller := $sparkOperator.controller | default dict -}}
-    {{- $batch := $controller.batchScheduler | default dict -}}
-    
-    {{- if and $webhook.enable $batch.enable .Values.volcanoIntegrationTests.enabled -}}
-      true
-    {{- end -}}
-  {{- end -}}
-{{- end -}}

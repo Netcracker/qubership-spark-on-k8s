@@ -1,28 +1,5 @@
 import yaml
 from PlatformLibrary import PlatformLibrary
-from kubernetes import client
-
-
-core_v1 = client.CoreV1Api()
-custom_api = client.CustomObjectsApi()
-
-
-def delete_k8s_secret(name, namespace):
-    try:
-        core_v1.delete_namespaced_secret(name, namespace)
-    except client.exceptions.ApiException as e:
-        if e.status != 404:
-            raise e
-
-
-def delete_volcano_queue(name):
-    try:
-        custom_api.delete_cluster_custom_object(
-            group="scheduling.volcano.sh", version="v1beta1", plural="queues", name=name
-        )
-    except client.exceptions.ApiException as e:
-        if e.status != 404:
-            raise e
 
 
 def parse_yaml_from_file(file_path):
