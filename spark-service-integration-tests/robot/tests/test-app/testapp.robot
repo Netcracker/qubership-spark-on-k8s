@@ -51,13 +51,16 @@ Check Status Of Pod For App
 
 Delete Kubernetes Secret
     [Arguments]    ${SECRET_NAME}    ${NAMESPACE}=${SPARK_APPS_NAMESPACE}
-    Run Keyword And Ignore Error  Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Secret    ${NAMESPACE}    ${SECRET_NAME}
-    Log To Console    Secret ${SECRET_NAME} deleted from ${NAMESPACE}.
+    ${status}    ${error_msg}=    Run Keyword And Ignore Error    Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Secret    ${NAMESPACE}    ${SECRET_NAME}
+    
+    Run Keyword If    '${status}' == 'PASS'    Log To Console    \nSecret ${SECRET_NAME} deleted successfully from ${NAMESPACE}.
+    Run Keyword If    '${status}' == 'FAIL'    Log To Console    \nWARNING: Failed to delete ${SECRET_NAME}. Error: ${error_msg}
 
 Delete Volcano Queue
     [Arguments]    ${QUEUE_NAME}
-    Run Keyword And Ignore Error  Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Custom Object    scheduling.volcano.sh    v1beta1    ${SPARK_APPS_NAMESPACE}    queues    ${QUEUE_NAME}
-    Log To Console    Volcano Queue ${QUEUE_NAME} teardown attempted.
+    ${status}    ${error_msg}=    Run Keyword And Ignore Error    Wait Until Keyword Succeeds    3x    5s    Delete Namespaced Custom Object    scheduling.volcano.sh    v1beta1    ${SPARK_APPS_NAMESPACE}    queues    ${QUEUE_NAME}
+    Run Keyword If    '${status}' == 'PASS'    Log To Console    \nVolcano Queue ${QUEUE_NAME} teardown attempted successfully.
+    Run Keyword If    '${status}' == 'FAIL'    Log To Console    \nWARNING: Failed to teardown Volcano Queue ${QUEUE_NAME}. Error: ${error_msg}
 
 Check Status CR
     [Arguments]  ${APP_NAME}  ${status}
