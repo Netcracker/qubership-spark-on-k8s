@@ -30,7 +30,16 @@ Library  ../lib/jsonObject.py
 *** Keywords ***
 Create CR For Spark Application
     [Arguments]  ${APP_IMAGE}  ${PATH_TO_APP}  ${VOLCANO}=False
-    ${body}=    Update App Yaml  ${APP_IMAGE}  ${PATH_TO_APP}  ${SPARK_APPS_SERVICEACCOUNT}  ${S3_ENDPOINT}  ${S3_ACCESS_KEY}  ${S3_SECRET_KEY}  ${VOLCANO}
+    
+    ${body}=    Update App Yaml    
+    ...    app_image=${APP_IMAGE}    
+    ...    path_to_app=${PATH_TO_APP}    
+    ...    sa_name=${SPARK_APPS_SERVICEACCOUNT}    
+    ...    s3_path=${S3_ENDPOINT}    
+    ...    s3_a_key=${S3_ACCESS_KEY}    
+    ...    s3_s_key=${S3_SECRET_KEY}    
+    ...    use_volcano=${VOLCANO}
+    
     Create Namespaced Custom Object  ${GROUP}  ${VERSION}  ${SPARK_APPS_NAMESPACE}  ${PLURAL}  ${body}
     Log To Console  \nSpark App is created!
 
@@ -55,14 +64,6 @@ Delete Kubernetes Secret
     
     Run Keyword If    '${status}' == 'PASS'    Log To Console    \nSecret ${SECRET_NAME} deleted successfully.
     Run Keyword If    '${status}' == 'FAIL'    Log To Console    \nWARNING: Failed to delete ${SECRET_NAME}. Error: ${error_msg}
-
-Delete Volcano Queue
-    [Arguments]    ${QUEUE_NAME}
-
-    ${rc}    ${output}=    Run And Return Rc And Output    kubectl delete queue ${QUEUE_NAME} --ignore-not-found
-    
-    Run Keyword If    ${rc} == 0    Log To Console    \nVolcano Queue ${QUEUE_NAME} teardown attempted successfully.
-    Run Keyword If    ${rc} != 0    Log To Console    \nWARNING: Failed to teardown Volcano Queue ${QUEUE_NAME}. Error: ${output}
 
 Check Status CR
     [Arguments]  ${APP_NAME}  ${status}
@@ -98,7 +99,6 @@ Run Dual Volcano Scheduled Applications
     Skip If    '${VOLCANO_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Volcano tests.
     [Teardown]    Run Keywords    Delete CR    spark-pi-integration-tests
     ...    AND    Delete CR    spark-pi-long-run-integration-tests
-    ...    AND    Delete Volcano Queue    sparkqueue
 
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi.yaml    VOLCANO=True
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi-long-run.yaml    VOLCANO=True
