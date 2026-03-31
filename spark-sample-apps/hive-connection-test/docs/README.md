@@ -77,38 +77,24 @@ stringData:
   TABLE_NAME: {table name}
 ```
 ### Kubernetes secret for S3 Certificates
-The application uses a pre created Kuberenetes Secret to securely store S3 TLS certificates
+The application uses a pre created Kuberenetes Secret to securely store S3 and Hive Metastore TLS certificates
 
 ```yaml
-apiVersion: v1
 kind: Secret
-metadata:
-  name: s3-cert
-  namespace: spark-apps
-type: Opaque
-stringData:
-  s3.pem: |
-    -----BEGIN CERTIFICATE-----
-    certificate content
-    -----END CERTIFICATE-----
-```
-
-### Kuberenetes secret for Hive Metastore Certificates
-The application uses a pre created Kubernetes Secret to securely store Hive Metastore Certificates
-
-```yaml
 apiVersion: v1
-kind: Secret
 metadata:
-  name: hive-cert
+  name: ca-certificates
   namespace: spark-apps
 type: Opaque
 stringData:
   hive.pem: |
     -----BEGIN CERTIFICATE-----
-    certificate content
+    hive metastore certificate content
     -----END CERTIFICATE-----
-    
+  s3.pem: |
+    -----BEGIN CERTIFICATE-----
+    s3 certificate content
+    -----END CERTIFICATE----- 
 ```
 
 ### Init Containers
@@ -125,16 +111,12 @@ Add the follwing configuration to spark application to connect to Hive Metastore
 
 ```yaml
 volumes:
-  - name: combined-certs
-    projected:
-      sources:
-        - secret:
-            name: hive-cert
-        - secret:
-            name: s3-cert
+  - name: ca-certificates
+      secret:
+        secretName: ca-certs
 # The following should be added to driver, initcontainer, and executor
 volumeMounts:
-  - name: combined-certs
+  - name: ca-certificates
     mountPath: "/certs/trust"
     readOnly: true 
 env:
@@ -144,9 +126,8 @@ env:
 
 
 ## Environment Variables in Spark Application
-The following environment variables are set within the Spark application to improve execution and suppress unnecessary warnings:
+The following environment variables are set within the Spark application to import certificates:
 
-- `PYTHONPATH="/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"`: Ensures that PySpark and Py4J dependencies are correctly resolved in the Python environment.
 - `TRUST_CERTS_DIR`: Stores certificates 
 
 
