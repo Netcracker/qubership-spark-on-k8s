@@ -60,6 +60,8 @@ spec:
     - name: s3-credentials
       secret:
         secretName: s3-secrets
+    - name: common-volume
+      emptyDir: {}        
 
   driver:
     cores: 1
@@ -72,6 +74,7 @@ spec:
       seccompProfile:
         type: RuntimeDefault
       allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
       runAsNonRoot: true
       runAsUser: 185
       capabilities:
@@ -83,9 +86,12 @@ spec:
       - name: s3-credentials
         mountPath: "/etc/s3-secrets"
         readOnly: true
-    env:
-      - name: PYTHONPATH
-        value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"    
+      - name: common-volume
+        mountPath: /tmp
+        subPath: tmp
+      - name: common-volume
+        mountPath: /opt/spark/logs
+        subPath: logs  
     initContainers:
       - name: delete-s3
         image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
@@ -103,18 +109,22 @@ spec:
           - name: s3-credentials
             mountPath: "/etc/s3-secrets"
             readOnly: true
+          - name: common-volume
+            mountPath: /tmp
+            subPath: tmp
+          - name: common-volume
+            mountPath: /opt/spark/logs
+            subPath: logs  
         securityContext:
           seccompProfile:
             type: RuntimeDefault
           allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
           runAsNonRoot: true
           runAsUser: 185
           capabilities:
             drop:
               - ALL
-        env:
-          - name: PYTHONPATH
-            value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
   executor:
     cores: 1
     instances: 1
@@ -125,17 +135,21 @@ spec:
       seccompProfile:
         type: RuntimeDefault
       allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
       runAsNonRoot: true
       runAsUser: 185
       capabilities:
         drop:
           - ALL
-    env:
-      - name: PYTHONPATH
-        value: "/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"
     volumeMounts:
       - name: java-cacerts-dir     
         mountPath: /java-security
       - name: s3-credentials
         mountPath: "/etc/s3-secrets"
         readOnly: true
+      - name: common-volume
+        mountPath: /tmp
+        subPath: tmp
+      - name: common-volume
+        mountPath: /opt/spark/logs
+        subPath: logs  
