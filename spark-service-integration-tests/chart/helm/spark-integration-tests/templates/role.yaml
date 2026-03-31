@@ -8,6 +8,28 @@ metadata:
   labels:
     {{- include "all_objects_labels_ssit" . | nindent 4 }}
 rules:
+{{- if .Values.sparkHiveIntegrationTests.enabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames: 
+      - "s3-secrets"      
+    verbs:
+      - get
+      - delete
+{{- end }}      
+{{- if .Values.volcanoIntegrationTests.enabled }}
+  - apiGroups: 
+      - scheduling.volcano.sh
+    resources: 
+      - queues
+    resourceNames:
+      - "sparkqueue"
+    verbs: 
+      - get
+      - delete
+{{- end }}      
   - apiGroups:
       - ""
     resources:

@@ -22,12 +22,21 @@ def update_app_yaml(
     s3_a_key="",
     s3_s_key="",
     arguments="50",
+    use_volcano=False,
 ):
     stream = open(path_to_app, "r")
     data = yaml.safe_load(stream)
     data["spec"]["image"] = app_image
+    if "initContainers" in data["spec"]["driver"]:
+        data["spec"]["driver"]["initContainers"][0]["image"] = app_image
     data["metadata"]["name"] = data["metadata"]["name"] + "-integration-tests"
     data["spec"]["driver"]["serviceAccount"] = sa_name
+    if use_volcano:
+        data["spec"]["batchScheduler"] = "volcano"
+        data["spec"]["batchSchedulerOptions"] = {
+            "queue": "sparkqueue",
+            "resources": {"cpu": "3", "memory": "3G"},
+        }
     if "arguments" in data["spec"]:
         data["spec"]["arguments"] = [arguments]
     if "hadoopConf" in data["spec"]:
@@ -63,3 +72,22 @@ def patch_deployment_resources(name, namespace, resources_dict=reduced_resources
     deployment = pl_lib.get_deployment_entity(name, namespace)
     deployment.spec.template.spec.containers[0].resources = resources_dict
     pl_lib.patch_namespaced_deployment_entity(name, namespace, deployment)
+
+
+def check_volcano_pending_status(app_name, namespace):
+    pod_name = f"{app_name}-driver"
+    try:
+        pod = pl_lib.get_pod(pod_name, namespace)
+        if not pod.status or not pod.status.conditions:
+            return False
+
+        for condition in pod.status.conditions:
+            if condition.type == "PodScheduled" and condition.status == "False":
+                if (
+                    condition.reason == "Unschedulable"
+                    and "pod group is not ready" in condition.message
+                ):
+                    return True
+        return False
+    except Exception:
+        return False

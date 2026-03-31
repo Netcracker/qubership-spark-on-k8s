@@ -19,19 +19,39 @@ The application is defined as a `SparkApplication` resource in Kubernetes, utili
 The application includes various Spark and Hadoop configurations to integrate with Hive and S3-compatible storage.
 
 ### Key Spark Configurations
-- `spark.sql.warehouse.dir`: `s3a://hive/warehouse`
-- `spark.sql.hive.metastore.version`: `3.1.3`
-- `spark.sql.hive.metastore.jars.path`: `/opt/spark/hivejars/*`
-- `spark.hadoop.hive.metastore.uris`: `thrift://hive-metastore.hive-metastore:9083`
-- `spark.hadoop.fs.s3a.endpoint`: `https://test-minio.com`
-- `spark.hadoop.fs.s3a.connection.ssl.enabled`: `false`
-- `spark.hadoop.fs.s3a.impl`: `org.apache.hadoop.fs.s3a.S3AFileSystem`
-- `spark.hadoop.fs.s3a.path.style.access`: `true`
-- `spark.hadoop.fs.s3a.committer.magic.enabled`: `true`
-- `spark.driver.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking` - deprecated, for this option to work, your image should include AWS java SDK v1, since the default image includes AWS java SDK v2 where disabling certificate verification is not supported.
-- `spark.executor.extraJavaOptions`: `-Dcom.amazonaws.sdk.disableCertChecking` - deprecated, for this option to work, your image should include AWS java SDK v1, since the default image includes AWS java SDK v2 where disabling certificate verification is not supported.
-- `spark.sql.catalogImplementation`: `hive`
-- `spark.sql.legacy.createHiveTableByDefault`: `false`
+    "spark.jars.ivy": "/tmp/.ivy"
+    # --- Hive Metastore Config ---
+    "spark.sql.hive.metastore.version": "4.0.1"
+    "spark.sql.hive.metastore.jars": "path"
+    "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
+    "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.hive-metastore:9083"
+    "spark.hadoop.hive.metastore.schema.verification": "false"
+    "spark.hadoop.hive.metastore.schema.verification.record.version": "false"
+    "spark.sql.catalogImplementation": "hive"
+    "spark.sql.legacy.createHiveTableByDefault": "false"
+    "spark.sql.streaming.fileSource.log.deletion": "false"
+    "spark.sql.sources.commitProtocolClass": "org.apache.spark.internal.io.cloud.PathOutputCommitProtocol"
+    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
+    # --- Hive TLS config ---
+    "spark.hadoop.hive.metastore.use.SSL": "true"
+    "spark.hadoop.hive.metastore.truststore.path": "/java-security/cacerts"
+    "spark.hadoop.hive.metastore.truststore.password": "changeit"
+    # --- S3A / MinIO Core Config ---
+    "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
+    "spark.hadoop.fs.s3a.fast.upload": "true"
+    "spark.hadoop.fs.s3.buckets.create.enabled": "true"
+    "spark.hadoop.fs.s3a.metadatastore.authoritative": "true"
+    "spark.hadoop.fs.s3a.committer.magic.enabled": "true"
+    "spark.hadoop.fs.s3a.committer.name": "magic"
+    "spark.sql.parquet.output.committer.class": "org.apache.spark.internal.io.cloud.BindingParquetOutputCommitter"
+    # ---S3 TLS config ---
+    "spark.hadoop.fs.s3a.connection.ssl.enabled": "true"
+    # --- Logs and Timeouts ---
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    "spark.driver.extraJavaOptions": "-Djavax.net.ssl.trustStore=/java-security/cacerts -Djavax.net.ssl.trustStorePassword=changeit -Dcom.amazonaws.sdk.disableCertChecking --add-modules jdk.incubator.vector -Dlog4j2.logger.fileStreamSink.name=org.apache.spark.sql.execution.streaming.FileStreamSink -Dlog4j2.logger.fileStreamSink.level=error"
+    "spark.executor.extraJavaOptions": "-Djavax.net.ssl.trustStore=/java-security/cacerts -Djavax.net.ssl.trustStorePassword=changeit -Dcom.amazonaws.sdk.disableCertChecking --add-modules jdk.incubator.vector -Dlog4j2.logger.fileStreamSink.name=org.apache.spark.sql.execution.streaming.FileStreamSink -Dlog4j2.logger.fileStreamSink.level=error"
 
 ### Security & Execution Context
 - Runs as a non-root user (`runAsUser: 185`)
@@ -39,7 +59,7 @@ The application includes various Spark and Hadoop configurations to integrate wi
 - Drops all privileged capabilities for security
 
 ### Kubernetes Secret for S3 Credentials
-The application uses a Kubernetes Secret to securely store S3 credentials:
+The application uses a pre created Kubernetes Secret to securely store S3 credentials:
 
 ```yaml
 apiVersion: v1
@@ -49,9 +69,32 @@ metadata:
   namespace: spark-apps
 type: Opaque
 stringData:
-  AWS_ACCESS_KEY_ID: {"awsaccesskey"}
-  AWS_SECRET_ACCESS_KEY: {"awssecretkey"}  
-  S3_ENDPOINT_URL: {"aws endpoint url"}
+  AWS_ACCESS_KEY_ID: {minioaccesskey}
+  AWS_SECRET_ACCESS_KEY: {miniosecretkey}
+  S3_ENDPOINT_URL: {minio url}
+  BUCKET_NAME: {bucket name}
+  DB_NAME: {database name}
+  TABLE_NAME: {table name}
+```
+### Kubernetes secret for S3 Certificates
+The application uses a pre created Kuberenetes Secret to securely store S3 and Hive Metastore TLS certificates
+
+```yaml
+kind: Secret
+apiVersion: v1
+metadata:
+  name: ca-certificates
+  namespace: spark-apps
+type: Opaque
+stringData:
+  hive.pem: |
+    -----BEGIN CERTIFICATE-----
+    hive metastore certificate content
+    -----END CERTIFICATE-----
+  s3.pem: |
+    -----BEGIN CERTIFICATE-----
+    s3 certificate content
+    -----END CERTIFICATE----- 
 ```
 
 ### Init Containers
@@ -61,19 +104,32 @@ The application includes an init container to delete old S3 data before running 
 - **Image:** Same as the main application
 - **Script:** `delete_s3.py`
 - **Function:** Deletes old data from `s3://hive/warehouse/mysparkdb2.db/`
-- **Environment Variables:**
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
-  - `S3_ENDPOINT_URL`
 - **Security Context:** Runs as a non-root user with restricted privileges
 
-## Environment Variables in Spark Application
-The following environment variables are set within the Spark application to improve execution and suppress unnecessary warnings:
+## Hive Metastore and S3 TLS support
+Add the follwing configuration to spark application to connect to Hive Metastore and S3 storage securely.
 
-- `AWS_JAVA_V1_DISABLE_DEPRECATION_ANNOUNCEMENT=true`: Disables deprecation warnings from AWS Java SDK v1.
-- `PYTHONPATH="/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip"`: Ensures that PySpark and Py4J dependencies are correctly resolved in the Python environment.
-- `AWS_ACCESS_KEY_ID`: AWS accesskey referenced from s3_secrets to connect to S3 endpoint
-- `AWS_SECRET_ACCESS_KEY`: AWS secret access key referenced from s3_secrets to connect to S3 endpoint
+```yaml
+volumes:
+  - name: ca-certificates
+      secret:
+        secretName: ca-certs
+# The following should be added to driver, initcontainer, and executor
+volumeMounts:
+  - name: ca-certificates
+    mountPath: "/certs/trust"
+    readOnly: true 
+env:
+  - name: TRUST_CERTS_DIR
+    value: /certs/trust               
+```
+
+
+## Environment Variables in Spark Application
+The following environment variables are set within the Spark application to import certificates:
+
+- `TRUST_CERTS_DIR`: Stores certificates 
+
 
 ## Restart Policy
 The application will not restart automatically but has retry mechanisms in place:
