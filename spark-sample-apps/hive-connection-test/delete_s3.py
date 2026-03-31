@@ -37,7 +37,7 @@ def main():
         ),
     )
 
-    response = s3_w.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix.rstrip('/'))
+    response = s3_w.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix.rstrip("/"))
 
     if "Contents" in response:
         for obj in response["Contents"]:
