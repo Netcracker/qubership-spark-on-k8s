@@ -37,44 +37,40 @@ fi
 
 if [ -n "${TRUST_CERTS_DIR}" ] && [ -d "${TRUST_CERTS_DIR}" ]; then
     ORIGINAL_CACERTS="${JAVA_HOME}/lib/security/cacerts"
+    WRITABLE_CACERTS="/java-security/cacerts"
+
+    echo "Initial Setup: Checking writability of /java-security..."
     
-    if [ -w "$ORIGINAL_CACERTS" ]; then
-        echo "Original cacerts is writable. Patching in place..."
-        TARGET_CACERTS="$ORIGINAL_CACERTS"
-    else
-        echo "Original cacerts is RO. Falling back to /java-security..."
-        TARGET_CACERTS="/java-security/cacerts"
-        if [ ! -d "/java-security" ] || [ ! -w "/java-security" ]; then
-            echo "ERROR: /java-security is missing or NOT writable. Patching will fail."
-            exit 1
-        fi
-        echo "Refreshing writable cacerts from system..."
-        cp -f "$ORIGINAL_CACERTS" "$TARGET_CACERTS"
-        chmod 664 "$TARGET_CACERTS"
+    if [ ! -w "/java-security" ]; then
+        echo "ERROR: /java-security is NOT writable. Check your K8s volumeMounts."
     fi
 
+    echo "Refreshing writable cacerts from system..."
+    cp -f "$ORIGINAL_CACERTS" "$WRITABLE_CACERTS"
+    chmod 664 "$WRITABLE_CACERTS"
+    
     for filename in "${TRUST_CERTS_DIR}"/*; do
         if [ -f "$filename" ]; then
             alias_name=$(basename "$filename")
-            echo "Importing: $alias_name into $TARGET_CACERTS"
+            echo "Importing: $alias_name"
           
             "${JAVA_HOME}/bin/keytool" -import \
                 -trustcacerts \
                 -alias "$alias_name" \
                 -file "${filename}" \
-                -keystore "$TARGET_CACERTS" \
+                -keystore "$WRITABLE_CACERTS" \
                 -storepass changeit \
                 -noprompt \
                 -J-Djava.io.tmpdir=/tmp \
                 -storetype JKS
         fi
     done;
-
-    export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$TARGET_CACERTS"
-    export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$TARGET_CACERTS"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${TARGET_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit -Djava.io.tmpdir=/tmp"
     
-    echo "Certs successfully patched in $TARGET_CACERTS"
+    export SPARK_HISTORY_OPTS="$SPARK_HISTORY_OPTS -Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
+    export SPARK_JAVA_OPT_SSL="-Djavax.net.ssl.trustStore=$WRITABLE_CACERTS"
+    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Djavax.net.ssl.trustStore=${WRITABLE_CACERTS} -Djavax.net.ssl.trustStorePassword=changeit -Djava.io.tmpdir=/tmp"
+    
+    echo "Certs successfully patched in writable volume."
 fi
 
 if [[ -f $TLS_KEY_PATH && -f $TLS_CERT_PATH ]]; then

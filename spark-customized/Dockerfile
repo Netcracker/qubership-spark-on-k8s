@@ -37,9 +37,7 @@ USER root
     # Change permissions to run examples
     # Still need to add property     "spark.jars.ivy": "/tmp/.ivy" when running in openshift
 RUN chmod 777 /opt/spark/work-dir \
-    # Add permissions to add certs
-    && chown spark ${JAVA_HOME}/lib/security/cacerts && chgrp root ${JAVA_HOME}/lib/security/cacerts \
-    && chmod ug+rw ${JAVA_HOME}/lib/security/cacerts \
+    # Create the writable volume for the copy
     && mkdir -p /java-security \
     && chown spark:spark /java-security \
     && chmod 775 /java-security
