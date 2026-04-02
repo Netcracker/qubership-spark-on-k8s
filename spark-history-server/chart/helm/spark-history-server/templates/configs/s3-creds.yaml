@@ -8,7 +8,8 @@ metadata:
     release: {{ .Release.Name }}
     {{- include "all_objects_labels_shs" . | nindent 4 }}
 type: Opaque
-data:
-  accesskey: {{ .Values.s3.accesskey | b64enc }}
-  secretkey: {{ .Values.s3.secretkey | b64enc }}
+stringData:
+  access-key: {{ .Values.s3.accesskey }}
+  secret-key: {{ .Values.s3.secretkey }}
+  jceks.pass: {{ .Values.s3.jceksPassword }}
 {{- end }}

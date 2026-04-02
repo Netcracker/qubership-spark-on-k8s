@@ -30,7 +30,18 @@ podAnnotations: {}
 
 affinity: {}
 
-podSecurityContext: {}
+podSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    fsGroup: 185
+    privileged: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 185
+    seccompProfile:
+      type: RuntimeDefault
   # fsGroup: 2000
 
 securityContext: 
@@ -141,6 +152,7 @@ s3:
   endpoint: http://minioaddress.your.cloud.qubership.org
   accesskey: yourminioaccesskey
   secretkey: yourminiosecretkey
+  jceksPassword: yourjceksPassword
 
 hdfs:
   enabled: false
@@ -441,6 +453,7 @@ oauth2Proxy:
 
   # Whether to use secrets instead of environment values for setting up OAUTH2_PROXY variables
   proxyVarsAsSecrets: true
+  secretsAsFiles: true
 
   # Configure Kubernetes liveness and readiness probes.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/

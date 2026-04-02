@@ -39,7 +39,9 @@ USER root
 RUN chmod 777 /opt/spark/work-dir \
     # Create the writable volume for the copy
     && mkdir -p /java-security \
+    && mkdir -p /opt/spark/secrets \
     && chown spark:spark /java-security \
+    && chown spark:spark /opt/spark/secrets \
     && chmod 775 /java-security
 
 

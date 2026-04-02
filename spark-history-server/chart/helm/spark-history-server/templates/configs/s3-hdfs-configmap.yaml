@@ -1,0 +1,34 @@
+{{- if or .Values.hdfs.enabled .Values.s3.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-s3-hdfs-config
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    {{- include "all_objects_labels_shs" . | nindent 4 }}
+data:
+  {{- if .Values.hdfs.hdfs_site }}
+  hdfs-site.xml: |
+    {{- .Values.hdfs.hdfs_site | nindent 4 }}
+  {{- end }}
+
+  
+  core-site.xml: |
+    <configuration>
+      {{- if .Values.s3.enabled }}
+      <property>
+        <name>hadoop.security.credential.provider.path</name>
+        <value>jceks://file/opt/spark/secrets/s3.jceks</value>
+      </property>
+      <property>
+        <name>hadoop.security.credstore.java-keystore-provider.password-file</name>
+        <value>/opt/spark/raw-creds/jceks.pass</value>
+      </property>
+      {{- end }}
+      {{- if .Values.hdfs.core_site }}
+{{ .Values.hdfs.core_site | nindent 6 }}
+      {{- end }}
+    </configuration>
+{{- end }}
+

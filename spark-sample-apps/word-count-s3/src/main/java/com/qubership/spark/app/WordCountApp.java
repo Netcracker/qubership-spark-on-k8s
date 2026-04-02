@@ -4,7 +4,10 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
+import org.apache.hadoop.conf.Configuration;
 import scala.Tuple2;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import java.util.Arrays;
 
@@ -15,6 +18,8 @@ public final class WordCountApp {
                 .builder()
                 .appName("JavaWordCount")
                 .getOrCreate();
+
+	setupS3Credentials(spark);		
 
         JavaSparkContext jsc = new JavaSparkContext(spark.sparkContext());
         
@@ -27,4 +32,21 @@ public final class WordCountApp {
 
         spark.stop();
     }
+    public static void setupS3Credentials(SparkSession spark) throws Exception {
+        Configuration hadoopConf = spark.sparkContext().hadoopConfiguration();
+
+        String accessKey = new String(
+            Files.readAllBytes(Paths.get("/opt/spark/raw-creds/accesskey"))
+        ).trim();
+
+        String secretKey = new String(
+            Files.readAllBytes(Paths.get("/opt/spark/raw-creds/secretkey"))
+        ).trim();
+
+        hadoopConf.set("fs.s3a.access.key", accessKey);
+        hadoopConf.set("fs.s3a.secret.key", secretKey);
+
+        System.out.println("S3 credentials set programmatically");
+   }
+    
 }

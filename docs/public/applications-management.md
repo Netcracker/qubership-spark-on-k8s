@@ -204,6 +204,7 @@ Refer to the following documentation:
 * [Specifying Environment Variables](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/user-guide.md#specifying-environment-variables)
 * [Using Secrets As Environment Variables](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/master/docs/user-guide.md#using-secrets-as-environment-variables)
 * [Environment Variables](/docs/public/user-guide.md#environment-variables-in-spark-since-332)
+* [Replace Secret to ENV mapping with file based Secret mounts](/docs/public/user-guide.md#replace-secret-to-env-mapping-with-file-based-secret-mounts)
 
 # Python Applications
 

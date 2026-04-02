@@ -39,16 +39,6 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: status.podIP
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: spark-thrift-secret
-                  key: accesskey
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: spark-thrift-secret
-                  key: secretkey
           command:
             - '/opt/thrift-server-entrypoint.sh'
           volumeMounts:

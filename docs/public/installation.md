@@ -1,5 +1,5 @@
-This document describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. 
-The following topics are covered in the document:
+This guide describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. 
+The following topics are covered in the guide:
 
 * [Prerequisites](#prerequisites)
     * [Common](#common) 
@@ -37,6 +37,8 @@ The following topics are covered in the document:
           * [AWS V4 Signature Configuration](#aws-v4-signature-configuration)
           * [TLS](#tls)
         * [Security Hardening for History Server](#security-hardening-for-history-server)
+          * [RO Filesystem Support](#ro-filesystem-support)
+          * [Replace Secret to ENV Mapping with File Based Secret Mounts](#replace-secret-to-env-mapping-with-file-based-secret-mounts)
         * [HTTPRoute for K8S Gateway API Support](#httproute-for-k8s-gateway-api-support)   
     * [Spark Thrift Server Deployment](#spark-thrift-server-deployment)
 * [Upgrade](#upgrade)
@@ -1989,6 +1991,9 @@ TLS configuration is described in the [Using Secure S3 Endpoint For Spark Histor
 
 ### Security Hardening for History Server
 
+The security hardening information for History server is specified in the below sub-sections.
+
+#### RO Filesystem Support
 To improve the security posture of the application, the deployment is configured with a read-only root filesystem. This prevents the container process from writing to any location on the disk except for specifically designated volumes.
 The following settings are applied:
 ```
@@ -2003,6 +2008,48 @@ The following volumes are already provisioned in the deployment to handle the st
  | common-volume | /tmp | tmp | Provides a writable area for temporary files, and general OS-level buffers. |
  | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
  | java-cacerts-dir| /java-security | java-security | Used specifically for managing Java truststores and security certificates at runtime. |
+
+ #### Replace Secret to ENV Mapping with File Based Secret Mounts
+ 
+To improve the application security, it is recommended to replace the secret-to-environment variable mapping with file-based secret mounts for handling sensitive data. These changes are applied starting from release 2.4.0
+
+Sensitive parameters are now read from the mounted secret files using automated secret volume mounts.
+
+The following configurations have been applied:
+
+ ```
+ # Added S3 credentials to the secret `s3-creds`, used by the Spark History Server deployment
+ access-key: {{ .Values.s3.accesskey }}
+ secret-key: {{ .Values.s3.secretkey }}
+ jceks.pass: {{ .Values.s3.jceksPassword }}
+ ```
+ Using the above credentials, the entrypoint script creates a JCEKS keystore with a password. The properties `hadoop.security.credential.provider.path` and `hadoop.security.credstore.java-keystore-provider.password-file` are added to `core-site.xml` via the ConfigMap `s3-hdfs-configmap`.
+
+ ```
+ # Added S3 credentials to the secret `init-job-credentials-secret`, used by `s3-init-job`
+ s3_accessKey: {{ .Values.s3.accesskey | b64enc }}
+ s3_secretKey: {{ .Values.s3.secretkey | b64enc }}
+ ``` 
+
+ ```
+ # Added the following arguments to pass client-secret and cookie-secret as files from secrets. Used by Oauth2Proxy deployment
+ args:
+   {{- if .Values.oauth2Proxy.secretsAsFiles }}
+   - --client-secret-file=/var/run/secrets/oauth2-proxy/client-secret
+   - --cookie-secret-file=/var/run/secrets/oauth2-proxy/cookie-secret
+   {{- end }}
+ ```  
+ By default, `.Values.oauth2Proxy.secretsAsFiles` is set to `true`, and these secret files override the corresponding environment variables and flags.
+
+ The following volumes are provisioned in the deployment to support the above configuration:
+ | Volume Name | Mount Path | Purpose|
+ |:------------:|:----------:|:-------|
+ | s3-creds | /opt/spark/raw-creds | Stores S3 credentials. |
+ | s3-jcekS | /opt/spark/secrets | Stores the created JCEKS. |
+ | s3-init-credentials|  /var/run/secrets/spark/s3-init | Stores S3 credentials for `s3-init-job` |
+ | oauth-secrets | /var/run/secrets/oauth2-proxy | Stores oauth secrets |
+
+
  
 ### HTTPRoute for K8S Gateway API Support
 

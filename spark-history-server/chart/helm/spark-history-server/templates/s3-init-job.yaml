@@ -17,6 +17,10 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       volumes:
+        - name: s3-init-credentials
+          secret:
+            secretName: {{ .Chart.Name }}-init-job-credentials
+            defaultMode: 0400
         {{- if .Values.extraVolumes }}
           {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
         {{- end }}
@@ -25,24 +29,17 @@ spec:
         image: {{ template "spark-history-server.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
-          {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- toYaml .Values.securityContext | nindent 10 }}
         command: ["/bin/bash"]
         resources: {{- toYaml .Values.s3InitJob.resources | nindent 12 }}
         env:
           {{- if .Values.extraEnv }}
           {{- toYaml .Values.extraEnv | nindent 10}}
           {{- end }}
-          - name: "ACCESS_KEY"
-            valueFrom:
-              secretKeyRef:
-                key: s3_accessKey
-                name: {{ .Chart.Name }}-init-job-credentials
-          - name: "SECRET_KEY"
-            valueFrom:
-              secretKeyRef:
-                key: s3_secretKey
-                name: {{ .Chart.Name }}-init-job-credentials
         volumeMounts:
+          - name: s3-init-credentials
+            mountPath: /var/run/secrets/spark/s3-init
+            readOnly: true
           {{- if .Values.extraVolumeMounts }}
             {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
           {{- end }}
@@ -50,6 +47,9 @@ spec:
         args:
           - "-c"
           - |-
+            ACCESS_KEY=$(cat /var/run/secrets/spark/s3-init/s3_accessKey)
+            SECRET_KEY=$(cat /var/run/secrets/spark/s3-init/s3_secretKey)
+
             s3_url="{{ .Values.s3.endpoint }}"
             s3_uri="{{ .Values.logDirectory }}"
             aws_sigv4="{{ .Values.s3InitJob.awsSigV4 }}"
