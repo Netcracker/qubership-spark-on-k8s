@@ -13,6 +13,10 @@ spec:
   sparkVersion: "4.0.2"
   restartPolicy:
     type: Never
+  volumes:
+    - name: s3-creds
+      secret:
+        secretName: s3-cred  
   sparkConf:
     "spark.jars.ivy": "/tmp/.ivy"
     "spark.s3.input.file": "s3a://spark-samples/wordcount/input/log4j.properties"
@@ -32,6 +36,9 @@ spec:
     "fs.s3a.committer.staging.abort.pending.uploads": "true"
     "fs.s3a.committer.staging.conflict-mode": append
     "fs.s3a.connection.timeout": "200000"
+    "fs.s3a.multiobjectdelete.enable": "false"
+    "fs.s3a.fast.upload": "true"
+    
 
   driver:
     labels:
@@ -46,17 +53,9 @@ spec:
       capabilities:
         drop:
           - ALL
-    env:
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: s3-cred
-            key: accesskey
-      - name: AWS_SECRET_ACCESS_KEY
-        valueFrom:
-          secretKeyRef:
-            name: s3-cred
-            key: secretkey
+    volumeMounts:
+      - name: s3-creds
+        mountPath: /opt/spark/raw-creds
   executor:
     cores: 1
     instances: 1
@@ -71,14 +70,6 @@ spec:
       capabilities:
         drop:
           - ALL
-    env:
-      - name: AWS_ACCESS_KEY_ID
-        valueFrom:
-          secretKeyRef:
-            name: s3-cred
-            key: accesskey
-      - name: AWS_SECRET_ACCESS_KEY
-        valueFrom:
-          secretKeyRef:
-            name: s3-cred
-            key: secretkey
+    volumeMounts:
+      - name: s3-creds
+        mountPath: /opt/spark/raw-creds

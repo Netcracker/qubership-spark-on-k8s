@@ -45,8 +45,35 @@ spec:
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
         command:
-          - '/opt/entrypoint.sh'
-          - '/opt/spark/sbin/start-history-server.sh'
+          - /bin/sh
+          - -c
+        args: 
+          - |
+            set -e
+            JCEKS_PATH=/opt/spark/secrets/s3.jceks
+            if [ ! -f ${JCEKS_PATH} ]; then
+              echo "Creating JCEKS for S3 credentials..."
+
+              ACCESS=$(cat /opt/spark/raw-creds/access-key)
+              SECRET=$(cat /opt/spark/raw-creds/secret-key)
+
+              export HADOOP_CREDSTORE_PASSWORD=$(cat /opt/spark/raw-creds/jceks.pass)
+
+              /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.access.key \
+                  -value "$ACCESS" \
+                  -provider jceks://file/opt/spark/secrets/s3.jceks
+
+              /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.secret.key \
+                  -value "$SECRET" \
+                  -provider jceks://file/opt/spark/secrets/s3.jceks
+                  
+              chmod 600 ${JCEKS_PATH}
+
+              echo "JCEKS created successfully"  
+            else
+              echo "JCEKS already exists, skipping creation."
+            fi    
+            exec /opt/entrypoint.sh /opt/spark/sbin/start-history-server.sh  
         env:
           {{- if .Values.extraEnv }}
           {{ tpl (toYaml .Values.extraEnv) . | nindent 10 }}
@@ -61,27 +88,24 @@ spec:
                {{- end }}"
           - name: SPARK_CONF_DIR
             value: /opt/spark/conf
-          {{- if .Values.hdfs.enabled }}
+          {{- if or .Values.hdfs.enabled .Values.s3.enabled }}
           - name: HADOOP_CONF_DIR
             value: /etc/hadoop/conf
           {{- end }}
           {{- if .Values.s3.enabled }}
-          - name: AWS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Chart.Name }}-s3-creds
-                key: accesskey
-          - name: AWS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Chart.Name }}-s3-creds
-                key: secretkey
           {{- if .Values.s3.sslInsecure }}
           - name: JAVA_TOOL_OPTIONS
             value: '-Dcom.amazonaws.sdk.disableCertChecking'
           {{- end }}
           {{- end }}
         volumeMounts:
+          {{- if .Values.s3.enabled }}
+          - name: s3-creds
+            mountPath: /opt/spark/raw-creds
+            readOnly: true
+          - name: s3-jceks
+            mountPath: /opt/spark/secrets
+          {{- end }}
           - name: common-volume
             mountPath: /tmp
             subPath: tmp
@@ -106,7 +130,7 @@ spec:
             {{- if .Values.extraVolumeMounts }}
               {{- tpl (toYaml .Values.extraVolumeMounts) . | nindent 10 }}
             {{- end }}
-          {{- if .Values.hdfs.enabled }}
+          {{- if or .Values.hdfs.enabled .Values.s3.enabled }}
           - name: hdfs-config
             mountPath: /etc/hadoop/conf
           {{- end }}
@@ -157,6 +181,10 @@ spec:
           - {{ . | quote }}
           {{- end }}
         args:
+        {{- if .Values.oauth2Proxy.secretsAsFiles }}
+          - --client-secret-file=/var/run/secrets/oauth2-proxy/client-secret
+          - --cookie-secret-file=/var/run/secrets/oauth2-proxy/cookie-secret
+        {{- end }}
         {{- if .Values.oauth2Proxy.alphaConfig.enabled }}
           - --alpha-config=/etc/oauth2_proxy/oauth2_proxy.yml
         {{- else }}
@@ -234,7 +262,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name:  {{ template "oauth2-proxy.secretName" . }}
-              key: cookie-secret
+              key: cookie-secret      
         {{- end }}
         {{- if eq (default "cookie" .Values.oauth2Proxy.sessionStorage.type) "redis" }}
         - name: OAUTH2_PROXY_SESSION_STORE_TYPE
@@ -329,6 +357,11 @@ spec:
         resizePolicy: {{ toYaml . | nindent 12 }}
 {{- end }}
         volumeMounts:
+          {{- if .Values.oauth2Proxy.secretsAsFiles }}
+          - name: oauth-secrets
+            mountPath: /var/run/secrets/oauth2-proxy
+            readOnly: true
+          {{- end }}  
           {{- with .Values.oauth2Proxy.config.google }}
           {{- if and .adminEmail (or .serviceAccountJson .existingSecret) }}
           - name: google-secret
@@ -369,6 +402,20 @@ spec:
         {{- end }}
 {{ end }}
       volumes:
+        {{- if .Values.s3.enabled }}
+        - name: s3-creds
+          secret:
+            secretName: {{ .Chart.Name }}-s3-creds
+            defaultMode: 0400
+        - name: s3-jceks
+          emptyDir: {}
+        {{- end }}
+        {{- if .Values.oauth2Proxy.secretsAsFiles }}
+        - name: oauth-secrets
+          secret:
+            secretName: {{ template "oauth2-proxy.secretName" . }}
+            defaultMode: 0400
+        {{- end }}   
         - name: common-volume
           emptyDir: {}
         - name: java-cacerts-dir
@@ -383,7 +430,7 @@ spec:
             name: {{ .Chart.Name }}-spark-config
         - name: hdfs-config
           configMap:
-            name: {{ .Chart.Name }}-hdfs-config
+            name: {{ .Chart.Name }}-s3-hdfs-config
         {{- if .Values.extraVolumes }}
           {{- tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
         {{- end }}
@@ -394,6 +441,7 @@ spec:
         - name: hdfs-keytab
           secret:
             secretName: {{ .Chart.Name }}-keytab
+            defaultMode: 0400
         {{- end }}
 {{ if .Values.oauth2Proxy.enabled }}
         {{- with .Values.oauth2Proxy.config.google }}

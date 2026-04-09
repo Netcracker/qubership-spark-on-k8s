@@ -8,6 +8,8 @@ This guide provides references to the original GCP Spark Operator documentation 
 * [Using a SparkApplication](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#using-a-sparkapplication)
 * [Integration with S3 Storage](#integration-with-s3-storage)
 * [Spark Application Dependencies](#integration-with-s3-storage)
+* [Support for Read Only Root Filesystem](#support-for-read-only-root-filesystem)
+* [Replace Secret to ENV Mapping with File Based Secret Mounts](#replace-secret-to-env-mapping-with-file-based-secret-mounts)
 * [Writing a SparkApplication Spec](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#writing-a-sparkapplication-spec)
     * [Specifying Deployment Mode](https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/blob/spark-operator-chart-1.0.4/docs/user-guide.md#specifying-deployment-mode)
     * [Specifying Application Dependencies](#spark-application-dependencies)
@@ -131,7 +133,7 @@ For more information on how to enable the mutating admission webhook, see [Quick
        app.kubernetes.io/processed-by-operator: spark-operator
        app.kubernetes.io/managed-by: the-tool-used-to-create-this-cr
    ```
-### Support for Read-Only Root Filesystem
+### Support for Read Only Root Filesystem
 
 If the `TRUST_CERTS_DIR` environment variable is specified, certificates will be imported to `/java-security/cacerts`. Hence, a writable volume such as an emptyDir should be mounted with path `/java-security/` to support Read only Root filesystem.
 
@@ -169,6 +171,46 @@ spec:
        - name: TRUST_CERTS_DIR
          value: /spark/customcerts               
 ```
+### Replace Secret to ENV Mapping with File Based Secret Mounts
+The sensitive parameters should be stored in Kubernets secrets and the sensitive parameters from the secret to env is not recommended. Sensitive parameters are now read from the mounted secret files using secret volume mounts.
+
+Configuration Steps:
+
+```yaml
+spec:
+  volumes:
+    - name: s3-creds
+      secret:
+        secretName: s3-cred
+  driver:
+    volumeMounts:
+      - name: s3-creds
+        mountPath: /opt/spark/raw-creds
+  executor:
+     volumeMounts:   
+       - name: s3-creds
+         mountPath: /opt/spark/raw-creds 
+```             
+Here is an example in a Java application to read sensitive parameters from a mounted secret and use them.
+```java
+public static void setupS3Credentials(SparkSession spark) throws Exception {
+        Configuration hadoopConf = spark.sparkContext().hadoopConfiguration();
+
+        String accessKey = new String(
+            Files.readAllBytes(Paths.get("/opt/spark/raw-creds/accesskey"))
+        ).trim();
+
+        String secretKey = new String(
+            Files.readAllBytes(Paths.get("/opt/spark/raw-creds/secretkey"))
+        ).trim();
+
+        hadoopConf.set("fs.s3a.access.key", accessKey);
+        hadoopConf.set("fs.s3a.secret.key", secretKey);
+
+        System.out.println("S3 credentials set programmatically");
+   }
+```
+An example can be viewed in [spark-word-count-s3.yaml](../../spark-sample-apps/word-count-s3/cr/spark-word-count-s3.yaml).
 
 #### Main Parameters of Application
 
@@ -275,6 +317,8 @@ To work with S3 storage:
        "fs.s3a.committer.staging.abort.pending.uploads": "true"
        "fs.s3a.committer.staging.conflict-mode": append
        "fs.s3a.connection.timeout": "200000"
+       "fs.s3a.multiobjectdelete.enable": "false"
+       "fs.s3a.fast.upload": "true"
    ``` 
    
    The rest of the other properties are described in the following links:
