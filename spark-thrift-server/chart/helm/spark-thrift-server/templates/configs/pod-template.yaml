@@ -12,4 +12,9 @@ data:
      containers:
        - name: spark-thrift-executor
          securityContext:
+           {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+           {{- toYaml (omit .Values.securityContext "runAsUser") | nindent 10 }}
+           {{- else }}
            {{- toYaml .Values.securityContext | nindent 10 }}
+           {{- end }}
+           

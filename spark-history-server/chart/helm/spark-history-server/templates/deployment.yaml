@@ -33,7 +33,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
+        {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+        {{- toYaml (omit .Values.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}
+        {{- else }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- end }}
       {{- with .Values.hostAliases }}
       hostAliases:
         {{- toYaml . | nindent 8 }}
@@ -43,7 +47,11 @@ spec:
         image: {{ template "spark-history-server.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
+          {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+          {{- toYaml (omit .Values.securityContext "runAsUser") | nindent 12 }}
+          {{- else }}
           {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
         command:
           - /bin/sh
           - -c
@@ -394,6 +402,9 @@ spec:
           {{- end }}
           {{- if .Values.oauth2Proxy.securityContext.enabled }}
           {{- $securityContext := unset .Values.oauth2Proxy.securityContext "enabled" }}
+          {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+          {{- $securityContext = unset $securityContext "runAsUser" }}
+          {{- end }}
         securityContext:
           {{- toYaml $securityContext | nindent 10 }}
         {{- end }}

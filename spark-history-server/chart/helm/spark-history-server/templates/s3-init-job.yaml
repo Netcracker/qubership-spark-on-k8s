@@ -15,7 +15,11 @@ spec:
         {{- include "all_objects_labels_shs" . | nindent 8 }}
     spec:
       securityContext:
+        {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+        {{- toYaml (omit .Values.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}
+        {{- else }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- end }}
       volumes:
         - name: s3-init-credentials
           secret:
