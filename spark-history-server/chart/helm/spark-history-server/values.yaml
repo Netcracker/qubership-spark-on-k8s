@@ -8,7 +8,7 @@ replicas: 1
 
 image:
   repository: ghcr.io/netcracker/qubership-spark-customized
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   tag: main
 
 imagePullSecrets: []
