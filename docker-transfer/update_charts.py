@@ -1,8 +1,8 @@
 from pathlib import Path
 import re
 
-controller_file = Path("./chart/helm/spark-on-k8s/charts/spark-operator/templates/controller/deployment.yaml")
-webhook_file = Path("./chart/helm/spark-on-k8s/charts/spark-operator/templates/webhook/deployment.yaml")
+controller_file = Path("./chart/helm/spark-on-k8s/charts/spark_operator/templates/controller/deployment.yaml")
+webhook_file = Path("./chart/helm/spark-on-k8s/charts/spark_operator/templates/webhook/deployment.yaml")
 
 
 def patch_sc(file_path, sc_var):

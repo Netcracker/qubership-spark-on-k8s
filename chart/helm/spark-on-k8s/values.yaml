@@ -1,4 +1,4 @@
-spark-operator:
+spark_operator:
   image:
     registry: ghcr.io
     repository: netcracker/qubership-spark-operator
