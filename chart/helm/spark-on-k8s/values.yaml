@@ -56,7 +56,7 @@ prometheusRules:
 appServiceMonitor:
   enable: false
 spark-history-server:
-  enabled: false
+  enabled: true
   securityContext:
     capabilities:
       drop:
