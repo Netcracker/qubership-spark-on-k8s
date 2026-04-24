@@ -13,8 +13,8 @@ WORKDIR /app
 RUN mkdir -p chart/helm/spark-on-k8s/charts && \
     curl -s -L https://github.com/kubeflow/spark-operator/releases/download/v2.5.0/spark-operator-2.5.0.tgz | \
     tar xvz -C chart/helm/spark-on-k8s/charts && \
-    mv chart/helm/spark-on-k8s/charts/spark-operator chart/helm/spark-on-k8s/charts/spark_operator && \
-    sed -i 's/^name: spark-operator/name: spark_operator/' chart/helm/spark-on-k8s/charts/spark_operator/Chart.yaml
+    mv chart/helm/spark-on-k8s/charts/spark-operator chart/helm/spark-on-k8s/charts/spark-operator && \
+    sed -i 's/^name: spark-operator/name: spark-operator/' chart/helm/spark-on-k8s/charts/spark-operator/Chart.yaml
 
 COPY chart /app/chart
 COPY spark-history-server/chart/helm /app/chart/helm/spark-on-k8s/charts
@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir ruamel.yaml==0.17.32 && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-history-server/values.yaml && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-thrift-server/values.yaml && \
     python sync_util.py images chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-integration-tests/values.yaml && \
-    python sync_util.py qubership-spark-operator chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark_operator/values.yaml && \
+    python sync_util.py qubership-spark-operator chart/helm/spark-on-k8s/release-images.yaml chart/helm/spark-on-k8s/charts/spark-operator/values.yaml && \
     python update_charts.py
 
 FROM scratch
