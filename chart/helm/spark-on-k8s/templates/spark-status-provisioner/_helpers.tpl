@@ -1,8 +1,8 @@
 {{- define "qubership-spark-on-k8s.spark-operator.fullname" -}}
-{{- if index .Values "spark-operator" "fullnameOverride" -}}
-{{- index .Values "spark-operator" "fullnameOverride" | trunc 63 | trimSuffix "-" -}}
+{{- if index .Values "spark_operator" "fullnameOverride" -}}
+{{- index .Values "spark_operator" "fullnameOverride" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default "spark-operator" (index .Values "spark-operator" "nameOverride") -}}
+{{- $name := default "spark_operator" (index .Values "spark_operator" "nameOverride") -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -37,8 +37,8 @@ Calculates resources that should be monitored during deployment by Deployment St
   {{- if (index .Values "spark-operator" "controller" "replicas" | int) }}
   {{- printf "Deployment %s, " (include "qubership-spark-on-k8s.spark-operator.controller.deploymentName" .) -}}
   {{- end }}
-  {{- if index .Values "spark-operator" "webhook" "enable" }}
-  {{- if (index .Values "spark-operator" "webhook" "replicas" | int) }}
+  {{- if index .Values "spark_operator" "webhook" "enable" }}
+  {{- if (index .Values "spark_operator" "webhook" "replicas" | int) }}
   {{- printf "Deployment %s, " (include "qubership-spark-on-k8s.spark-operator.webhook.deploymentName" .) -}}
   {{- end }}
   {{- end }}
