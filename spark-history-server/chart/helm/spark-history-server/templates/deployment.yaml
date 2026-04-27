@@ -33,7 +33,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+        {{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
         {{- toYaml (omit .Values.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}
         {{- else }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -47,7 +47,7 @@ spec:
         image: {{ template "spark-history-server.image" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         securityContext:
-          {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+          {{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
           {{- toYaml (omit .Values.securityContext "runAsUser") | nindent 12 }}
           {{- else }}
           {{- toYaml .Values.securityContext | nindent 12 }}
@@ -402,7 +402,7 @@ spec:
           {{- end }}
           {{- if .Values.oauth2Proxy.securityContext.enabled }}
           {{- $securityContext := unset .Values.oauth2Proxy.securityContext "enabled" }}
-          {{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}
+          {{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
           {{- $securityContext = unset $securityContext "runAsUser" }}
           {{- end }}
         securityContext:

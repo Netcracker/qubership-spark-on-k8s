@@ -29,7 +29,7 @@ def patch_sc(file_path, sc_var):
         )
 
     new_block = f"""securityContext:
-        {{{{- if eq (default "KUBERNETES" .Values.PAAS_PLATFORM) "OPENSHIFT" }}}}
+        {{{{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}}}
         {{{{ toYaml (omit .Values.{sc_var}.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}}}
         {{{{- else }}}}
         {{{{- toYaml .Values.{sc_var}.podSecurityContext  | nindent 8 }}}}
