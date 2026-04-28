@@ -65,7 +65,10 @@ Find a Deployment Status Provisioner image in various places.
 {{- end -}}
 
 {{- define "statusProvisioner.shouldOmitSecurityContext" -}}
-{{- $isOpenShift := .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}
 {{- $omit := default true .Values.openShift.omit -}}
-{{- and $isOpenShift $omit -}}
+{{- if $omit -}}
+  {{- .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}
+{{- else -}}
+  false
+{{- end -}}
 {{- end -}}

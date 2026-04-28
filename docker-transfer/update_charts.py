@@ -72,11 +72,14 @@ def patch_sc(file_path, sc_var):
     success("Exactly one matching securityContext block found")
 
     new_block = f"""securityContext:
-        {{{{- $isOpenShift := .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}}}
         {{{{- $omit := default true .Values.openShift.omit -}}}}
-
-        {{{{- if and $isOpenShift $omit }}}}
+        {{{{- if $omit }}}}
+        {{{{- $isOpenShift := .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}}}
+        {{{{- if $isOpenShift }}}}
         {{{{ toYaml (omit .Values.{sc_var}.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}}}
+        {{{{- else }}}}
+        {{{{- toYaml .Values.{sc_var}.podSecurityContext | nindent 8 }}}}
+        {{{{- end }}}}
         {{{{- else }}}}
         {{{{- toYaml .Values.{sc_var}.podSecurityContext | nindent 8 }}}}
         {{{{- end }}}}"""

@@ -12,9 +12,5 @@ data:
      containers:
        - name: spark-thrift-executor
          securityContext:
-           {{- if include "thriftServer.shouldOmitSecurityContext" . | eq "true" }}
-           {{- toYaml (omit .Values.securityContext "runAsUser") | nindent 10 }}
-           {{- else }}
            {{- toYaml .Values.securityContext | nindent 10 }}
-           {{- end }}
            
