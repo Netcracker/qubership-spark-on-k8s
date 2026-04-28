@@ -136,3 +136,5 @@ statusProvisioner:
   labels: {}
 certManagerIntegration:
   enabled: false
+openShift:
+  omit: true  
