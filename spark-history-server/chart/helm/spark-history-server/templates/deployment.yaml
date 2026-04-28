@@ -398,7 +398,6 @@ spec:
           {{- end }}
         securityContext:
           {{- toYaml .Values.securityContext | nindent 10 }}
-        {{- end }}
         {{- if .Values.oauth2Proxy.extraContainers }}
           {{- toYaml .Values.oauth2Proxy.extraContainers | nindent 6 }}
         {{- end }}
