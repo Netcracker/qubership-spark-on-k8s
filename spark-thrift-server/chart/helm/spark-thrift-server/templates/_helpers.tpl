@@ -100,3 +100,9 @@ Processed by cert-manager label
 {{- define "cert_manager_label_sts" -}}
 app.kubernetes.io/processed-by-operator: cert-manager
 {{- end }}
+
+{{- define "thriftServer.shouldOmitSecurityContext" -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}
+{{- $omit := default true .Values.openShift.omit -}}
+{{- and $isOpenShift $omit -}}
+{{- end -}}

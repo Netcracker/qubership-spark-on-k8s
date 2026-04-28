@@ -109,3 +109,9 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 {{- end }}
+
+{{- define "integrationTests.shouldOmitSecurityContext" -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}
+{{- $omit := default true .Values.openShift.omit -}}
+{{- and $isOpenShift $omit -}}
+{{- end -}}

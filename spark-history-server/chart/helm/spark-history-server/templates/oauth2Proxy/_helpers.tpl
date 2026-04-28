@@ -164,3 +164,8 @@ client-id: {{ tpl .Values.oauth2Proxy.config.clientID $ | b64enc | quote }}
     {{ printf "%s:v%s" (.Values.image.repository) (include "oauth2-proxy.version" .) }}
 {{- end -}}
 
+{{- define "oauth2Proxy.shouldOmitSecurityContext" -}}
+{{- $isOpenShift := .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}
+{{- $omit := default true .Values.openShift.omit -}}
+{{- and $isOpenShift $omit -}}
+{{- end -}}

@@ -24,7 +24,7 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "spark-thrift-server.serviceAccountName" . }}
       securityContext:
-        {{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
+        {{- if include "thriftServer.shouldOmitSecurityContext" . | eq "true" }}
         {{- toYaml (omit .Values.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}
         {{- else }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -34,7 +34,7 @@ spec:
           image: {{ template "spark-thrift-server.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
-            {{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
+            {{- if include "thriftServer.shouldOmitSecurityContext" . | eq "true" }}
             {{- toYaml (omit .Values.securityContext "runAsUser") | nindent 12 }}
             {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
