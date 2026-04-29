@@ -396,8 +396,11 @@ spec:
           {{- if ne (len .Values.oauth2Proxy.extraVolumeMounts) 0 }}
           {{ toYaml .Values.oauth2Proxy.extraVolumeMounts | nindent 10 }}
           {{- end }}
+        {{- if .Values.oauth2Proxy.securityContext.enabled }}
+          {{- $securityContext := unset .Values.oauth2Proxy.securityContext "enabled" }}
         securityContext:
-          {{- toYaml .Values.securityContext | nindent 10 }}
+          {{- toYaml $securityContext | nindent 10 }}
+        {{- end }}
         {{- if .Values.oauth2Proxy.extraContainers }}
           {{- toYaml .Values.oauth2Proxy.extraContainers | nindent 6 }}
         {{- end }}

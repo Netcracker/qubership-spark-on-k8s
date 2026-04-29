@@ -69,6 +69,17 @@ spark-history-server:
     allowPrivilegeEscalation: false
     seccompProfile:
       type: RuntimeDefault
+  oauth2Proxy:
+    securityContext:
+      enabled: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault    
 spark-thrift-server:
   enabled: false
   securityContext:
