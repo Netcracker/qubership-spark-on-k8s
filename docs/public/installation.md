@@ -22,7 +22,7 @@ The following topics are covered in the guide:
     * [Manual Deployment](#manual-deployment)
     * [HA Scheme](#ha-scheme)
     * [Non-HA Scheme](#non-ha-scheme-not-recommended)
-    * [Openshift support](#openshift-support)
+    * [OpenShift Support](#openshift-support)
     * [Spark Operator S3 Connectivity Support](#spark-operator-s3-connectivity-support)
     * [Spark History Server Deployment](#spark-history-server-deployment) 
         * [Using Secure S3 Endpoint for Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) 
@@ -1100,7 +1100,7 @@ For the application's high availability settings, refer to the Configuring Autom
 Spark Operator supports deployment in the Active-Active DR scheme.  
 Independent instances of Spark Operator are installed on each site.
 
-## Openshift support
+## OpenShift Support
 
 To support OpenShift, the securityContext in all deployments is adjusted to comply with OpenShift’s Security Context Constraints (SCC).
 
