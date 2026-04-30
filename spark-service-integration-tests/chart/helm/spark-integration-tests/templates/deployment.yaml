@@ -29,7 +29,11 @@ spec:
         {{ .Values.affinity | toJson }}
       {{- end }}
       securityContext:
+        {{- if include "integrationTests.shouldOmitSecurityContext" . | eq "true" }}
+        {{- toYaml (omit .Values.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}
+        {{- else }}
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- end }}
       containers:
         - name: {{ .Values.service.name }}
           securityContext:

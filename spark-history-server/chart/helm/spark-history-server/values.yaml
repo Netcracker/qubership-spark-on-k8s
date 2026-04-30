@@ -31,17 +31,9 @@ podAnnotations: {}
 affinity: {}
 
 podSecurityContext:
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
-    fsGroup: 185
-    privileged: false
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 185
-    seccompProfile:
-      type: RuntimeDefault
+  fsGroup: 185
+  runAsUser: 185
+  runAsGroup: 185
   # fsGroup: 2000
 
 securityContext: 

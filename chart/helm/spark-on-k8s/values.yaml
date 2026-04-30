@@ -3,6 +3,8 @@ spark-operator:
     registry: ghcr.io
     repository: netcracker/qubership-spark-operator
     tag: main
+  openShift:
+    omit: true
   controller:
     podSecurityContext:
       runAsNonRoot: true
@@ -57,11 +59,12 @@ appServiceMonitor:
   enable: false
 spark-history-server:
   enabled: false
+  openShift:
+    omit: true
   securityContext:
     capabilities:
       drop:
         - ALL
-    runAsUser: 185
     runAsNonRoot: true
     allowPrivilegeEscalation: false
     seccompProfile:
@@ -75,10 +78,8 @@ spark-history-server:
         - ALL
       readOnlyRootFilesystem: true
       runAsNonRoot: true
-      runAsUser: 2000
-      runAsGroup: 2000
       seccompProfile:
-        type: RuntimeDefault
+        type: RuntimeDefault    
 spark-thrift-server:
   enabled: false
   securityContext:
@@ -91,6 +92,8 @@ spark-thrift-server:
     seccompProfile:
       type: RuntimeDefault
 spark-integration-tests:
+  openShift:
+    omit: true
   enabled: false
   sparkOperatorControllerDeploymentName: sparkoperator-spark-operator-controller
   sparkOperatorWebhookDeploymentName: sparkoperator-spark-operator-webhook
@@ -124,3 +127,5 @@ statusProvisioner:
   labels: {}
 certManagerIntegration:
   enabled: false
+openShift:
+  omit: true  

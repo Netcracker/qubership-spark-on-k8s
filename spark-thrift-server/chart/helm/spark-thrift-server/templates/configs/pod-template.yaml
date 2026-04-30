@@ -13,3 +13,4 @@ data:
        - name: spark-thrift-executor
          securityContext:
            {{- toYaml .Values.securityContext | nindent 10 }}
+           

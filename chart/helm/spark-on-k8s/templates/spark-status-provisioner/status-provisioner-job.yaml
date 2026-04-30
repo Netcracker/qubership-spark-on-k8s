@@ -27,7 +27,11 @@ spec:
       restartPolicy: Never
       serviceAccountName: spark-status-provisioner
       securityContext:
+        {{- if include "statusProvisioner.shouldOmitSecurityContext" . | eq "true" }}
+        {{ toYaml (omit .Values.statusProvisioner.podSecurityContext "runAsUser" "fsGroup" "runAsGroup") | nindent 8 }}
+        {{- else }}
         {{- toYaml .Values.statusProvisioner.podSecurityContext | nindent 8 }}
+        {{- end }}
       containers:
         - name: status-provisioner
           image: {{ template "deployment-status-provisioner.image" . }}

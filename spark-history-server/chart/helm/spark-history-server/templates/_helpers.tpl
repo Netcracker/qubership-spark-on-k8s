@@ -117,3 +117,12 @@ Processed by cert-manager label
 {{- define "cert_manager_label_shs" -}}
 app.kubernetes.io/processed-by-operator: cert-manager
 {{- end }}
+
+{{- define "historyServer.shouldOmitSecurityContext" -}}
+{{- $omit := default true .Values.openShift.omit -}}
+{{- if $omit -}}
+  {{- .Capabilities.APIVersions.Has "security.openshift.io/v1" -}}
+{{- else -}}
+  false
+{{- end -}}
+{{- end -}}

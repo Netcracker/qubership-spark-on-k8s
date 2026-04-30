@@ -1,4 +1,4 @@
-This guide describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. 
+This guide describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. Some modifications have been applied to the  templates to ensure compatibility with different environments (for example, OpenShift).
 The following topics are covered in the guide:
 
 * [Prerequisites](#prerequisites)
@@ -22,6 +22,7 @@ The following topics are covered in the guide:
     * [Manual Deployment](#manual-deployment)
     * [HA Scheme](#ha-scheme)
     * [Non-HA Scheme](#non-ha-scheme-not-recommended)
+    * [OpenShift Support](#openshift-support)
     * [Spark Operator S3 Connectivity Support](#spark-operator-s3-connectivity-support)
     * [Spark History Server Deployment](#spark-history-server-deployment) 
         * [Using Secure S3 Endpoint for Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) 
@@ -757,7 +758,7 @@ The following table lists the additional spark-on-k8s configuration parameters.
 | grafanadashboard.enable | bool | `false` | The string to submit a Grafana dashboard.|
 | grafanaApplicationDashboard.enable | bool | `false` | The string to submit a Grafana dashboard for applications.|
 | appServiceMonitor.enable | bool | `false` | The string to submit a service monitor for Spark applications.|
-
+| `spark-operator.openShift.omit` | `boolean` | `true` | Specifies whether the security context should be adjusted for OpenShift |
 ### Monitoring Configuration
 
 To enable all monitoring options, it is necessary to set the following parameters:
@@ -864,6 +865,7 @@ As qubership-spark-on-k8s chart is a parent chart, it can override the Spark His
 |`spark-history-server.gateway.rules`|`array`|`[]`|rules for HTTPRoute. When `rules[].matches` is not set, it defaults to `path.type=PathPrefix` and `path.value=/`. `backendRefs` in the rule will point to trino server service, but the weight can be configured if needed.|
 |`spark-history-server.gateway.redirectRoute.enabled`|`boolean`|`false`|Specifies if redirect HTTPRoute for trino server is deployed|
 |`spark-history-server.gateway.redirectRoute.parentRefs`|`array`|`[]`|parentRefs for redirect HTTPRoute|
+| `spark-history-server.openShift.omit` | `boolean` | `true` | Specifies whether the security context should be adjusted for OpenShift |
 
 ## Spark Thrift Server
 
@@ -1003,6 +1005,7 @@ The Spark Integration Tests parameters are specified below.
 | `prometheusUrl` | string | `""` | The parameter specifies the path to Custom Resource that should be used for the write status of auto-tests execution. |
 | `sparkAppsServiceAccount` | string | `sparkapps-sa` | The parameter specifies the service account name in the Spark apps namespace. |
 | `priorityClassName`               | false                                        | string, null      | `~`                                                                                    | The parameter specifies the priority class name for spark tests pods.  |
+| `spark-integration-tests.openShift.omit` | `boolean` | `true` | Specifies whether the security context should be adjusted for OpenShift |
 
  
 For example:
@@ -1040,6 +1043,7 @@ Status Provisioner is a component for providing the overall service status.
 | `statusProvisioner.integrationTestsTimeout` | int | `2000` | The timeout in seconds that the job waits for the integration tests to complete.|
 | `statusProvisioner.resources` | string | | The pod resource requests and limits.|
 | `statusProvisioner.priorityClassName`               | false                                        | string, null      | `~`                                                     | Priority class name for spark operator pods. |
+| `openShift.omit` | `boolean` | `true` | Specifies whether the security context should be adjusted for OpenShift |
 
 
 ```yaml
@@ -1095,6 +1099,28 @@ For the application's high availability settings, refer to the Configuring Autom
 
 Spark Operator supports deployment in the Active-Active DR scheme.  
 Independent instances of Spark Operator are installed on each site.
+
+## OpenShift Support
+
+To support OpenShift, the securityContext in all deployments is adjusted to comply with OpenShift’s Security Context Constraints (SCC).
+
+When running on OpenShift, the following fields are omitted:
+
+* `runAsUser`
+* `runAsGroup`
+* `fsGroup`
+
+This is required because OpenShift typically assigns a random UID and may reject explicitly defined user/group settings.
+This behavior can be controlled via the following parameter in each subchart:
+```yaml
+openShift:
+  omit: true
+```  
+* `true` (default):
+Automatically omits runAsUser, runAsGroup, and fsGroup when deployed on OpenShift.
+* `false`:
+Keeps the full securityContext unchanged.
+Use this if your OpenShift cluster has custom SCC rules that allow explicit user/group settings.
 
 ## Spark Operator S3 Connectivity Support
 
