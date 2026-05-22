@@ -1,0 +1,450 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "spark-operator": {
+      "type": "object",
+      "description": "Configuration for the spark-operator subchart",
+      "properties": {
+        "image": {
+          "type": "object",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "default": "ghcr.io",
+              "description": "Image registry for spark-operator"
+            },
+            "repository": {
+              "type": "string",
+              "default": "netcracker/qubership-spark-operator",
+              "description": "Image repository for spark-operator"
+            },
+            "tag": {
+              "type": "string",
+              "default": "main",
+              "description": "Image tag for spark-operator"
+            }
+          }
+        },
+        "openShift": {
+          "type": "object",
+          "properties": {
+            "omit": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to omit OpenShift-specific resources"
+            }
+          }
+        },
+        "controller": {
+          "type": "object",
+          "description": "Configuration for the spark-operator controller",
+          "properties": {
+            "podSecurityContext": {
+              "description": "Pod-level security context for spark-operator controller pods.",
+              "type": "object",
+              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+              "default": {
+                "runAsNonRoot": true,
+                "seccompProfile": {
+                  "type": "RuntimeDefault"
+                },
+                "runAsUser": 185
+              }
+            },
+            "resources": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+              "description": "Compute Resources required by spark-operator controller container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+              "default": {
+                "limits": {
+                  "cpu": "200m",
+                  "memory": "600Mi"
+                },
+                "requests": {
+                  "cpu": "100m",
+                  "memory": "300Mi"
+                }
+              }
+            }
+          }
+        },
+        "webhook": {
+          "type": "object",
+          "description": "Configuration for the spark-operator webhook",
+          "properties": {
+            "podSecurityContext": {
+              "description": "Pod-level security context for spark-operator webhook pods.",
+              "type": "object",
+              "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+              "default": {
+                "runAsNonRoot": true,
+                "seccompProfile": {
+                  "type": "RuntimeDefault"
+                },
+                "runAsUser": 185
+              }
+            },
+            "resources": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+              "description": "Compute Resources required by spark-operator webhook container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+              "default": {
+                "limits": {
+                  "cpu": "200m",
+                  "memory": "600Mi"
+                },
+                "requests": {
+                  "cpu": "100m",
+                  "memory": "300Mi"
+                }
+              }
+            }
+          }
+        },
+        "spark": {
+          "type": "object",
+          "properties": {
+            "jobNamespaces": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [
+                "spark-apps"
+              ],
+              "description": "Namespaces where Spark jobs will run"
+            },
+            "serviceAccount": {
+              "type": "object",
+              "description": "Service account configuration for Spark jobs.",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "default": "sparkapps-sa"
+                }
+              }
+            }
+          }
+        },
+        "prometheus": {
+          "type": "object",
+          "properties": {
+            "podMonitor": {
+              "type": "object",
+              "description": "Configuration for the PodMonitor resource for spark-operator.",
+              "properties": {
+                "create": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether to create the PodMonitor resource."
+                },
+                "labels": {
+                  "type": "object",
+                  "description": "Labels to add to the PodMonitor resource for spark-operator. By default, it includes labels to identify the component and its association with platform monitoring.",
+                  "default": {
+                    "app.kubernetes.io/component": "monitoring",
+                    "app.kubernetes.io/name": "spark-operator-gcp-podmonitor",
+                    "app.kubernetes.io/part-of": "platform-monitoring",
+                    "k8s-app": "spark-operator-gcp-podmonitor"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable internal metrics (deprecated)"
+        }
+      }
+    },
+    "grafanaApplicationDashboard": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable the Grafana application dashboard."
+        }
+      }
+    },
+    "grafanadashboard": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable the Grafana dashboard for spark-operator metrics."
+        }
+      }
+    },
+    "prometheusRules": {
+      "type": "object",
+      "properties": {
+        "alert": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to enable Prometheus alerts for spark-operator."
+            }
+          }
+        }
+      }
+    },
+    "appServiceMonitor": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable the application ServiceMonitor."
+        }
+      }
+    },
+    "spark-history-server": {
+      "type": "object",
+      "description": "Configuration for the Spark History Server.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable the Spark History Server."
+        },
+        "openShift": {
+          "type": "object",
+          "properties": {
+            "omit": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to omit the Spark History Server on OpenShift."
+            }
+          }
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container-level security context for the history server Pod.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {
+            "allowPrivilegeEscalation": false,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "readOnlyRootFilesystem": true,
+            "runAsNonRoot": true,
+            "seccompProfile": {
+              "type": "RuntimeDefault"
+            }
+          }
+        },
+        "oauth2Proxy": {
+          "type": "object",
+          "properties": {
+            "securityContext": {
+              "type": "object",
+              "description": "Container-level security context for the oauth2proxy container.",
+              "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+              "default": {
+                "enable": true,
+                "allowPrivilegeEscalation": false,
+                "capabilities": {
+                  "drop": [
+                    "ALL"
+                  ]
+                },
+                "readOnlyRootFilesystem": true,
+                "runAsNonRoot": true,
+                "seccompProfile": {
+                  "type": "RuntimeDefault"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "spark-thrift-server": {
+      "type": "object",
+      "description": "Configuration for the Spark Thrift Server.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "whether to enable the Spark Thrift Server."
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container-level security context for the spark thrift server Pod.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {
+            "allowPrivilegeEscalation": false,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "readOnlyRootFilesystem": true,
+            "runAsNonRoot": true,
+            "seccompProfile": {
+              "type": "RuntimeDefault"
+            },
+            "runAsUser": 185
+          }
+        }
+      }
+    },
+    "spark-integration-tests": {
+      "type": "object",
+      "properties": {
+        "openShift": {
+          "type": "object",
+          "properties": {
+            "omit": {
+              "type": "boolean",
+              "default": true,
+              "description": "whether to omit spark integration tests on OpenShift due to security constraints"
+            }
+          }
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "to enable integration tests"
+        },
+        "sparkOperatorControllerDeploymentName": {
+          "type": "string",
+          "default": "sparkoperator-spark-operator-controller",
+          "description": "Name of the Spark Operator Controller deployment"
+        },
+        "sparkOperatorWebhookDeploymentName": {
+          "type": "string",
+          "default": "sparkoperator-spark-operator-webhook",
+          "description": "Name of the Spark Operator Webhook deployment"
+        },
+        "sparkAppsServiceAccount": {
+          "type": "string",
+          "default": "sparkapps-sa",
+          "description": "Name of the Spark Apps service account"
+        }
+      }
+    },
+    "statusProvisioner": {
+      "type": "object",
+      "properties": {
+        "podSecurityContext": {
+          "type": "object",
+          "description": "Pod-level security context for the status provisionor Pod.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+          "default": {
+            "runAsNonRoot": true,
+            "seccompProfile": {
+              "type": "RuntimeDefault"
+            },
+            "runAsUser": 185
+          }
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container-level security context for the status provisionor Pod.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {
+            "privileged": false,
+            "allowPrivilegeEscalation": false,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "readOnlyRootFilesystem": true
+          }
+        },
+        "priorityClassName": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Priority class name for the status provisioner Pod."
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to enable the status provisioner, which updates SparkApplication status with job completion info."
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+          "description": "Compute Resources required by status provisioner container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+          "default": {
+            "limits": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "image": {
+          "type": "string",
+          "default": "ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.4",
+          "description": "Container image for the status provisioner"
+        },
+        "lifetimeAfterCompletion": {
+          "type": "integer",
+          "default": 600,
+          "description": "Time in seconds that the status provisioner Pod will live after a Spark job completes. This allows the provisioner to update the SparkApplication status with job completion info after the job finishes. If set to 0, the provisioner Pod will be deleted immediately after it updates the SparkApplication status."
+        },
+        "podReadinessTimeout": {
+          "type": "integer",
+          "default": 300,
+          "description": "Timeout in seconds for waiting for the status provisioner Pod to be ready"
+        },
+        "integrationTestsTimeout": {
+          "type": "integer",
+          "default": 2000,
+          "description": "Timeout in milliseconds for integration tests"
+        },
+        "labels": {
+          "type": "object",
+          "default": {},
+          "description": "Labels to add to the status provisioner Pod",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "certManagerIntegration": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable cert-manager integration for automatic TLS certificate management for the Spark Operator."
+        }
+      }
+    },
+    "openShift": {
+      "type": "object",
+      "properties": {
+        "omit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to omit OpenShift-specific resources from the chart"
+        }
+      }
+    }
+  }
+}

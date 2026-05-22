@@ -9,10 +9,10 @@ image:
     tag: main
 
 sparkAppsNamespace: "spark-apps"
-status_writing_enabled: "true"
+status_writing_enabled: true
 cr_status_writing:
-  is_short_status_message: "true"
-  only_integration_tests: "true"
+  is_short_status_message: true
+  only_integration_tests: true
   status_custom_resource_path: "apps/v1/spark/deployments/spark-integration-tests-runner"
 prometheusUrl: ""
 resources:
