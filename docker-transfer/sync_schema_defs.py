@@ -11,7 +11,7 @@ SCHEMA_FILES = [
     Path("chart/helm/spark-on-k8s/charts/spark-history-server/values.schema.json"),
     Path("chart/helm/spark-on-k8s/charts/spark-thrift-server/values.schema.json"),
     Path("chart/helm/spark-on-k8s/charts/spark-integration-tests/values.schema.json"),
-    Path("chart/helm/spark-on-k8s/charts/spark-operator/values.schema.json")    
+    Path("chart/helm/spark-on-k8s/charts/spark-operator/values.schema.json"),
 ]
 
 with open(COMMON_DEFS_FILE, "r") as f:

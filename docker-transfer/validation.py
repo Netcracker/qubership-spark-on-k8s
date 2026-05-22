@@ -12,10 +12,14 @@ def validate_defaults(values, default_values_schema, param_path=""):
 
                 if "default" in schema_prop and not isinstance(value, (dict, list)):
                     if schema_prop["default"] == "see the values.yaml file":
-                        print(f"Skipping validation for this parameter: {param_path}{key}.")
+                        print(
+                            f"Skipping validation for this parameter: {param_path}{key}."
+                        )
                         continue
                     if schema_prop["default"] != value:
-                        print(f"form schema: {schema_prop["default"]}, from values: {value}")
+                        print(
+                            f"form schema: {schema_prop["default"]}, from values: {value}"
+                        )
                         raise ValueError(f"{param_path}{key} is different!")
                 else:
                     validate_defaults(
