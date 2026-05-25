@@ -492,7 +492,7 @@
             "parentRefs": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "object"
               },
               "default": [],
               "description": "parentRefs for HTTPRoute."
@@ -524,7 +524,7 @@
                 "caCertificateRefs": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "object"
                   },
                   "default": [],
                   "description": "caCertificateRefs for backendTLSPolicy."
@@ -560,7 +560,7 @@
                 "parentRefs": {
                   "type": "array",
                   "items": {
-                    "type": "string"
+                    "type": "object"
                   },
                   "default": [],
                   "description": "parentRefs for redirect route."
@@ -811,7 +811,7 @@
               "description": "Internal traffic policy for the oauth2-proxy service. This can be set to 'Cluster' or 'Local' to control how internal traffic is routed to the pods."
             },
             "targetPort": {
-              "type": "string",
+              "type": "integer",
               "default": "",
               "description": "Target port for the oauth2-proxy service. This should match the port that the oauth2-proxy container is listening on and can be set to a specific port number or a named port."
             },
@@ -1555,7 +1555,7 @@
         "parentRefs": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "object"
           },
           "default": [],
           "description": "parentRefs for HTTPRoute"
@@ -1587,7 +1587,7 @@
             "parentRefs": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "object"
               },
               "default": [],
               "description": "parentRefs for redirect Route."
