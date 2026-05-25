@@ -1,6 +1,7 @@
 service:
   name: spark-integration-tests-runner
-
+openShift:
+  omit: true
 serviceAccount:
   create: true
   name: "spark-integration-tests"

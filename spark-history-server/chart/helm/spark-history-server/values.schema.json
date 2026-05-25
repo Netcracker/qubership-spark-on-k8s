@@ -811,7 +811,10 @@
               "description": "Internal traffic policy for the oauth2-proxy service. This can be set to 'Cluster' or 'Local' to control how internal traffic is routed to the pods."
             },
             "targetPort": {
-              "type": "integer",
+              "type": [
+                "integer",
+                "string"
+              ],
               "default": "",
               "description": "Target port for the oauth2-proxy service. This should match the port that the oauth2-proxy container is listening on and can be set to a specific port number or a named port."
             },
@@ -1155,7 +1158,8 @@
             "minAvailable": {
               "type": [
                 "integer",
-                "string"
+                "string",
+                "null"
               ],
               "default": 1,
               "description": "Minimum number of available pods for the PodDisruptionBudget for the oauth2-proxy deployment. This can be set to an integer value to specify an absolute number of pods that must be available, or a string percentage (e.g., '50%') to specify a percentage of the total number of pods that must be available."
@@ -1163,7 +1167,8 @@
             "maxUnavailable": {
               "type": [
                 "integer",
-                "string"
+                "string",
+                "null"
               ],
               "default": null,
               "description": "Maximum number of unavailable pods for the PodDisruptionBudget for the oauth2-proxy deployment. This can be set to an integer value to specify an absolute number of pods that can be unavailable, or a string percentage (e.g., '50%') to specify a percentage of the total number of pods that can be unavailable. This should be set based on the desired level of availability and tolerance for disruptions for the oauth2-proxy deployment."
