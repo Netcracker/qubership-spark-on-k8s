@@ -959,6 +959,10 @@
           "description": "The duration before the TLS certificate expires that cert-manager should attempt to renew the certificate. This is only used if cert-manager is enabled."
         }
       }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
     }
   },
   "additionalProperties": true

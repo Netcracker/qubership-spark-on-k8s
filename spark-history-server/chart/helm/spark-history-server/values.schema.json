@@ -5,7 +5,7 @@
     "replicas": {
       "type": "integer",
       "default": 1,
-      "description": "Number of replicas for spark-history-server"
+      "description": "The desired number of pods."
     },
     "image": {
       "type": "object",
@@ -13,17 +13,17 @@
         "repository": {
           "type": "string",
           "default": "ghcr.io/netcracker/qubership-spark-customized",
-          "description": "Container image repository for spark-history-server"
+          "description": "The image repository."
         },
         "pullPolicy": {
           "type": "string",
           "default": "IfNotPresent",
-          "description": "Image pull policy for spark-history-server"
+          "description": "The image pull policy."
         },
         "tag": {
           "type": "string",
           "default": "main",
-          "description": "Container image tag for spark-history-server"
+          "description": "This overrides the image tag whose default is the chart appVersion."
         }
       }
     },
@@ -33,7 +33,7 @@
         "type": "string"
       },
       "default": [],
-      "description": "Image pull secrets for spark-history-server"
+      "description": "The image pull secrets."
     },
     "nameOverride": {
       "type": "string",
@@ -43,7 +43,7 @@
     "fullnameOverride": {
       "type": "string",
       "default": "spark-history-server",
-      "description": "Override the full name of the chart"
+      "description": "The string to override a release name."
     },
     "priorityClassName": {
       "type": [
@@ -59,7 +59,7 @@
         "create": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to create a service account for spark-history-server"
+          "description": "This creates a service account for the Spark History Server."
         },
         "annotations": {
           "type": "object",
@@ -72,7 +72,7 @@
         "name": {
           "type": "string",
           "default": "",
-          "description": "Name of the service account to use for spark-history-server. If not set and create is true, a name will be generated using the fullname template"
+          "description": "The optional name for the Spark History Server service account."
         }
       }
     },
@@ -87,7 +87,7 @@
     "affinity": {
       "type": "object",
       "default": {},
-      "description": "Affinity settings for spark-history-server pods"
+      "description": "The parameter specifies the affinity scheduling rules."
     },
     "podSecurityContext": {
       "description": "Pod-level security context for spark-operator controller pods.",
@@ -121,17 +121,17 @@
         "externalPort": {
           "type": "integer",
           "default": 80,
-          "description": "External port for the spark-history-server service"
+          "description": "The Spark History Server service external port."
         },
         "internalPort": {
           "type": "integer",
           "default": 18080,
-          "description": "Internal port for the spark-history-server service"
+          "description": "The Spark History Server service internal port."
         },
         "type": {
           "type": "string",
           "default": "ClusterIP",
-          "description": "Service type for spark-history-server"
+          "description": "The Spark History Server service type."
         }
       }
     },
@@ -141,17 +141,17 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to create an ingress resource for spark-history-server"
+          "description": "It enables the Spark History Server ingress creation."
         },
         "host": {
           "type": "string",
           "default": "spark-history-server.your.cloud.qubership.org",
-          "description": "Host for the spark-history-server ingress"
+          "description": "It is the ingress host and should be compatible with the cluster's ingress URL routing rules."
         },
         "path": {
           "type": "string",
           "default": "/",
-          "description": "Path for the spark-history-server ingress"
+          "description": "Path for the spark-history-server ingress.It should be set to '/'."
         },
         "annotations": {
           "type": "object",
@@ -249,27 +249,27 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to enable liveness probe for spark-history-server"
+          "description": "Enables or disables the liveness probe."
         },
         "initialDelaySeconds": {
           "type": "integer",
           "default": 10,
-          "description": "Initial delay in seconds for the liveness probe of spark-history-server"
+          "description": "Number of seconds after the container has started before liveness probes are initiated."
         },
         "timeoutSeconds": {
           "type": "integer",
           "default": 20,
-          "description": "Timeout in seconds for the liveness probe of spark-history-server"
+          "description": "Number of seconds after which the probe times out."
         },
         "failureThreshold": {
           "type": "integer",
           "default": 5,
-          "description": "Failure threshold for the liveness probe of spark-history-server"
+          "description": "Minimum consecutive failures for the probe to be considered failed, causing container restart."
         },
         "periodSeconds": {
           "type": "integer",
           "default": 60,
-          "description": "Period in seconds for the liveness probe of spark-history-server"
+          "description": "The time interval in seconds denoting how often to perform the probe."
         }
       }
     },
@@ -279,27 +279,27 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to enable readiness probe for spark-history-server"
+          "description": "Enables or disables the readiness probe."
         },
         "initialDelaySeconds": {
           "type": "integer",
           "default": 15,
-          "description": "Initial delay in seconds for the readiness probe of spark-history-server"
+          "description": "Number of seconds after the container has started before readiness probes are initiated."
         },
         "timeoutSeconds": {
           "type": "integer",
           "default": 5,
-          "description": "Timeout in seconds for the readiness probe of spark-history-server"
+          "description": "Number of seconds after which the probe times out."
         },
         "failureThreshold": {
           "type": "integer",
           "default": 5,
-          "description": "Failure threshold for the readiness probe of spark-history-server"
+          "description": "Minimum consecutive failures for the probe to be considered failed, marking the container as Not Ready."
         },
         "periodSeconds": {
           "type": "integer",
           "default": 30,
-          "description": "Period in seconds for the readiness probe of spark-history-server"
+          "description": "The time interval in seconds denoting how often to perform the probe."
         }
       }
     },
@@ -342,7 +342,7 @@
         "null"
       ],
       "default": "",
-      "description": "Additional Spark properties to set for spark-history-server in the format of key=value pairs separated by newlines"
+      "description": "The Spark properties that are added to the config map, which is mounted by /opt/spark/conf and exposed to the SPARK_CONF_DIR environment variable."
     },
     "initJobCredentialsSecret": {
       "type": "object",
@@ -367,12 +367,12 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to create an init job to set up S3 credentials for spark-history-server"
+          "description": "The parameter that enables the Pre-install/upgrade Helm job. The job creates S3 path in S3 object storage and upload a mock file. The S3 path to create is set in s3.warehouseDir parameter."
         },
         "awsSigV4": {
           "type": "string",
           "default": "aws:minio:s3:s3",
-          "description": "AWS SigV4 configuration for S3 compatibility"
+          "description": "AWS V4 signature authentication configuration of the following format <provider1[:prvdr2[:reg[:srv]]]>. Used to authenticate requests to S3 storage. Configured to work with S3 MinIO by default. Details at https://curl.se/docs/manpage.html."
         },
         "priorityClassName": {
           "type": [
@@ -380,7 +380,7 @@
             "null"
           ],
           "default": null,
-          "description": "Priority class name for the S3 init job. If not set, the init job will use the same priority class as the main deployment."
+          "description": "Priority class name for init job."
         },
         "initAnnotations": {
           "type": "object",
@@ -389,7 +389,7 @@
             "helm.sh/hook-weight": "-10",
             "helm.sh/hook-delete-policy": "before-hook-creation"
           },
-          "description": "Annotations to add to the S3 init job. By default, the job will be annotated with Helm hook annotations to create it before the main deployment and delete it before creating a new one on upgrade.",
+          "description": "The S3 init job annotations.",
           "additionalProperties": {
             "type": "string"
           }
@@ -413,7 +413,7 @@
     "logDirectory": {
       "type": "string",
       "default": "s3a://tmp/spark/logs",
-      "description": "Log directory for spark-history-server. This should be a directory in the S3 bucket configured for spark-history-server to store the Spark event logs."
+      "description": "The directory to look for Spark applications' event logs."
     },
     "s3": {
       "type": "object",
@@ -421,22 +421,22 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to enable S3 integration for spark-history-server"
+          "description": "It should be enabled if S3 storage is used to store event logs."
         },
         "endpoint": {
           "type": "string",
           "default": "http://minioaddress.your.cloud.qubership.org",
-          "description": "S3 endpoint for spark-history-server to connect to the S3-compatible storage"
+          "description": "The S3 storage endpoint."
         },
         "accesskey": {
           "type": "string",
           "default": "yourminioaccesskey",
-          "description": "Access key for S3 authentication for spark-history-server"
+          "description": "The base64 encoded S3 storage access key. It is stored in a secret"
         },
         "secretkey": {
           "type": "string",
           "default": "yourminiosecretkey",
-          "description": "Secret key for S3 authentication for spark-history-server"
+          "description": "The base64 encoded S3 storage secret key. It is stored in a secret."
         },
         "jceksPassword": {
           "type": "string",
@@ -471,7 +471,7 @@
         "enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to enable oauth2-proxy as an authentication proxy in front of spark-history-server"
+          "description": "It enables OAuth2 Proxy authentication for the Spark History Server UI."
         },
         "gateway": {
           "type": "object",
@@ -479,7 +479,7 @@
             "enabled": {
               "type": "boolean",
               "default": false,
-              "description": "Whether to enable Gateway API support for the oauth2-proxy ingress. If enabled, an HTTPRoute will be created instead of an Ingress resource for oauth2-proxy."
+              "description": "Specifies if HTTPRoute for oauth2-proxy is deployed."
             },
             "hostnames": {
               "type": "array",
@@ -487,7 +487,7 @@
                 "type": "string"
               },
               "default": [],
-              "description": "Hostnames for the oauth2-proxy Gateway API HTTPRoute. This should be set if gateway.enabled is true."
+              "description": "hostnames for HTTPRoute."
             },
             "parentRefs": {
               "type": "array",
@@ -495,7 +495,7 @@
                 "type": "string"
               },
               "default": [],
-              "description": "Parent references for the oauth2-proxy Gateway API HTTPRoute. This should be set if gateway.enabled is true and should reference the Gateway resource to attach the HTTPRoute to."
+              "description": "parentRefs for HTTPRoute."
             },
             "rules": {
               "type": "array",
@@ -503,12 +503,12 @@
                 "type": "object"
               },
               "default": [],
-              "description": "Additional rules for the oauth2-proxy Gateway API HTTPRoute. This can be used to specify additional routing rules or match conditions for the HTTPRoute."
+              "description": "rules for HTTPRoute. When rules[].matches is not set, it defaults to path.type=PathPrefix and path.value=/. backendRefs in the rule will point to trino server service, but the weight can be configured if needed."
             },
             "labels": {
               "type": "object",
               "default": {},
-              "description": "Labels to add to the oauth2-proxy Gateway API HTTPRoute",
+              "description": "Labels for HTTPRoute and related objects",
               "additionalProperties": {
                 "type": "string"
               }
@@ -519,7 +519,7 @@
                 "enabled": {
                   "type": "boolean",
                   "default": false,
-                  "description": "Whether to enable TLS for the backend connection from the oauth2-proxy to spark-history-server when using Gateway API. If enabled, the HTTPRoute will be configured to use TLS for the backend connection."
+                  "description": "Specifies if the backendTLSPolicy should be deployed"
                 },
                 "caCertificateRefs": {
                   "type": "array",
@@ -527,17 +527,17 @@
                     "type": "string"
                   },
                   "default": [],
-                  "description": "References to Kubernetes secrets containing CA certificates to trust for the backend TLS connection from the oauth2-proxy to spark-history-server when using Gateway API. This should be set if backendTLSPolicy.enabled is true and should reference secrets containing the necessary CA certificates for the backend TLS connection."
+                  "description": "caCertificateRefs for backendTLSPolicy."
                 },
                 "hostname": {
                   "type": "string",
                   "default": "",
-                  "description": "Hostname to use for SNI when connecting from the oauth2-proxy to spark-history-server with TLS when using Gateway API. This should be set if backendTLSPolicy.enabled is true and should match the hostname on the TLS certificate used by spark-history-server."
+                  "description": "Hostname for backendTLSPolicy."
                 },
                 "wellKnownCACertificates": {
                   "type": "string",
                   "default": "",
-                  "description": "Comma-separated list of well-known CA certificates to trust for the backend TLS connection from the oauth2-proxy to spark-history-server when using Gateway API. This can be used as an alternative to specifying custom CA certificates with caCertificateRefs if the necessary CA certificates are included in the list of well-known CAs supported by the Kubernetes cluster."
+                  "description": "wellKnownCACertificates for backendTLSPolicy."
                 },
                 "subjectAltNames": {
                   "type": "array",
@@ -545,7 +545,7 @@
                     "type": "string"
                   },
                   "default": [],
-                  "description": "Subject alternative names to verify when connecting from the oauth2-proxy to spark-history-server with TLS when using Gateway API. This can be used as an additional verification step for the backend TLS connection in addition to trusting specific CA certificates."
+                  "description": "subjectAltNames for backendTLSPolicy."
                 }
               }
             },
@@ -563,7 +563,7 @@
                     "type": "string"
                   },
                   "default": [],
-                  "description": "Parent references for the oauth2-proxy redirect HTTPRoute when using Gateway API. This should be set if redirectRoute.enabled is true and should reference the Gateway resource to attach the redirect HTTPRoute to."
+                  "description": "parentRefs for redirect route."
                 },
                 "hostnames": {
                   "type": "array",
@@ -571,7 +571,7 @@
                     "type": "string"
                   },
                   "default": [],
-                  "description": "Hostnames for the oauth2-proxy redirect HTTPRoute when using Gateway API. This should be set if redirectRoute.enabled is true."
+                  "description": "hostnames for redirect Route"
                 }
               }
             }
@@ -627,12 +627,12 @@
             "clientID": {
               "type": "string",
               "default": "",
-              "description": "OAuth2 client ID for oauth2-proxy authentication"
+              "description": "The Keycloak client ID, configured for the Spark History Server authentication."
             },
             "clientSecret": {
               "type": "string",
               "default": "",
-              "description": "OAuth2 client secret for oauth2-proxy authentication"
+              "description": "The Keycloak client secret, configured for the Spark History Server authentication."
             },
             "cookieSecret": {
               "type": "string",
@@ -652,7 +652,7 @@
             "configFile": {
               "type": "string",
               "default": "",
-              "description": "Path to a custom configuration file for oauth2-proxy. If set, this file will be used as the configuration for oauth2-proxy instead of the configuration generated from the other config properties. This can be used to provide a completely custom configuration for oauth2-proxy if the provided config properties do not cover all use cases or if you want to manage the configuration separately."
+              "description": "The OAuth2 Proxy configuration. All properties are described in the OAuth2 Proxy Official Documentation at https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/overview#config-file."
             }
           }
         },
@@ -921,12 +921,12 @@
             "enabled": {
               "type": "boolean",
               "default": true,
-              "description": "Whether to create an Ingress resource for oauth2-proxy. If enabled, an Ingress will be created to expose the oauth2-proxy service externally."
+              "description": "It enables the OAuth2 Proxy ingress."
             },
             "path": {
               "type": "string",
               "default": "/",
-              "description": "Path for the Ingress resource for oauth2-proxy. This is the path that will be used to route traffic to the oauth2-proxy service through the Ingress."
+              "description": "Path for the Ingress resource for oauth2-proxy.It should be set to '/'."
             },
             "supportsPathType": {
               "type": "boolean",
@@ -944,7 +944,7 @@
                 "type": "string"
               },
               "default": [],
-              "description": "Hostnames for the Ingress resource for oauth2-proxy. This should be set if ingress.enabled is true and should include the hostnames that you want to use to access the oauth2-proxy service through the Ingress."
+              "description": "It is the ingress host and should be compatible with the cluster's ingress URL routing rules."
             },
             "annotations": {
               "type": "object",
@@ -1542,7 +1542,7 @@
         "enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to create a Gateway API Gateway resource for oauth2-proxy. If enabled, a Gateway will be created to expose the oauth2-proxy service using the Gateway API. This should be set if you want to use the Gateway API to manage the external exposure of oauth2-proxy instead of using an Ingress resource."
+          "description": "Specifies if HTTPRoute for History-server is deployed."
         },
         "hostnames": {
           "type": "array",
@@ -1550,7 +1550,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "Hostnames for the Gateway API Gateway resource for oauth2-proxy. This should be set if gateway.enabled is true and should include the hostnames that you want to use to access the oauth2-proxy service through the Gateway."
+          "description": "hostnames for HTTPRoute"
         },
         "parentRefs": {
           "type": "array",
@@ -1558,7 +1558,7 @@
             "type": "string"
           },
           "default": [],
-          "description": "Parent references for the Gateway API Gateway resource for oauth2-proxy. This should be set if gateway.enabled is true and should include the parent references (e.g., to a GatewayClass or other resources) needed to properly configure the Gateway resource for oauth2-proxy."
+          "description": "parentRefs for HTTPRoute"
         },
         "rules": {
           "type": "array",
@@ -1566,12 +1566,12 @@
             "type": "object"
           },
           "default": [],
-          "description": "Rules for the Gateway API Gateway resource for oauth2-proxy. This can be used to specify the routing rules for the Gateway resource to route traffic to the oauth2-proxy service based on specified criteria such as hostnames, paths, or other conditions."
+          "description": "rules for HTTPRoute. When rules[].matches is not set, it defaults to path.type=PathPrefix and path.value=/. backendRefs in the rule will point to trino server service, but the weight can be configured if needed."
         },
         "labels": {
           "type": "object",
           "default": {},
-          "description": "Labels to add to the Gateway API Gateway resource for oauth2-proxy. This can be used to add additional labels for organizational or selection purposes.",
+          "description": "Labels for HTTPRoute and related objects.",
           "additionalProperties": {
             "type": "string"
           }
@@ -1590,7 +1590,7 @@
                 "type": "string"
               },
               "default": [],
-              "description": "Parent references for the redirect route of the Gateway API Gateway resource for oauth2-proxy. This should be set if gateway.redirectRoute.enabled is true and should include the parent references (e.g., to a GatewayClass or other resources) needed to properly configure the redirect route for oauth2-proxy."
+              "description": "parentRefs for redirect Route."
             },
             "hostnames": {
               "type": "array",
@@ -1598,11 +1598,15 @@
                 "type": "string"
               },
               "default": [],
-              "description": "Hostnames for the redirect route of the Gateway API Gateway resource for oauth2-proxy. This should be set if gateway.redirectRoute.enabled is true and should include the hostnames that you want to use for the redirect route to access the oauth2-proxy service through the Gateway."
+              "description": "hostnames for redirect Route"
             }
           }
         }
       }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
     }
   },
   "additionalProperties": true

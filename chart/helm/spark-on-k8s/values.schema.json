@@ -32,7 +32,7 @@
             "omit": {
               "type": "boolean",
               "default": true,
-              "description": "Whether to omit OpenShift-specific resources"
+              "description": "Specifies whether the security context should be adjusted for OpenShift"
             }
           }
         },
@@ -172,7 +172,7 @@
         "enable": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to enable the Grafana application dashboard."
+          "description": "The string to submit a Grafana dashboard for applications"
         }
       }
     },
@@ -182,7 +182,7 @@
         "enable": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to enable the Grafana dashboard for spark-operator metrics."
+          "description": "The string to submit a Grafana dashboard"
         }
       }
     },
@@ -207,7 +207,7 @@
         "enable": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to enable the application ServiceMonitor."
+          "description": "The string to submit a service monitor for Spark applications."
         }
       }
     },
@@ -218,7 +218,7 @@
         "enabled": {
           "type": "boolean",
           "default": false,
-          "description": "Whether to enable the Spark History Server."
+          "description": "It enables the Spark History Server deployment."
         },
         "openShift": {
           "type": "object",
@@ -226,7 +226,7 @@
             "omit": {
               "type": "boolean",
               "default": true,
-              "description": "Whether to omit the Spark History Server on OpenShift."
+              "description": "Specifies whether the security context should be adjusted for OpenShift"
             }
           }
         },
@@ -281,7 +281,7 @@
         "enabled": {
           "type": "boolean",
           "default": false,
-          "description": "whether to enable the Spark Thrift Server."
+          "description": "It enables the Spark Thrift Server deployment."
         },
         "securityContext": {
           "type": "object",
@@ -313,14 +313,14 @@
             "omit": {
               "type": "boolean",
               "default": true,
-              "description": "whether to omit spark integration tests on OpenShift due to security constraints"
+              "description": "Specifies whether the security context should be adjusted for OpenShift"
             }
           }
         },
         "enabled": {
           "type": "boolean",
           "default": false,
-          "description": "to enable integration tests"
+          "description": "The parameter specifies whether the integration tests are installed or not. Set to true to run tests."
         },
         "sparkOperatorControllerDeploymentName": {
           "type": "string",
@@ -335,7 +335,7 @@
         "sparkAppsServiceAccount": {
           "type": "string",
           "default": "sparkapps-sa",
-          "description": "Name of the Spark Apps service account"
+          "description": "The parameter specifies the service account name in the Spark apps namespace."
         }
       }
     },
@@ -380,7 +380,7 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to enable the status provisioner, which updates SparkApplication status with job completion info."
+          "description": "The parameter specifies if the status provisioner job is deployed."
         },
         "resources": {
           "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
@@ -399,22 +399,22 @@
         "image": {
           "type": "string",
           "default": "ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.4",
-          "description": "Container image for the status provisioner"
+          "description": "The image for the Deployment Status Provisioner pod."
         },
         "lifetimeAfterCompletion": {
           "type": "integer",
           "default": 600,
-          "description": "Time in seconds that the status provisioner Pod will live after a Spark job completes. This allows the provisioner to update the SparkApplication status with job completion info after the job finishes. If set to 0, the provisioner Pod will be deleted immediately after it updates the SparkApplication status."
+          "description": "The number of seconds that the job remains alive after its completion."
         },
         "podReadinessTimeout": {
           "type": "integer",
           "default": 300,
-          "description": "Timeout in seconds for waiting for the status provisioner Pod to be ready"
+          "description": "The timeout in seconds that the job waits for the monitored resources to be ready or completed."
         },
         "integrationTestsTimeout": {
           "type": "integer",
           "default": 2000,
-          "description": "Timeout in milliseconds for integration tests"
+          "description": "The timeout in seconds that the job waits for the integration tests to complete."
         },
         "labels": {
           "type": "object",
@@ -442,9 +442,13 @@
         "omit": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to omit OpenShift-specific resources from the chart"
+          "description": "Specifies whether the security context should be adjusted for OpenShift"
         }
       }
+    },
+     "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
     }
   }
 }

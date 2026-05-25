@@ -5,7 +5,7 @@
     "replicas": {
       "type": "integer",
       "default": 1,
-      "description": "Number of replicas for the deployment"
+      "description": "The desired number of pods. Currently, only one replica is supported."
     },
     "image": {
       "type": "object",
@@ -13,17 +13,17 @@
         "repository": {
           "type": "string",
           "default": "ghcr.io/netcracker/qubership-tests-spark-hive-connection",
-          "description": "Container image repository"
+          "description": "The image repository."
         },
         "pullPolicy": {
           "type": "string",
           "default": "Always",
-          "description": "Image pull policy (e.g., Always, IfNotPresent, Never)"
+          "description": "The image pull policy."
         },
         "tag": {
           "type": "string",
           "default": "main",
-          "description": "Container image tag"
+          "description": "This overrides the image tag."
         }
       }
     },
@@ -33,7 +33,7 @@
         "type": "string"
       },
       "default": [],
-      "description": "List of image pull secrets for private registries"
+      "description": "The image pull secrets."
     },
     "nameOverride": {
       "type": "string",
@@ -43,7 +43,7 @@
     "fullnameOverride": {
       "type": "string",
       "default": "spark-thrift-server",
-      "description": "Override the full name of the chart"
+      "description": "The string to override a release name."
     },
     "serviceAccount": {
       "type": "object",
@@ -51,7 +51,7 @@
         "create": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to create a service account"
+          "description": "This creates a service account for the Spark thrift Server."
         },
         "annotations": {
           "type": "object",
@@ -64,7 +64,7 @@
         "name": {
           "type": "string",
           "default": "spark-thrift-sa",
-          "description": "Name of the service account"
+          "description": "The optional name for the Spark thrift Server service account."
         }
       }
     },
@@ -94,7 +94,7 @@
         "null"
       ],
       "default": null,
-      "description": "Name of the priority class for the pods"
+      "description": "Priority class name for spark Thrift server pods."
     },
     "service": {
       "type": "object",
@@ -102,7 +102,7 @@
         "type": {
           "type": "string",
           "default": "NodePort",
-          "description": "Type of the Kubernetes Service (e.g., ClusterIP, NodePort, LoadBalancer)"
+          "description": "The Spark thrift Server service type."
         },
         "ports": {
           "type": "object",
@@ -113,27 +113,27 @@
                 "name": {
                   "type": "string",
                   "default": "thrift-server-port",
-                  "description": "Name of the port for the Thrift Server"
+                  "description": "Name of the Thrift server's port."
                 },
                 "protocol": {
                   "type": "string",
                   "default": "TCP",
-                  "description": "Protocol for the Thrift Server port"
+                  "description": "Thrift Server's port protocol."
                 },
                 "port": {
                   "type": "integer",
                   "default": 10000,
-                  "description": "Port number for the Thrift Server"
+                  "description": "The Thrift server's port."
                 },
                 "targetPort": {
                   "type": "integer",
                   "default": 10000,
-                  "description": "Target port number for the Thrift Server"
+                  "description": "The Thrift server's target port."
                 },
                 "nodePort": {
                   "type": "integer",
                   "default": 30204,
-                  "description": "Node port number for the Thrift Server (only applicable if service type is NodePort)"
+                  "description": "The Thrift server's node port."
                 }
               }
             },
@@ -143,7 +143,7 @@
                 "name": {
                   "type": "string",
                   "default": "spark-driver-port",
-                  "description": "Name of the port for the Spark Driver"
+                  "description": "Name of the Thrift server's driver port."
                 },
                 "protocol": {
                   "type": "string",
@@ -153,12 +153,12 @@
                 "port": {
                   "type": "integer",
                   "default": 7078,
-                  "description": "Port number for the Spark Driver"
+                  "description": "The Thrift server's driver port."
                 },
                 "targetPort": {
                   "type": "integer",
                   "default": 7078,
-                  "description": "Target port number for the Spark Driver"
+                  "description": "The Thrift server's driver target port."
                 }
               }
             },
@@ -168,7 +168,7 @@
                 "name": {
                   "type": "string",
                   "default": "spark-ui",
-                  "description": "Name of the port for the Spark UI"
+                  "description": "Name of the Thrift server's UI port."
                 },
                 "protocol": {
                   "type": "string",
@@ -178,17 +178,17 @@
                 "port": {
                   "type": "integer",
                   "default": 4040,
-                  "description": "Port number for the Spark UI"
+                  "description": "The Thrift server's port."
                 },
                 "targetPort": {
                   "type": "integer",
                   "default": 4040,
-                  "description": "Target port number for the Spark UI"
+                  "description": "The Thrift server's target port."
                 },
                 "nodePort": {
                   "type": "integer",
                   "default": 30868,
-                  "description": "Node port number for the Spark UI (only applicable if service type is NodePort)"
+                  "description": "The Thrift server's node port."
                 }
               }
             },
@@ -205,7 +205,8 @@
                   "targetPort": 22322,
                   "nodePort": 32485
                 }
-              ]
+              ],
+              "description": "Declaration of additional ports."
             }
           }
         }
@@ -217,17 +218,17 @@
         "enabled": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to enable Ingress for the Thrift Server"
+          "description": "It enables the Spark Thrift Server ingress creation."
         },
         "host": {
           "type": "string",
           "default": "",
-          "description": "Host for the Ingress rule"
+          "description": "It is the ingress host and should be compatible with the cluster's ingress URL routing rules."
         },
         "path": {
           "type": "string",
           "default": "/",
-          "description": "Path for the Ingress rule"
+          "description": "Path for the Ingress rule. It should be set to '/'."
         }
       }
     },
@@ -248,7 +249,7 @@
     },
     "log4j2Properties": {
       "type": "string",
-      "description": "Properties for configuring log4j2",
+      "description": "Log4j2 configuration.",
       "default": "see the values.yaml file"
     },
     "s3": {
@@ -257,17 +258,17 @@
         "endpoint": {
           "type": "string",
           "default": "http://minio.your.cloud.qubeship.com",
-          "description": "Endpoint for the S3 compatible storage"
+          "description": "The S3 storage endpoint."
         },
         "accesskey": {
           "type": "string",
           "default": "minioaccesskey",
-          "description": "Access key for the S3 compatible storage"
+          "description": "The S3 storage access key."
         },
         "secretkey": {
           "type": "string",
           "default": "miniosecretkey",
-          "description": "Secret key for the S3 compatible storage"
+          "description": "The S3 storage secret key."
         }
       }
     },
@@ -277,24 +278,28 @@
         "uri": {
           "type": "string",
           "default": "thrift://hive-metastore.hive-metastore-r.svc:9083",
-          "description": "URI for the Hive Metastore Thrift service"
+          "description": "The Hive Metastore URI. For example, thrift://hive-metastore.hive-metastore-r.svc:9083"
         },
         "warehouse": {
           "type": "string",
           "default": "s3a://thrift/warehouse",
-          "description": "Warehouse path for the Hive Metastore"
+          "description": "The bucket in S3 to store data."
         }
       }
     },
     "sparkMasterUri": {
       "type": "string",
       "default": "local",
-      "description": "URI for the Spark Master (e.g., local, spark://spark-master:7077)"
+      "description": "The master URL for the Spark cluster. By default, it works in the local master mode. To use Kubernetes as a resource manager, Spark master should be set to the Kubernetes API Server, k8s://HOST:PORT. For example, k8s://https://my.k8s.cluster.qubership.com:6443. For more details, refer to https://spark.apache.org/docs/latest/submitting-applications.html#master-urls"
     },
     "sparkProperties": {
       "type": "string",
       "default": "see the values.yaml file",
-      "description": "Spark configuration properties"
+      "description": "The Spark properties that are added to the config map, which is mounted by /opt/spark/conf and exposed to the SPARK_CONF_DIR environment variable."
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
     }
   },
   "additionalProperties": true

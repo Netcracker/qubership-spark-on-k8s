@@ -8,7 +8,7 @@
         "name": {
           "type": "string",
           "default": "spark-integration-tests-runner",
-          "description": "Name of the SparkApplication and the status provisioner Pod"
+          "description": "The parameter specifies the name of the Spark integration tests' service."
         }
       }
     },
@@ -18,17 +18,18 @@
         "create": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to create a separate ServiceAccount for the SparkApplication and the status provisioner Pod. If false, the default ServiceAccount in the namespace will be used."
+          "description": "The parameter specifies whether the service account for Spark Integration Tests is to be deployed or not."
         },
         "name": {
           "type": "string",
           "default": "spark-integration-tests",
-          "description": "Name of the ServiceAccount to use for the SparkApplication and the status provisioner Pod. This is only used if serviceAccount.create is true. If serviceAccount.create is false, this value is ignored and the default ServiceAccount will be used."
+          "description": "The parameter specifies the name of the service account that is used to deploy Spark Integration Tests."
         }
       }
     },
     "image": {
       "type": "object",
+      "description": "The parameter specifies the Docker image of Spark Service.",
       "properties": {
         "repository": {
           "type": "string",
@@ -38,19 +39,19 @@
         "tag": {
           "type": "string",
           "default": "main",
-          "description": "Container image tag for the SparkApplication. The image should contain the necessary test scripts and dependencies to run the Spark integration tests."
+          "description": "The parameter specifies the tags combined together with AND, OR, and NOT operators that select the test cases to run. To run all tests, set tags: alertsORtest_app."
         }
       }
     },
     "sparkAppsNamespace": {
       "type": "string",
       "default": "spark-apps",
-      "description": "Kubernetes namespace where the SparkApplication will be created. This namespace should exist before deploying the chart."
+      "description": "The parameter specifies the name of the Kubernetes namespace, where Spark apps are located."
     },
     "status_writing_enabled": {
       "type": "boolean",
       "default": true,
-      "description": "Whether to enable the status provisioner for writing SparkApplication status updates to a custom resource. If true, a status provisioner Pod will be created that will monitor the SparkApplication and update its status in a custom resource. If false, no status provisioner will be created and the SparkApplication status will not be written to a custom resource."
+      "description": "The parameter specifies enable/disable writing status of Integration tests' execution to the specified Custom Resource."
     },
     "cr_status_writing": {
       "type": "object",
@@ -58,24 +59,24 @@
         "is_short_status_message": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to write a short status message to the custom resource."
+          "description": "The parameter specifies the size of the integration test status message."
         },
         "only_integration_tests": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to write status updates to the custom resource only during the execution of integration tests. If true, the status provisioner will only write status updates to the custom resource while the integration tests are running. Once the tests complete, the provisioner will stop writing updates and can optionally be deleted based on the 'lifetimeAfterCompletion' setting. If false, the provisioner will continue to write status updates to the custom resource even after the integration tests have completed, until it is manually deleted or reaches its lifetime limit."
+          "description": "The parameter specifies whether to deploy only integration tests without any component (component was installed before)."
         },
         "status_custom_resource_path": {
           "type": "string",
           "default": "apps/v1/spark/deployments/spark-integration-tests-runner",
-          "description": "The API path of the custom resource where the status provisioner will write SparkApplication status updates. This should be a valid Kubernetes API path for a custom resource that can store the status information. The provisioner will use this path to update the status of the SparkApplication in the specified custom resource."
+          "description": "The parameter (optional) specifies the path to Custom Resource that should be used for the write status of auto-tests execution."
         }
       }
     },
     "prometheusUrl": {
       "type": "string",
       "default": "",
-      "description": "URL of the Prometheus server to scrape metrics from the SparkApplication. If not provided, metrics will not be scraped or exposed."
+      "description": "The parameter specifies the path to Custom Resource that should be used for the write status of auto-tests execution."
     },
     "resources": {
       "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
@@ -207,6 +208,10 @@
           "description": "Docker image for the Spark-Hive integration tests."
         }
       }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
     }
   },
   "additionalProperties": true
