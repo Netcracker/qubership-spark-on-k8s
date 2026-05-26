@@ -1,4 +1,5 @@
-This guide describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. Some modifications have been applied to the  templates to ensure compatibility with different environments (for example, OpenShift).
+This guide describes the installation procedures for the qubership-spark-on-k8s chart. Qubership-spark-on-k8s chart includes kubeflow spark-operator chart as a subchart as the main component. Some modifications have been applied to the  templates to ensure compatibility with different environments (for example, OpenShift). The Qubership-spark-on-k8s chart also includes a values.schema.json file in each subchart. It is a custom schema that defines the structure, data types, and allowed fields for values.yaml, ensuring that configurations are valid and consistent. This enables Helm to validate input values during linting and templating, helping prevent misconfigurations at deployment time.
+
 The following topics are covered in the guide:
 
 * [Prerequisites](#prerequisites)
