@@ -197,7 +197,7 @@
         "scheduledSparkApplicationTimestampPrecision": {
           "type": "string",
           "default": "nanos",
-          "description": "Timestamp precision for ScheduledSparkApplication run names. Valid values: nanos (default), micros, millis, seconds, minutes. Shorter precisions produce shorter names which helps with Kubernetes name length limits. NOTE: Using lower precisions such as "seconds" or "minutes" increases the risk of name collisions if multiple runs are created within the same time unit (for example during reconciliation loops or manual re-triggers). A collision will cause run creation to fail. Choose a precision compatible with your scheduling frequency: "minutes" is only suitable for jobs scheduled at most once per minute, "seconds" for jobs scheduled at most once per second."
+          "description": "Timestamp precision for ScheduledSparkApplication run names. Valid values: nanos (default), micros, millis, seconds, minutes. Shorter precisions produce shorter names which helps with Kubernetes name length limits. NOTE: Using lower precisions such as seconds or minutes increases the risk of name collisions if multiple runs are created within the same time unit (for example during reconciliation loops or manual re-triggers). A collision will cause run creation to fail. Choose a precision compatible with your scheduling frequency: minutes is only suitable for jobs scheduled at most once per minute, seconds for jobs scheduled at most once per second."
         },
         "uiService": {
           "type": "object",
@@ -413,7 +413,7 @@
         },
         "resources": {
           "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
-          "description": "Pod resource requests and limits for controller containers. Note, that each job submission will spawn a JVM within the controller pods using "/usr/local/openjdk-11/bin/java -Xmx128m". Kubernetes may kill these Java processes at will to enforce resource limits. When that happens, you will see the following error: 'failed to run spark-submit for SparkApplication [...]: signal: killed' - when this happens, you may want to increase memory limits.",
+          "description": "Pod resource requests and limits for controller containers. Note, that each job submission will spawn a JVM within the controller pods using /usr/local/openjdk-11/bin/java -Xmx128m. Kubernetes may kill these Java processes at will to enforce resource limits. When that happens, you will see the following error: 'failed to run spark-submit for SparkApplication [...]: signal: killed' - when this happens, you may want to increase memory limits.",
           "default": {}
         },
         "securityContext": {
