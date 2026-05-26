@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "description": "Schema for the spark Helm chart values. Some Kubernetes object definitions are derived from https://github.com/yannh/kubernetes-json-schema.",
   "properties": {
     "spark-operator": {
       "type": "object",
@@ -446,7 +447,7 @@
         }
       }
     },
-     "PAAS_PLATFORM": {
+    "PAAS_PLATFORM": {
       "type": "string",
       "description": "The PaaS platform where spark is being deployed to."
     }
