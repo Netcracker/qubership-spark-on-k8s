@@ -12,7 +12,11 @@ def validate_defaults(values, default_values_schema, param_path=""):
 
                 if "default" in schema_prop and not isinstance(value, (dict, list)):
                     default_val = schema_prop.get("default", "")
-                    if ( isinstance(default_val, str) and default_val.startswith("see ") and default_val.endswith(" values.yaml file") ):
+                    if (
+                        isinstance(default_val, str)
+                        and default_val.startswith("see ")
+                        and default_val.endswith(" values.yaml file")
+                    ):
                         print(
                             f"Skipping validation for this parameter: {param_path}{key}."
                         )
