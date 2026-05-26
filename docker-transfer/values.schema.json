@@ -1,0 +1,970 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "The parameters descriptions are taken from https://github.com/kubeflow/spark-operator/tree/master/charts/spark-operator-chart#values. Schema for the spark Helm chart values. Some Kubernetes object definitions are derived from https://github.com/yannh/kubernetes-json-schema.",
+  "properties": {
+    "nameOverride": {
+      "type": "string",
+      "default": "",
+      "description": "String to partially override release name."
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "default": "",
+      "description": "String to fully override release name."
+    },
+    "commonLabels": {
+      "type": "object",
+      "default": {},
+      "description": "Common labels to add to the resources.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "registry": {
+          "type": "string",
+          "default": "ghcr.io",
+          "description": "Image registry."
+        },
+        "repository": {
+          "type": "string",
+          "default": "kubeflow/spark-operator/controller",
+          "description": "Image repository."
+        },
+        "tag": {
+          "type": "string",
+          "default": "",
+          "description": "Image tag."
+        },
+        "pullPolicy": {
+          "type": "string",
+          "default": "IfNotPresent",
+          "description": "Image pull policy."
+        },
+        "pullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Image pull secrets for private image registry."
+        }
+      }
+    },
+    "hook": {
+      "type": "object",
+      "properties": {
+        "upgradeCrd": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to create a Helm pre-install/pre-upgrade hook Job to update CRDs."
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "registry": {
+              "type": "string",
+              "default": "ghcr.io",
+              "description": "Image registry."
+            },
+            "repository": {
+              "type": "string",
+              "default": "kubeflow/spark-operator/kubectl",
+              "description": "Image repository"
+            },
+            "tag": {
+              "type": "string",
+              "default": "",
+              "description": "Image tag."
+            }
+          }
+        },
+        "nodeSelector": {
+          "type": "object",
+          "default": {},
+          "description": "Node selector for the Helm hook Job."
+        },
+        "affinity": {
+          "type": "object",
+          "default": {},
+          "description": "Affinity for the Helm hook Job."
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "List of node taints to tolerate for the Helm hook Job."
+        }
+      }
+    },
+    "controller": {
+      "type": "object",
+      "properties": {
+        "replicas": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of replicas of controller."
+        },
+        "featureGates": {
+          "type": "array",
+          "description": "Feature gates to enable or disable specific features.",
+          "default": [
+            {
+              "name": "PartialRestart",
+              "enabled": false
+            },
+            {
+              "name": "LoadSparkDefaults",
+              "enabled": false
+            }
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "enabled"
+            ]
+          }
+        },
+        "revisionHistoryLimit": {
+          "type": "integer",
+          "default": 10,
+          "description": "The number of old history to retain to allow rollback."
+        },
+        "leaderElection": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to enable leader election for controller."
+            },
+            "leaseDuration": {
+              "type": "string",
+              "default": "15s",
+              "description": "Leader election lease duration."
+            },
+            "renewDeadline": {
+              "type": "string",
+              "default": "10s",
+              "description": "Leader election renew deadline."
+            },
+            "retryPeriod": {
+              "type": "string",
+              "default": "2s",
+              "description": "Leader election retry period."
+            }
+          }
+        },
+        "workers": {
+          "type": "integer",
+          "default": 10,
+          "description": "Reconcile concurrency, higher values might increase memory usage."
+        },
+        "logLevel": {
+          "type": "string",
+          "default": "info",
+          "description": "Configure the verbosity of logging, can be one of debug, info, error."
+        },
+        "logEncoder": {
+          "type": "string",
+          "default": "console",
+          "description": "Configure the encoder of logging, can be one of console or json."
+        },
+        "driverPodCreationGracePeriod": {
+          "type": "string",
+          "default": "10s",
+          "description": "Grace period after a successful spark-submit when driver pod not found errors will be retried. Useful if the driver pod can take some time to be created."
+        },
+        "maxTrackedExecutorPerApp": {
+          "type": "integer",
+          "default": 1000,
+          "description": "Specifies the maximum number of Executor pods that can be tracked by the controller per SparkApplication."
+        },
+        "scheduledSparkApplicationTimestampPrecision": {
+          "type": "string",
+          "default": "nanos",
+          "description": "Timestamp precision for ScheduledSparkApplication run names. Valid values: nanos (default), micros, millis, seconds, minutes. Shorter precisions produce shorter names which helps with Kubernetes name length limits. NOTE: Using lower precisions such as seconds or minutes increases the risk of name collisions if multiple runs are created within the same time unit (for example during reconciliation loops or manual re-triggers). A collision will cause run creation to fail. Choose a precision compatible with your scheduling frequency: minutes is only suitable for jobs scheduled at most once per minute, seconds for jobs scheduled at most once per second."
+        },
+        "uiService": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create service for Spark web UI."
+            }
+          }
+        },
+        "uiIngress": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to create ingress for Spark web UI. controller.uiService.enable must be true to enable ingress."
+            },
+            "urlFormat": {
+              "type": "string",
+              "default": "",
+              "description": "Ingress URL format. Required if controller.uiIngress.enable is true."
+            },
+            "ingressClassName": {
+              "type": "string",
+              "default": "",
+              "description": "Optionally set the ingressClassName"
+            },
+            "tls": {
+              "type": "array",
+              "default": [],
+              "description": "Optionally set default TLS configuration for the Spark UI's ingress. ingressTLS in the SparkApplication spec overrides this."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Optionally set default ingress annotations for the Spark UI's ingress. ingressAnnotations in the SparkApplication spec overrides this.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "batchScheduler": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to enable batch scheduler for spark jobs scheduling. If enabled, users can specify batch scheduler name in spark application."
+            },
+            "kubeSchedulerNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "Specifies a list of kube-scheduler names for scheduling Spark pods."
+            },
+            "default": {
+              "type": "string",
+              "default": "",
+              "description": "Default batch scheduler to be used if not specified by the user. If specified, this value must be either volcano or yunikorn. Specifying any other value will cause the controller to error on startup."
+            }
+          }
+        },
+        "serviceAccount": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create a service account for the controller."
+            },
+            "name": {
+              "type": "string",
+              "default": "",
+              "description": "Optional name for the controller service account."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Extra annotations for the controller service account.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "automountServiceAccountToken": {
+              "type": "boolean",
+              "default": true,
+              "description": "Auto-mount service account token to the controller pods."
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create RBAC resources for the controller"
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Extra annotations for the controller RBAC resources.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "labels": {
+          "type": "object",
+          "default": {},
+          "description": "Extra labels for controller pods",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "default": {},
+          "description": "Extra annotations for controller pods.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "volumes": {
+          "type": "array",
+          "description": "Volumes for controller pods",
+          "items": {
+            "type": "object"
+          },
+          "default": [
+            {
+              "name": "tmp",
+              "emptyDir": {
+                "type": "object"
+              }
+            }
+          ]
+        },
+        "nodeSelector": {
+          "type": "object",
+          "default": {},
+          "description": "Node selector for controller pods."
+        },
+        "affinity": {
+          "type": "object",
+          "default": {},
+          "description": "Affinity for controller pods."
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "List of node taints to tolerate for controller pods."
+        },
+        "priorityClassName": {
+          "type": "string",
+          "default": "",
+          "description": "Priority class for controller pods"
+        },
+        "podSecurityContext": {
+          "description": "Security context for controller pods.",
+          "type": "object",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+          "default": {
+            "fsGroup": 185
+          }
+        },
+        "topologySpreadConstraints": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: Pod Topology Spread Constraints. The labelSelector field in topology spread constraint will be set to the selector labels for controller pods if not specified."
+        },
+        "env": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Environment variables for controller containers."
+        },
+        "envFrom": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Environment variable sources for controller containers."
+        },
+        "volumeMounts": {
+          "type": "array",
+          "description": "Volume mounts for controller containers.",
+          "items": {
+            "type": "object"
+          },
+          "default": [
+            {
+              "name": "tmp",
+              "mountPath": "/tmp",
+              "readOnly": false
+            }
+          ]
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+          "description": "Pod resource requests and limits for controller containers. Note, that each job submission will spawn a JVM within the controller pods using /usr/local/openjdk-11/bin/java -Xmx128m. Kubernetes may kill these Java processes at will to enforce resource limits. When that happens, you will see the following error: 'failed to run spark-submit for SparkApplication [...]: signal: killed' - when this happens, you may want to increase memory limits.",
+          "default": {}
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Security context for controller containers.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {
+            "readOnlyRootFilesystem": true,
+            "privileged": false,
+            "allowPrivilegeEscalation": false,
+            "runAsNonRoot": true,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "seccompProfile": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "default": "RuntimeDefault"
+                }
+              }
+            }
+          }
+        },
+        "sidecars": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Sidecar containers for controller pods."
+        },
+        "podDisruptionBudget": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to create pod disruption budget for controller. Ref: Specifying a Disruption Budget for your Application"
+            },
+            "minAvailable": {
+              "type": "integer",
+              "default": 1,
+              "description": "The number of pods that must be available. Require controller.replicas to be greater than 1"
+            }
+          }
+        },
+        "pprof": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to enable pprof."
+            },
+            "port": {
+              "type": "integer",
+              "default": 6060,
+              "description": "Specifies pprof port."
+            },
+            "portName": {
+              "type": "string",
+              "default": "pprof",
+              "description": "Specifies pprof service port name."
+            }
+          }
+        },
+        "workqueueRateLimiter": {
+          "type": "object",
+          "properties": {
+            "bucketQPS": {
+              "type": "integer",
+              "default": 50,
+              "description": "Specifies the average rate of items process by the workqueue rate limiter."
+            },
+            "bucketSize": {
+              "type": "integer",
+              "default": 500,
+              "description": "Specifies the maximum number of items that can be in the workqueue at any given time."
+            },
+            "maxDelay": {
+              "type": "object",
+              "properties": {
+                "enable": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Specifies whether to enable max delay for the workqueue rate limiter. This is useful to avoid losing events when the workqueue is full."
+                },
+                "duration": {
+                  "type": "string",
+                  "default": "6h",
+                  "description": "Specifies the maximum delay duration for the workqueue rate limiter."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "webhook": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Specifies whether to enable webhook."
+        },
+        "replicas": {
+          "type": "integer",
+          "default": 1,
+          "description": "Number of replicas of webhook server."
+        },
+        "revisionHistoryLimit": {
+          "type": "integer",
+          "default": 10,
+          "description": "The number of old history to retain to allow rollback."
+        },
+        "leaderElection": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to enable leader election for webhook."
+            }
+          }
+        },
+        "logLevel": {
+          "type": "string",
+          "default": "info",
+          "description": "Configure the verbosity of logging, can be one of debug, info, error"
+        },
+        "logEncoder": {
+          "type": "string",
+          "default": "console",
+          "description": "Configure the encoder of logging, can be one of console or json."
+        },
+        "port": {
+          "type": "integer",
+          "default": 9443,
+          "description": "Specifies webhook port."
+        },
+        "portName": {
+          "type": "string",
+          "default": "webhook",
+          "description": "Specifies webhook service port name."
+        },
+        "failurePolicy": {
+          "type": "string",
+          "default": "Fail",
+          "description": "Specifies how unrecognized errors are handled. Available options are Ignore or Fail."
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 10,
+          "description": "Specifies the timeout seconds of the webhook, the value must be between 1 and 30."
+        },
+        "resourceQuotaEnforcement": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to enable the ResourceQuota enforcement for SparkApplication resources."
+            }
+          }
+        },
+        "serviceAccount": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create a service account for the webhook."
+            },
+            "name": {
+              "type": "string",
+              "default": "",
+              "description": "Optional name for the webhook service account."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Extra annotations for the webhook service account.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "automountServiceAccountToken": {
+              "type": "boolean",
+              "default": true,
+              "description": "Auto-mount service account token to the webhook pods."
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create RBAC resources for the webhook."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Extra annotations for the webhook RBAC resources.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "labels": {
+          "type": "object",
+          "default": {},
+          "description": "Extra labels for webhook pods.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "annotations": {
+          "type": "object",
+          "default": {},
+          "description": "Extra annotations for webhook pods.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "sidecars": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Sidecar containers for webhook pods."
+        },
+        "volumes": {
+          "type": "array",
+          "description": "Volumes for webhook pods.",
+          "items": {
+            "type": "object"
+          },
+          "default": [
+            {
+              "name": "serving-certs",
+              "emptyDir": {}
+            }
+          ]
+        },
+        "nodeSelector": {
+          "type": "object",
+          "default": {},
+          "description": "Node selector for webhook pods."
+        },
+        "affinity": {
+          "type": "object",
+          "default": {},
+          "description": "Affinity for webhook pods."
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "List of node taints to tolerate for webhook pods."
+        },
+        "priorityClassName": {
+          "type": "string",
+          "default": "",
+          "description": "Priority class for webhook pods."
+        },
+        "podSecurityContext": {
+          "type": "object",
+          "description": "Security context for webhook pods.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+          "default": {
+            "fsGroup": 185
+          }
+        },
+        "topologySpreadConstraints": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Topology spread constraints rely on node labels to identify the topology domain(s) that each Node is in. Ref: Pod Topology Spread Constraints. The labelSelector field in topology spread constraint will be set to the selector labels for webhook pods if not specified."
+        },
+        "env": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Environment variables for webhook containers."
+        },
+        "envFrom": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Environment variable sources for webhook containers."
+        },
+        "volumeMounts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [
+            {
+              "name": "serving-certs",
+              "mountPath": "/etc/k8s-webhook-server/serving-certs",
+              "subPath": "serving-certs",
+              "readOnly": false
+            }
+          ],
+          "description": "Volume mounts for webhook containers."
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+          "description": "Pod resource requests and limits for webhook pods.",
+          "default": {}
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Security context for webhook containers.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {
+            "readOnlyRootFilesystem": true,
+            "privileged": false,
+            "allowPrivilegeEscalation": false,
+            "runAsNonRoot": true,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "seccompProfile": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "default": "RuntimeDefault"
+                }
+              }
+            },
+            "seLinuxOptions": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.SELinuxOptions"
+            },
+            "appArmorProfile": {
+              "$ref": "#/definitions/io.k8s.api.core.v1.AppArmorProfile"
+            }
+          }
+        },
+        "podDisruptionBudget": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to create pod disruption budget for webhook. Ref: Specifying a Disruption Budget for your Application."
+            },
+            "minAvailable": {
+              "type": "integer",
+              "default": 1,
+              "description": "The number of pods that must be available. Require webhook.replicas to be greater than 1."
+            }
+          }
+        }
+      }
+    },
+    "spark": {
+      "type": "object",
+      "properties": {
+        "jobNamespaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "default"
+          ],
+          "description": "List of namespaces where to run spark jobs. If empty string is included, all namespaces will be allowed. Namespaces specified here will be watched in addition to those matching jobNamespaceSelector. Make sure the namespaces have already existed."
+        },
+        "jobNamespaceSelector": {
+          "type":"string",
+          "default": "",
+          "description": "Label selector to filter namespaces to watch. Supports standard Kubernetes label selector syntax (e.g., 'spark-operator=enabled,env in (prod,staging)'). Namespaces matching this selector will be watched in addition to those in jobNamespaces. When specified, requires ClusterRole permission to list and watch namespaces. Leave empty to disable namespace selector functionality."
+        },
+        "serviceAccount": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create a service account for spark applications."
+            },
+            "name": {
+              "type": "string",
+              "default": "",
+              "description": "Optional name for the spark service account."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Optional annotations for the spark service account.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "automountServiceAccountToken": {
+              "type": "boolean",
+              "default": true,
+              "description": "Auto-mount service account token to the spark applications pods."
+            }
+          }
+        },
+        "rbac": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to create RBAC resources for spark applications."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Optional annotations for the spark application RBAC resources."
+            }
+          }
+        }
+      }
+    },
+    "prometheus": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": true,
+              "description": "Specifies whether to enable prometheus metrics scraping."
+            },
+            "port": {
+              "type": "integer",
+              "default": 8080,
+              "description": "Metrics port."
+            },
+            "portName": {
+              "type": "string",
+              "default": "metrics",
+              "description": "Metrics port name."
+            },
+            "endpoint": {
+              "type": "string",
+              "default": "/metrics",
+              "description": "Metrics serving endpoint."
+            },
+            "prefix": {
+              "type": "string",
+              "default": "",
+              "description": "Metrics prefix, will be added to all exported metrics."
+            },
+            "jobStartLatencyBuckets":{
+              "type":"string",
+              "default":"30,60,90,120,150,180,210,240,270,300",
+              "description":"Job Start Latency histogram buckets. Specified in seconds."
+            },
+            "labels": {
+              "type": "string",
+              "default": "",
+              "description": "Labels to be added to the Spark Operator standard metrics, e.g., label1Key,label2Key. Defaults to 'app_type' if not set."
+            }
+          }
+        },
+        "podMonitor": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies whether to create pod monitor. Note that prometheus metrics should be enabled as well."
+            },
+            "labels": {
+              "type": "object",
+              "default": {},
+              "description": "Pod monitor labels",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "jobLabel": {
+              "type": "string",
+              "default": "spark-operator-podmonitor",
+              "description": "The label to use to retrieve the job name from."
+            },
+            "podMetricsEndpoint": {
+              "type": "object",
+              "properties": {
+                "scheme": {
+                  "type": "string",
+                  "default": "http",
+                  "description": "Prometheus metrics endpoint properties. metrics.portName will be used as a port."
+                },
+                "interval": {
+                  "type": "string",
+                  "default": "5s",
+                  "description": "The interval at which to scrape the controller pods for metrics in the PodMonitor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "certManager":{
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "Specifies whether to use cert-manager to generate certificate for webhook. webhook.enable must be set to true to enable cert-manager."
+        },
+        "issuerRef": {
+          "type": "object",
+          "default": {},
+          "description": "The reference to the issuer."
+        },
+       "duration":{
+          "type": "string",
+          "default": "",
+          "description": "The duration of the certificate validity (e.g. 2160h). See cert-manager.io/v1.Certificate."
+       },
+       "renewBefore":{
+          "type": "string",
+          "default": "",
+          "description": "The duration before the certificate expiration to renew the certificate (e.g. 720h). See cert-manager.io/v1.Certificate."
+        }
+      }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
+    }
+  },
+  "additionalProperties": true
+}

@@ -92,8 +92,6 @@ spark-thrift-server:
     seccompProfile:
       type: RuntimeDefault
 spark-integration-tests:
-  openShift:
-    omit: true
   enabled: false
   sparkOperatorControllerDeploymentName: sparkoperator-spark-operator-controller
   sparkOperatorWebhookDeploymentName: sparkoperator-spark-operator-webhook

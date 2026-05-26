@@ -71,7 +71,7 @@ spec:
               value: {{ .Values.s3.accessKey }}
             - name: S3_SECRET_KEY
               value: {{ .Values.s3.secretKey }}
-            {{- if (eq "true" .Values.status_writing_enabled) }}
+            {{- if (eq true .Values.status_writing_enabled) }}
             - name: ONLY_INTEGRATION_TESTS
               value: {{ .Values.cr_status_writing.only_integration_tests | quote }}
             - name: IS_SHORT_STATUS_MESSAGE

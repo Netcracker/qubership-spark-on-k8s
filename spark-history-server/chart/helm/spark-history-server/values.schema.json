@@ -1,0 +1,1619 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Schema for the spark Helm chart values. Some Kubernetes object definitions are derived from https://github.com/yannh/kubernetes-json-schema.",
+  "properties": {
+    "replicas": {
+      "type": "integer",
+      "default": 1,
+      "description": "The desired number of pods."
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "default": "ghcr.io/netcracker/qubership-spark-customized",
+          "description": "The image repository."
+        },
+        "pullPolicy": {
+          "type": "string",
+          "default": "IfNotPresent",
+          "description": "The image pull policy."
+        },
+        "tag": {
+          "type": "string",
+          "default": "main",
+          "description": "This overrides the image tag whose default is the chart appVersion."
+        }
+      }
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "The image pull secrets."
+    },
+    "nameOverride": {
+      "type": "string",
+      "default": "",
+      "description": "Override the name of the chart"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "default": "spark-history-server",
+      "description": "The string to override a release name."
+    },
+    "priorityClassName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Priority class name for spark-history-server pods"
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": true,
+          "description": "This creates a service account for the Spark History Server."
+        },
+        "annotations": {
+          "type": "object",
+          "default": {},
+          "description": "Annotations to add to the service account",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string",
+          "default": "",
+          "description": "The optional name for the Spark History Server service account."
+        }
+      }
+    },
+    "podAnnotations": {
+      "type": "object",
+      "default": {},
+      "description": "Annotations to add to the spark-history-server pods",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "affinity": {
+      "type": "object",
+      "default": {},
+      "description": "The parameter specifies the affinity scheduling rules."
+    },
+    "podSecurityContext": {
+      "description": "Pod-level security context for spark-operator controller pods.",
+      "type": "object",
+      "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+      "default": {
+        "fsGroup": 185,
+        "runAsUser": 185,
+        "runAsGroup": 185
+      }
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container-level security context for the history server Pod.",
+      "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+      "default": {
+        "capabilities": {
+          "drop": [
+            "ALL"
+          ]
+        },
+        "privileged": false,
+        "readOnlyRootFilesystem": true,
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false
+      }
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "externalPort": {
+          "type": "integer",
+          "default": 80,
+          "description": "The Spark History Server service external port."
+        },
+        "internalPort": {
+          "type": "integer",
+          "default": 18080,
+          "description": "The Spark History Server service internal port."
+        },
+        "type": {
+          "type": "string",
+          "default": "ClusterIP",
+          "description": "The Spark History Server service type."
+        }
+      }
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "It enables the Spark History Server ingress creation."
+        },
+        "host": {
+          "type": "string",
+          "default": "spark-history-server.your.cloud.qubership.org",
+          "description": "It is the ingress host and should be compatible with the cluster's ingress URL routing rules."
+        },
+        "path": {
+          "type": "string",
+          "default": "/",
+          "description": "Path for the spark-history-server ingress.It should be set to '/'."
+        },
+        "annotations": {
+          "type": "object",
+          "default": {
+            "gateway-api-converter.netcracker.com/ignore": "true"
+          },
+          "description": "Annotations to add to the spark-history-server ingress",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tls": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to enable TLS for the spark-history-server ingress"
+            },
+            "secretName": {
+              "type": "string",
+              "default": "",
+              "description": "Name of the secret containing the TLS certificate for the spark-history-server ingress"
+            }
+          }
+        }
+      }
+    },
+    "certManagerInegration": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable cert-manager integration for automatic TLS certificate management for the spark-history-server ingress."
+        },
+        "secretName": {
+          "type": "string",
+          "default": "spark-history-server-services-tls-certificate",
+          "description": "Name of the secret to be created by cert-manager to store the TLS certificate for the spark-history-server ingress"
+        },
+        "duration": {
+          "type": "integer",
+          "default": 365,
+          "description": "Duration in days for the TLS certificate issued by cert-manager for the spark-history-server ingress"
+        },
+        "subjectAlternativeName": {
+          "type": "object",
+          "properties": {
+            "additionalDnsNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "Additional DNS names to include in the TLS certificate for the spark-history-server ingress"
+            },
+            "additionalIpAddresses": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "Additional IP addresses to include in the TLS certificate for the spark-history-server ingress"
+            }
+          }
+        },
+        "clusterIssuerName": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Name of the ClusterIssuer to use for cert-manager to issue the TLS certificate for the spark-history-server ingress. If not set, the default ClusterIssuer will be used."
+        }
+      }
+    },
+    "resources": {
+      "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+      "description": "Compute Resources required by history server container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+      "default": {
+        "limits": {
+          "cpu": "300m",
+          "memory": "512Mi"
+        },
+        "requests": {
+          "cpu": "200m",
+          "memory": "256Mi"
+        }
+      }
+    },
+    "livenessProbe": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables or disables the liveness probe."
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "default": 10,
+          "description": "Number of seconds after the container has started before liveness probes are initiated."
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 20,
+          "description": "Number of seconds after which the probe times out."
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "default": 5,
+          "description": "Minimum consecutive failures for the probe to be considered failed, causing container restart."
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "default": 60,
+          "description": "The time interval in seconds denoting how often to perform the probe."
+        }
+      }
+    },
+    "readinessProbe": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enables or disables the readiness probe."
+        },
+        "initialDelaySeconds": {
+          "type": "integer",
+          "default": 15,
+          "description": "Number of seconds after the container has started before readiness probes are initiated."
+        },
+        "timeoutSeconds": {
+          "type": "integer",
+          "default": 5,
+          "description": "Number of seconds after which the probe times out."
+        },
+        "failureThreshold": {
+          "type": "integer",
+          "default": 5,
+          "description": "Minimum consecutive failures for the probe to be considered failed, marking the container as Not Ready."
+        },
+        "periodSeconds": {
+          "type": "integer",
+          "default": 30,
+          "description": "The time interval in seconds denoting how often to perform the probe."
+        }
+      }
+    },
+    "hostAliases": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": [],
+      "description": "Host aliases to add to the spark-history-server pods"
+    },
+    "kerberos": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable Kerberos authentication for spark-history-server"
+        },
+        "principal": {
+          "type": "string",
+          "default": "",
+          "description": "Kerberos principal for spark-history-server"
+        },
+        "keytab": {
+          "type": "string",
+          "default": "",
+          "description": "Keytab file for the Kerberos principal for spark-history-server"
+        },
+        "config": {
+          "type": "string",
+          "default": "",
+          "description": "Kerberos configuration file content for spark-history-server"
+        }
+      }
+    },
+    "sparkProperties": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": "",
+      "description": "The Spark properties that are added to the config map, which is mounted by /opt/spark/conf and exposed to the SPARK_CONF_DIR environment variable."
+    },
+    "initJobCredentialsSecret": {
+      "type": "object",
+      "properties": {
+        "annotations": {
+          "type": "object",
+          "default": {
+            "helm.sh/hook": "pre-install, pre-upgrade",
+            "helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded,hook-failed",
+            "helm.sh/hook-weight": "-15"
+          },
+          "description": "Annotations to add to the init job secret for spark-history-server. By default, the secret will be annotated with Helm hook annotations to create it before the main deployment and delete it after the hook is completed.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "s3InitJob": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "The parameter that enables the Pre-install/upgrade Helm job. The job creates S3 path in S3 object storage and upload a mock file. The S3 path to create is set in s3.warehouseDir parameter."
+        },
+        "awsSigV4": {
+          "type": "string",
+          "default": "aws:minio:s3:s3",
+          "description": "AWS V4 signature authentication configuration of the following format <provider1[:prvdr2[:reg[:srv]]]>. Used to authenticate requests to S3 storage. Configured to work with S3 MinIO by default. Details at https://curl.se/docs/manpage.html."
+        },
+        "priorityClassName": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Priority class name for init job."
+        },
+        "initAnnotations": {
+          "type": "object",
+          "default": {
+            "helm.sh/hook": "pre-install, pre-upgrade",
+            "helm.sh/hook-weight": "-10",
+            "helm.sh/hook-delete-policy": "before-hook-creation"
+          },
+          "description": "The S3 init job annotations.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+          "description": "Compute Resources required by s3 init job container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+          "default": {
+            "limits": {
+              "cpu": "50m",
+              "memory": "64Mi"
+            },
+            "requests": {
+              "cpu": "50m",
+              "memory": "64Mi"
+            }
+          }
+        }
+      }
+    },
+    "logDirectory": {
+      "type": "string",
+      "default": "s3a://tmp/spark/logs",
+      "description": "The directory to look for Spark applications' event logs."
+    },
+    "s3": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "It should be enabled if S3 storage is used to store event logs."
+        },
+        "endpoint": {
+          "type": "string",
+          "default": "http://minioaddress.your.cloud.qubership.org",
+          "description": "The S3 storage endpoint."
+        },
+        "accesskey": {
+          "type": "string",
+          "default": "yourminioaccesskey",
+          "description": "The base64 encoded S3 storage access key. It is stored in a secret"
+        },
+        "secretkey": {
+          "type": "string",
+          "default": "yourminiosecretkey",
+          "description": "The base64 encoded S3 storage secret key. It is stored in a secret."
+        },
+        "jceksPassword": {
+          "type": "string",
+          "default": "yourjceksPassword",
+          "description": "Password for the JCEKS file to store S3 credentials for spark-history-server"
+        }
+      }
+    },
+    "hdfs": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable HDFS integration for spark-history-server"
+        },
+        "hdfs_site": {
+          "type": "string",
+          "default": "",
+          "description": "Content of the hdfs-site.xml configuration file for spark-history-server to connect to HDFS. This should be a valid XML content with the necessary HDFS configuration properties."
+        },
+        "core_site": {
+          "type": "string",
+          "default": "",
+          "description": "Content of the core-site.xml configuration file for spark-history-server to connect to HDFS. This should be a valid XML content with the necessary HDFS configuration properties."
+        }
+      }
+    },
+    "oauth2Proxy": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "It enables OAuth2 Proxy authentication for the Spark History Server UI."
+        },
+        "gateway": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Specifies if HTTPRoute for oauth2-proxy is deployed."
+            },
+            "hostnames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "hostnames for HTTPRoute."
+            },
+            "parentRefs": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "default": [],
+              "description": "parentRefs for HTTPRoute."
+            },
+            "rules": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "default": [],
+              "description": "rules for HTTPRoute. When rules[].matches is not set, it defaults to path.type=PathPrefix and path.value=/. backendRefs in the rule will point to trino server service, but the weight can be configured if needed."
+            },
+            "labels": {
+              "type": "object",
+              "default": {},
+              "description": "Labels for HTTPRoute and related objects",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "backendTLSPolicy": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Specifies if the backendTLSPolicy should be deployed"
+                },
+                "caCertificateRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "default": [],
+                  "description": "caCertificateRefs for backendTLSPolicy."
+                },
+                "hostname": {
+                  "type": "string",
+                  "default": "",
+                  "description": "Hostname for backendTLSPolicy."
+                },
+                "wellKnownCACertificates": {
+                  "type": "string",
+                  "default": "",
+                  "description": "wellKnownCACertificates for backendTLSPolicy."
+                },
+                "subjectAltNames": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [],
+                  "description": "subjectAltNames for backendTLSPolicy."
+                }
+              }
+            },
+            "redirectRoute": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether to create a separate HTTPRoute for handling redirects from the oauth2-proxy when using Gateway API. If enabled, a separate HTTPRoute will be created with the specified hostnames and parentRefs to handle redirects from the oauth2-proxy."
+                },
+                "parentRefs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "default": [],
+                  "description": "parentRefs for redirect route."
+                },
+                "hostnames": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [],
+                  "description": "hostnames for redirect Route"
+                }
+              }
+            }
+          }
+        },
+        "image": {
+          "type": "object",
+          "properties": {
+            "repository": {
+              "type": "string",
+              "default": "quay.io/oauth2-proxy/oauth2-proxy",
+              "description": "Container image repository for oauth2-proxy"
+            },
+            "tag": {
+              "type": "string",
+              "default": "v7.14.2",
+              "description": "Container image tag for oauth2-proxy"
+            },
+            "pullPolicy": {
+              "type": "string",
+              "default": "IfNotPresent",
+              "description": "Image pull policy for oauth2-proxy"
+            },
+            "command": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "Command to run in the oauth2-proxy container. If not set, the default command from the container image will be used."
+            }
+          }
+        },
+        "kubeVersion": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "clientID": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "clientSecret": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "cookieSecret": {
+              "type": "string",
+              "default": "XXXXXXXXXXXXXXXX",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "cookieName": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "google": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "configFile": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "alphaConfig": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "serverConfigData": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "metricsConfigData": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "configData": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "configFile": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "existingConfig": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "existingSecret": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "default": null,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "extraArgs": {
+          "type": "object",
+          "default": {},
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "extraEnv": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "customLabels": {
+          "type": "object",
+          "default": {},
+          "description": "This parameter is not used in qubership-spark-on-k8s",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "authenticatedEmailsFile": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "persistence": {
+              "type": "string",
+              "default": "configmap",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "template": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "restrictedUserAccessKey": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "restricted_access": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "service": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "default": "ClusterIP",
+              "description": "Service type for the oauth2-proxy service. This can be set to 'ClusterIP', 'NodePort', or 'LoadBalancer' depending on how you want to expose the oauth2-proxy service within the Kubernetes cluster or externally."
+            },
+            "portNumber": {
+              "type": "integer",
+              "default": 4180,
+              "description": "Port number for the oauth2-proxy service. This is the port that the service will listen on and should match the port that oauth2-proxy is configured to use for its HTTP server."
+            },
+            "portName": {
+              "type": "string",
+              "default": "http-oauth2",
+              "description": "Port name for the oauth2-proxy service. This is an optional name for the port and can be used for organizational or selection purposes."
+            },
+            "appProtocol": {
+              "type": "string",
+              "default": "http",
+              "description": "Application protocol for the oauth2-proxy service port. This can be set to 'http', 'https', or other supported application protocols to indicate the protocol used by the service port."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Annotations to add to the oauth2-proxy service. This can be used to add additional annotations for organizational or management purposes.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "externalTrafficPolicy": {
+              "type": "string",
+              "default": "",
+              "description": "External traffic policy for the oauth2-proxy service. This can be set to 'Cluster' or 'Local' if the service type is 'LoadBalancer' or 'NodePort' to control how external traffic is routed to the pods."
+            },
+            "internalTrafficPolicy": {
+              "type": "string",
+              "default": "",
+              "description": "Internal traffic policy for the oauth2-proxy service. This can be set to 'Cluster' or 'Local' to control how internal traffic is routed to the pods."
+            },
+            "targetPort": {
+              "type": [
+                "integer",
+                "string"
+              ],
+              "default": "",
+              "description": "Target port for the oauth2-proxy service. This should match the port that the oauth2-proxy container is listening on and can be set to a specific port number or a named port."
+            },
+            "ipDualStack": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "Whether to enable dual-stack IP support for the oauth2-proxy service. If enabled, the service will be configured to support both IPv4 and IPv6 addresses."
+                },
+                "ipFamilies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": [
+                    "IPv6",
+                    "IPv4"
+                  ],
+                  "description": "List of IP families to support for the oauth2-proxy service when dual-stack is enabled. This should be set if ipDualStack.enabled is true and should include the IP families that you want to support for the service (e.g., 'IPv4', 'IPv6')."
+                },
+                "ipFamilyPolicy": {
+                  "type": "string",
+                  "default": "PreferDualStack",
+                  "description": "IP family policy for the oauth2-proxy service when dual-stack is enabled. This can be set to 'SingleStack', 'PreferDualStack', or 'RequireDualStack' to control how the service handles IP families when dual-stack is enabled."
+                }
+              }
+            },
+            "trafficDistribution": {
+              "type": "string",
+              "default": "",
+              "description": "Traffic distribution strategy for the oauth2-proxy service. This can be set to 'Weighted' to enable weighted traffic distribution to different subsets of pods, or left as an empty string for the default round-robin distribution."
+            }
+          }
+        },
+        "serviceAccount": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to create a service account for oauth2-proxy. If enabled, a service account will be created and used for the oauth2-proxy deployment."
+            },
+            "name": {
+              "type": "string",
+              "default": "spark-history-auth",
+              "description": "Name of the service account to create for oauth2-proxy. This should be set if serviceAccount.enabled is true and should be a valid Kubernetes service account name."
+            },
+            "automountServiceAccountToken": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to automount the service account token for the oauth2-proxy pods. This can be set to false if you do not want the service account token to be automatically mounted into the pods, which can be a security consideration if the token is not needed for the operation of oauth2-proxy."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "Annotations to add to the service account for oauth2-proxy. This can be used to add additional annotations for organizational or management purposes.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "imagePullSecrets": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "default": [],
+              "description": "Image pull secrets to add to the service account for oauth2-proxy. This can be used to specify image pull secrets if the container image for oauth2-proxy is stored in a private registry that requires authentication."
+            }
+          }
+        },
+        "networkPolicy": {
+          "type": "object",
+          "properties": {
+            "create": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "ingress": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "default": [],
+              "description": "Ingress rules for the NetworkPolicy for oauth2-proxy. This should be set if networkPolicy.create is true and should include the necessary rules to allow traffic to the oauth2-proxy pods as needed."
+            },
+            "egress": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "default": [],
+              "description": "Egress rules for the NetworkPolicy for oauth2-proxy. This can be used to specify egress rules to control the outbound traffic from the oauth2-proxy pods if networkPolicy.create is true."
+            }
+          }
+        },
+        "fullnameOverride": {
+          "type": "string",
+          "default": "oauth2-proxy-history",
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "It enables the OAuth2 Proxy ingress."
+            },
+            "path": {
+              "type": "string",
+              "default": "/",
+              "description": "Path for the Ingress resource for oauth2-proxy.It should be set to '/'."
+            },
+            "supportsPathType": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether the Kubernetes cluster supports the pathType field in Ingress resources. If true, the Ingress will be created with the specified pathType. If false, the pathType will not be included in the Ingress resource for compatibility with older Kubernetes versions that do not support it."
+            },
+            "pathType": {
+              "type": "string",
+              "default": "ImplementationSpecific",
+              "description": "Path type for the Ingress resource for oauth2-proxy. This can be set to 'Exact', 'Prefix', or 'ImplementationSpecific' depending on how you want the Ingress to match the specified path. This should be set based on the desired routing behavior for the Ingress and the capabilities of the Kubernetes cluster."
+            },
+            "hosts": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "It is the ingress host and should be compatible with the cluster's ingress URL routing rules."
+            },
+            "annotations": {
+              "type": "object",
+              "default": {
+                "gateway-api-converter.netcracker.com/ignore": "true"
+              },
+              "description": "Annotations to add to the Ingress resource for oauth2-proxy. By default, the Ingress is annotated to be ignored by the gateway-api-converter if that is being used in the cluster. This can be used to add additional annotations for organizational or management purposes.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "labels": {
+              "type": "object",
+              "default": {},
+              "description": "Labels to add to the Ingress resource for oauth2-proxy. This can be used to add additional labels for organizational or selection purposes.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+          "description": "Compute Resources required by status provisioner container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+          "default": {}
+        },
+        "resizePolicy": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "extraVolumes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Additional volumes to add to the oauth2-proxy deployment. This can be used to specify additional volumes that should be mounted into the oauth2-proxy pods for use in the configuration or operation of oauth2-proxy."
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "Additional volume mounts to add to the oauth2-proxy deployment. This should be used in conjunction with extraVolumes to specify how the additional volumes should be mounted into the oauth2-proxy pods."
+        },
+        "extraContainers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "extraInitContainers": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "priorityClassName": {
+          "type": "string",
+          "default": "",
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "hostAlias": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "tolerations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "nodeSelector": {
+          "type": "object",
+          "default": {},
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "proxyVarsAsSecrets": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to store the OAuth2 client ID, client secret, and cookie secret as Kubernetes secrets and reference them in the oauth2-proxy configuration instead of including them directly in the configuration file. If enabled, these values will be stored in a Kubernetes secret and the oauth2-proxy configuration will be set to reference the secrets for these values. This can be used to enhance security by not including sensitive values directly in the configuration file and instead referencing them from Kubernetes secrets."
+        },
+        "secretsAsFiles": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to mount the Kubernetes secrets containing the OAuth2 client ID, client secret, and cookie secret as files in the oauth2-proxy pods and reference them in the configuration file as file paths instead of environment variables. If enabled, the secrets will be mounted as files and the oauth2-proxy configuration will be set to reference the file paths for these values. This can be used as an alternative to proxyVarsAsSecrets for referencing sensitive values from Kubernetes secrets in a way that does not involve environment variables."
+        },
+        "livenessProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to enable a liveness probe for the oauth2-proxy pods. If enabled, a liveness probe will be configured to check the health of the oauth2-proxy pods and restart them if they are not healthy."
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "default": 0,
+              "description": "Initial delay in seconds for the liveness probe for the oauth2-proxy pods. This is the time to wait after the container has started before starting to perform liveness checks."
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "default": 1,
+              "description": "Timeout in seconds for the liveness probe for the oauth2-proxy pods. This is the time to wait for a response from the liveness check before considering it a failure."
+            }
+          }
+        },
+        "readinessProbe": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "Whether to enable a readiness probe for the oauth2-proxy pods. If enabled, a readiness probe will be configured to check when the oauth2-proxy pods are ready to receive traffic and only route traffic to them when they are ready."
+            },
+            "initialDelaySeconds": {
+              "type": "integer",
+              "default": 0,
+              "description": "Initial delay in seconds for the readiness probe for the oauth2-proxy pods. This is the time to wait after the container has started before starting to perform readiness checks."
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "default": 5,
+              "description": "Timeout in seconds for the readiness probe for the oauth2-proxy pods. This is the time to wait for a response from the readiness check before considering it a failure."
+            },
+            "periodSeconds": {
+              "type": "integer",
+              "default": 10,
+              "description": "Period in seconds for the readiness probe for the oauth2-proxy pods. This is the time to wait between performing readiness checks after the initial delay."
+            },
+            "successThreshold": {
+              "type": "integer",
+              "default": 1,
+              "description": "Success threshold for the readiness probe for the oauth2-proxy pods. This is the number of consecutive successful checks required before considering the pod ready after it has been marked as not ready."
+            }
+          }
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Pod-level security context for the oauth2proxy container.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {}
+        },
+        "deploymentAnnotations": {
+          "type": "object",
+          "default": {},
+          "description": "This parameter is not used in qubership-spark-on-k8s",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "podAnnotations": {
+          "type": "object",
+          "default": {},
+          "description": "This parameter is not used in qubership-spark-on-k8s",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "podLabels": {
+          "type": "object",
+          "default": {},
+          "description": "This parameter is not used in qubership-spark-on-k8s",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "replicas": {
+          "type": "integer",
+          "default": 1,
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "revisionHistoryLimit": {
+          "type": "integer",
+          "default": 10,
+          "description": "Revision history limit for the oauth2-proxy deployment. This is the number of old ReplicaSets to retain for rollback purposes when the deployment is updated. This should be set based on how many previous versions of the deployment you want to be able to roll back to if needed."
+        },
+        "enableServiceLinks": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to enable the injection of environment variables containing service information for the services in the same namespace as the oauth2-proxy deployment. This can be set to true to enable this feature, which can be useful for certain applications that need to access service information through environment variables, but it can also add additional environment variables to the pods which may not be desired in all cases."
+        },
+        "podDisruptionBudget": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "minAvailable": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ],
+              "default": 1,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "maxUnavailable": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ],
+              "default": null,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "unhealthyPodEvictionPolicy": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "autoscaling": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "minReplicas": {
+              "type": "integer",
+              "default": 1,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "maxReplicas": {
+              "type": "integer",
+              "default": 10,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "targetCPUUtilizationPercentage": {
+              "type": "integer",
+              "default": 80,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "annotations": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "behavior": {
+              "type": "object",
+              "default": {},
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "podSecurityContext": {
+          "type": "object",
+          "description": "This parameter is not used in qubership-spark-on-k8s",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+          "default": {}
+        },
+        "httpScheme": {
+          "type": "string",
+          "default": "http",
+          "description": "HTTP scheme to use for the backend connection from the oauth2-proxy to spark-history-server. This can be set to 'http' or 'https' depending on whether you want the oauth2-proxy to connect to spark-history-server over HTTP or HTTPS."
+        },
+        "initContainers": {
+          "type": "object",
+          "properties": {
+            "waitForRedis": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "image": {
+                  "type": "object",
+                  "properties": {
+                    "repository": {
+                      "type": "string",
+                      "default": "alpine",
+                      "description": "This parameter is not used in qubership-spark-on-k8s"
+                    },
+                    "tag": {
+                      "type": "string",
+                      "default": "latest",
+                      "description": "This parameter is not used in qubership-spark-on-k8s"
+                    },
+                    "pullPolicy": {
+                      "type": "string",
+                      "default": "IfNotPresent",
+                      "description": "This parameter is not used in qubership-spark-on-k8s"
+                    }
+                  }
+                },
+                "kubectlVersion": {
+                  "type": "string",
+                  "default": "",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "securityContext": {
+                  "type": "object",
+                  "description": "This parameter is not used in qubership-spark-on-k8s",
+                  "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+                  "default": {
+                    "enabled": true,
+                    "runAsNonRoot": true,
+                    "runAsUser": 65534,
+                    "runAsGroup": 65534,
+                    "allowPrivilegeEscalation": false,
+                    "capabilities": {
+                      "drop": [
+                        "ALL"
+                      ]
+                    },
+                    "seccompProfile": {
+                      "type": "RuntimeDefault"
+                    },
+                    "readOnlyRootFilesystem": true
+                  }
+                },
+                "timeout": {
+                  "type": "integer",
+                  "default": 180,
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "resources": {
+                  "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+                  "description": "This parameter is not used in qubership-spark-on-k8s",
+                  "default": {}
+                }
+              }
+            }
+          }
+        },
+        "htpasswdFile": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "existingSecret": {
+              "type": "string",
+              "default": "",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "entries": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "sessionStorage": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "default": "cookie",
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "redis": {
+              "type": "object",
+              "properties": {
+                "existingSecret": {
+                  "type": "string",
+                  "default": "",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "password": {
+                  "type": "string",
+                  "default": "",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "passwordKey": {
+                  "type": "string",
+                  "default": "redis-password",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "clientType": {
+                  "type": "string",
+                  "default": "standalone",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "standalone": {
+                  "type": "object",
+                  "properties": {
+                    "connectionUrl": {
+                      "type": "string",
+                      "default": "",
+                      "description": "This parameter is not used in qubership-spark-on-k8s"
+                    }
+                  }
+                },
+                "cluster": {
+                  "type": "object",
+                  "properties": {
+                    "connectionUrls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "default": [],
+                      "description": "List of connection URLs for the Redis cluster nodes used for session storage. This should be set if sessionStorage.type is 'redis' and sessionStorage.redis.clientType is 'cluster', and should include the necessary connection information (e.g., 'redis://:password@hostname:port') for connecting to each node in the Redis cluster."
+                    }
+                  }
+                },
+                "sentinel": {
+                  "type": "object",
+                  "properties": {
+                    "existingSecret": {
+                      "type": "string",
+                      "default": "",
+                      "description": "Name of an existing Kubernetes secret containing the Redis Sentinel connection information for oauth2-proxy session storage. If set, this secret will be used as the source of the Redis Sentinel connection information for oauth2-proxy instead of using the other Redis Sentinel configuration properties. This can be used to reference a pre-existing secret containing the Redis Sentinel connection information if you want to manage the connection information separately or have a specific reason to use a pre-existing secret."
+                    },
+                    "password": {
+                      "type": "string",
+                      "default": "",
+                      "description": "Password for the Redis Sentinel setup used for session storage. This should be set if the Redis Sentinel setup requires authentication."
+                    },
+                    "passwordKey": {
+                      "type": "string",
+                      "default": "redis-sentinel-password",
+                      "description": "Key in the values file that contains the password for the Redis Sentinel setup used for session storage. This should be set if the Redis Sentinel setup requires authentication and should reference a value in the values file that contains the password for the Redis Sentinel setup."
+                    },
+                    "masterName": {
+                      "type": "string",
+                      "default": "",
+                      "description": "Name of the Redis master node in the Sentinel setup used for session storage. This should be set if sessionStorage.type is 'redis' and sessionStorage.redis.clientType is 'sentinel', and should match the name of the master node as configured in the Redis Sentinel setup."
+                    },
+                    "connectionUrls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "default": [],
+                      "description": "List of connection URLs for the Redis Sentinel nodes used for session storage. This should be set if sessionStorage.type is 'redis' and sessionStorage.redis.clientType is 'sentinel', and should include the necessary connection information (e.g., 'redis://:password@hostname:port') for connecting to each node in the Redis Sentinel setup."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "redis": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            }
+          }
+        },
+        "checkDeprecation": {
+          "type": "boolean",
+          "default": true,
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "port": {
+              "type": "integer",
+              "default": 44180,
+              "description": "This parameter is not used in qubership-spark-on-k8s"
+            },
+            "service": {
+              "type": "object",
+              "properties": {
+                "appProtocol": {
+                  "type": "string",
+                  "default": "http",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                }
+              }
+            },
+            "serviceMonitor": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "default": false,
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "namespace": {
+                  "type": "string",
+                  "default": "",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "prometheusInstance": {
+                  "type": "string",
+                  "default": "default",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "interval": {
+                  "type": "string",
+                  "default": "60s",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "scrapeTimeout": {
+                  "type": "string",
+                  "default": "30s",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "labels": {
+                  "type": "object",
+                  "default": {},
+                  "description": "This parameter is not used in qubership-spark-on-k8s",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "scheme": {
+                  "type": "string",
+                  "default": "",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "tlsConfig": {
+                  "type": "object",
+                  "default": {},
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "bearerTokenFile": {
+                  "type": "string",
+                  "default": "",
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "annotations": {
+                  "type": "object",
+                  "default": {},
+                  "description": "This parameter is not used in qubership-spark-on-k8s",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "metricRelabelings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "default": [],
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                },
+                "relabelings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  },
+                  "default": [],
+                  "description": "This parameter is not used in qubership-spark-on-k8s"
+                }
+              }
+            }
+          }
+        },
+        "extraObjects": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "This parameter is not used in qubership-spark-on-k8s"
+        }
+      }
+    },
+    "gateway": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Specifies if HTTPRoute for History-server is deployed."
+        },
+        "hostnames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "hostnames for HTTPRoute"
+        },
+        "parentRefs": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "parentRefs for HTTPRoute"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": [],
+          "description": "rules for HTTPRoute. When rules[].matches is not set, it defaults to path.type=PathPrefix and path.value=/. backendRefs in the rule will point to trino server service, but the weight can be configured if needed."
+        },
+        "labels": {
+          "type": "object",
+          "default": {},
+          "description": "Labels for HTTPRoute and related objects.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "redirectRoute": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to create a redirect route for the Gateway API Gateway resource for oauth2-proxy. If enabled, a redirect route will be created to redirect traffic from HTTP to HTTPS or to another specified target. This can be used to ensure that traffic to oauth2-proxy is properly secured or routed according to your requirements."
+            },
+            "parentRefs": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "default": [],
+              "description": "parentRefs for redirect Route."
+            },
+            "hostnames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "description": "hostnames for redirect Route"
+            }
+          }
+        }
+      }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
+    }
+  },
+  "additionalProperties": true
+}

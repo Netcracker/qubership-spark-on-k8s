@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Schema for the spark Helm chart values. Some Kubernetes object definitions are derived from https://github.com/yannh/kubernetes-json-schema.",
+  "properties": {
+    "service": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "spark-integration-tests-runner",
+          "description": "The parameter specifies the name of the Spark integration tests' service."
+        }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": true,
+          "description": "The parameter specifies whether the service account for Spark Integration Tests is to be deployed or not."
+        },
+        "name": {
+          "type": "string",
+          "default": "spark-integration-tests",
+          "description": "The parameter specifies the name of the service account that is used to deploy Spark Integration Tests."
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "description": "The parameter specifies the Docker image of Spark Service.",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "default": "ghcr.io/netcracker/qubership-spark-on-k8s-tests",
+          "description": "Container image repository for the SparkApplication. The image tag will be determined by the 'tag' field. The image should contain the necessary test scripts and dependencies to run the Spark integration tests."
+        },
+        "tag": {
+          "type": "string",
+          "default": "main",
+          "description": "The parameter specifies the tags combined together with AND, OR, and NOT operators that select the test cases to run. To run all tests, set tags: alertsORtest_app."
+        }
+      }
+    },
+    "sparkAppsNamespace": {
+      "type": "string",
+      "default": "spark-apps",
+      "description": "The parameter specifies the name of the Kubernetes namespace, where Spark apps are located."
+    },
+    "status_writing_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "The parameter specifies enable/disable writing status of Integration tests' execution to the specified Custom Resource."
+    },
+    "cr_status_writing": {
+      "type": "object",
+      "properties": {
+        "is_short_status_message": {
+          "type": "boolean",
+          "default": true,
+          "description": "The parameter specifies the size of the integration test status message."
+        },
+        "only_integration_tests": {
+          "type": "boolean",
+          "default": true,
+          "description": "The parameter specifies whether to deploy only integration tests without any component (component was installed before)."
+        },
+        "status_custom_resource_path": {
+          "type": "string",
+          "default": "apps/v1/spark/deployments/spark-integration-tests-runner",
+          "description": "The parameter (optional) specifies the path to Custom Resource that should be used for the write status of auto-tests execution."
+        }
+      }
+    },
+    "prometheusUrl": {
+      "type": "string",
+      "default": "",
+      "description": "The parameter specifies the path to Custom Resource that should be used for the write status of auto-tests execution."
+    },
+    "resources": {
+      "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+      "description": "Compute Resources required by spark-integration-tests container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+      "default": {
+        "limits": {
+          "cpu": "400m",
+          "memory": "256Mi"
+        },
+        "requests": {
+          "cpu": "50m",
+          "memory": "256Mi"
+        }
+      }
+    },
+    "sparkAppImage": {
+      "type": "string",
+      "default": "ghcr.io/netcracker/qubership-spark-customized:main",
+      "description": "Container image for the SparkApplication. The image should contain the necessary test scripts and dependencies to run the Spark integration tests."
+    },
+    "sparkPyAppImage": {
+      "type": "string",
+      "default": "ghcr.io/netcracker/qubership-spark-customized-py:main",
+      "description": "Container image for the PySparkApplication. The image should contain the necessary test scripts and dependencies to run the PySpark integration tests."
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "description": "Pod-level security context for the spark-integration-tests Pod.",
+      "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+      "default": {}
+    },
+    "priorityClassName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null,
+      "description": "Priority class name for the spark-integration-tests Pod. If null, the Pod will not have a priority class and will be scheduled with default priority. If set to a valid priority class name, the Pod will be scheduled with the priority defined by that class."
+    },
+    "securityContext": {
+      "type": "object",
+      "description": "Container-level security context for the status provisionor Pod.",
+      "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+      "default": {
+        "capabilities": {
+          "drop": [
+            "ALL"
+          ]
+        },
+        "readOnlyRootFilesystem": true,
+        "allowPrivilegeEscalation": false,
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        },
+        "runAsNonRoot": true
+      }
+    },
+    "testsS3Endpoint": {
+      "type": "string",
+      "default": "http://your.minio.endpoint.com",
+      "description": "Endpoint URL for the S3-compatible storage used in integration tests. This should be the URL of the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
+    },
+    "testsS3AccessKey": {
+      "type": "string",
+      "default": "miniokey",
+      "description": "Access key for the S3-compatible storage used in integration tests. This should be the access key for the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
+    },
+    "testsS3SecretKey": {
+      "type": "string",
+      "default": "miniopass",
+      "description": "Secret key for the S3-compatible storage used in integration tests. This should be the secret key for the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
+    },
+    "s3": {
+      "type": "object",
+      "properties": {
+        "endpointUrl": {
+          "type": "string",
+          "default": "http://your.minio.endpoint.com",
+          "description": "Endpoint URL for the S3-compatible storage used in integration tests. This should be the URL of the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
+        },
+        "accessKey": {
+          "type": "string",
+          "default": "miniokey",
+          "description": "Access key for the S3-compatible storage used in integration tests. This should be the access key for the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
+        },
+        "secretKey": {
+          "type": "string",
+          "default": "miniopass",
+          "description": "Secret key for the S3-compatible storage used in integration tests. This should be the secret key for the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
+        },
+        "bucketName": {
+          "type": "string",
+          "default": "test-bucket",
+          "description": "Name of the S3 bucket used in integration tests."
+        },
+        "dbName": {
+          "type": "string",
+          "default": "test-db",
+          "description": "Name of the database used in integration tests."
+        },
+        "tableName": {
+          "type": "string",
+          "default": "test-table",
+          "description": "Name of the table used in integration tests."
+        }
+      }
+    },
+    "volcanoIntegrationTests": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable Volcano integration tests. If true, the Spark integration tests will include tests that verify the integration between the Spark Operator and Volcano scheduler. If false, these tests will be skipped."
+        }
+      }
+    },
+    "sparkHiveIntegrationTests": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable Spark-Hive integration tests. If true, the Spark integration tests will include tests that verify the integration between the Spark Operator and Hive. If false, these tests will be skipped."
+        },
+        "sparkHiveImage": {
+          "type": "string",
+          "default": "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main",
+          "description": "Docker image for the Spark-Hive integration tests."
+        }
+      }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
+    }
+  },
+  "additionalProperties": true
+}

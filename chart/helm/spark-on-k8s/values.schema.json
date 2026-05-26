@@ -1,0 +1,193 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Schema for the spark Helm chart values. Some Kubernetes object definitions are derived from https://github.com/yannh/kubernetes-json-schema.",
+  "properties": {
+    "spark-operator": {
+      "type": "object",
+      "description": "Configuration for the spark-operator subchart",
+      "default": "see the spark-operator subchart's values.yaml file"
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable internal metrics (deprecated)"
+        }
+      }
+    },
+    "grafanaApplicationDashboard": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "The string to submit a Grafana dashboard for applications"
+        }
+      }
+    },
+    "grafanadashboard": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "The string to submit a Grafana dashboard"
+        }
+      }
+    },
+    "prometheusRules": {
+      "type": "object",
+      "properties": {
+        "alert": {
+          "type": "object",
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "default": false,
+              "description": "Whether to enable Prometheus alerts for spark-operator."
+            }
+          }
+        }
+      }
+    },
+    "appServiceMonitor": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "default": false,
+          "description": "The string to submit a service monitor for Spark applications."
+        }
+      }
+    },
+    "spark-history-server": {
+      "type": "object",
+      "description": "Configuration for the Spark History Server.",
+      "default": "see the spark-history-server subchart's values.yaml file"
+    },
+    "spark-thrift-server": {
+      "type": "object",
+      "description": "Configuration for the Spark Thrift Server.",
+      "default": "see the spark-thrift-server subchart's values.yaml file"
+    },
+    "spark-integration-tests": {
+      "type": "object",
+      "description": "see the spark-service-integration-tests subchart's values.yaml file",
+      "default": ""
+    },
+    "statusProvisioner": {
+      "type": "object",
+      "properties": {
+        "podSecurityContext": {
+          "type": "object",
+          "description": "Pod-level security context for the status provisionor Pod.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.PodSecurityContext",
+          "default": {
+            "runAsNonRoot": true,
+            "seccompProfile": {
+              "type": "RuntimeDefault"
+            },
+            "runAsUser": 185
+          }
+        },
+        "securityContext": {
+          "type": "object",
+          "description": "Container-level security context for the status provisionor Pod.",
+          "$ref": "#/definitions/io.k8s.api.core.v1.SecurityContext",
+          "default": {
+            "privileged": false,
+            "allowPrivilegeEscalation": false,
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "readOnlyRootFilesystem": true
+          }
+        },
+        "priorityClassName": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Priority class name for the status provisioner Pod."
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "The parameter specifies if the status provisioner job is deployed."
+        },
+        "resources": {
+          "$ref": "#/definitions/io.k8s.api.core.v1.ResourceRequirements",
+          "description": "Compute Resources required by status provisioner container. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/",
+          "default": {
+            "limits": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            },
+            "requests": {
+              "cpu": "200m",
+              "memory": "200Mi"
+            }
+          }
+        },
+        "image": {
+          "type": "string",
+          "default": "ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.4",
+          "description": "The image for the Deployment Status Provisioner pod."
+        },
+        "lifetimeAfterCompletion": {
+          "type": "integer",
+          "default": 600,
+          "description": "The number of seconds that the job remains alive after its completion."
+        },
+        "podReadinessTimeout": {
+          "type": "integer",
+          "default": 300,
+          "description": "The timeout in seconds that the job waits for the monitored resources to be ready or completed."
+        },
+        "integrationTestsTimeout": {
+          "type": "integer",
+          "default": 2000,
+          "description": "The timeout in seconds that the job waits for the integration tests to complete."
+        },
+        "labels": {
+          "type": "object",
+          "default": {},
+          "description": "Labels to add to the status provisioner Pod",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "certManagerIntegration": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable cert-manager integration for automatic TLS certificate management for the Spark Operator."
+        }
+      }
+    },
+    "openShift": {
+      "type": "object",
+      "properties": {
+        "omit": {
+          "type": "boolean",
+          "default": true,
+          "description": "Specifies whether the security context should be adjusted for OpenShift"
+        }
+      }
+    },
+    "PAAS_PLATFORM": {
+      "type": "string",
+      "description": "The PaaS platform where spark is being deployed to."
+    }
+  }
+}
