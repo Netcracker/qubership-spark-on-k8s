@@ -48,18 +48,13 @@ RUN curl -fsSL -o /usr/local/bin/gosu https://github.com/tianon/gosu/releases/do
     && chmod +x /usr/local/bin/gosu
 
 RUN rm /opt/spark/examples/jars/jackson-mapper-asl-1.9.13.jar \
-    $SPARK_JARS_DIR/netty-*-4.1.125.Final.jar \
+    $SPARK_JARS_DIR/netty-*-4.1.118.Final.jar \
     $SPARK_JARS_DIR/jersey-client-3.0.16.jar \
     $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-aarch_64.jar \
     $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-riscv64.jar \
-    $SPARK_JARS_DIR/$SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar \
-    $SPARK_JARS_DIR/$SPARK_JARS_DIR/netty-transport-native-epoll-4.1.125.Final-linux-aarch_64.jar \
-    $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.125.Final-linux-x86_64.jar \
+    $SPARK_JARS_DIR/netty-transport-native-epoll-4.1.118.Final-linux-x86_64.jar \
     $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-aarch_64.jar \
-    $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar \
-    $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.125.Final-osx-aarch_64.jar \
-    $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.125.Final-osx-x86_64.jar 
-
+    $SPARK_JARS_DIR/netty-transport-native-kqueue-4.1.118.Final-osx-x86_64.jar 
 COPY --from=unpacker --chmod=0644 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
 COPY --chmod=0755 operator-entrypoint.sh /opt/spark/operator-entrypoint.sh
 
