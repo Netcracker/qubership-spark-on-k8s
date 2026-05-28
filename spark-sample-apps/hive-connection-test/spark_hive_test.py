@@ -21,6 +21,14 @@ def main():
     )
     spark.sparkContext.setLogLevel("ERROR")
 
+    log4jLogger = spark._jvm.org.apache.log4j
+    log4jLogger.LogManager.getLogger("org.apache.spark").setLevel(
+        log4jLogger.Level.ERROR
+    )
+    log4jLogger.LogManager.getLogger("org.apache.hadoop").setLevel(
+        log4jLogger.Level.ERROR
+    )
+    log4jLogger.LogManager.getLogger("hive").setLevel(log4jLogger.Level.ERROR)
 
     table_location = f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
 
@@ -28,6 +36,17 @@ def main():
 
     exit_code = 0
     try:
+
+        sc = spark.sparkContext
+        Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
+        FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
+        hadoop_conf = sc._jsc.hadoopConfiguration()
+        hadoop_conf.set("fs.s3a.endpoint", s3_endpoint_url)
+        hadoop_conf.set("fs.s3a.path.style.access", "true")
+        fs = FileSystem.get(Path(table_location).toUri(), hadoop_conf)
+
+        if not fs.exists(Path(table_location)):
+            fs.mkdirs(Path(table_location))
 
 
         spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
