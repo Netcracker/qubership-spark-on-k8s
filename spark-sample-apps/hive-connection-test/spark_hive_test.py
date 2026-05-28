@@ -31,6 +31,7 @@ def main():
 
 
         spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
+        print("\n creating table ")
 
         spark.sql(
             f"""
@@ -42,12 +43,12 @@ def main():
             LOCATION '{table_location}'
         """
         )
-
+        print("\n table created")
         # 2. Insert Data
         spark.sql(
             f"INSERT INTO {database_name}.{table_name} VALUES (1, 'James'), (2, 'Ann')"
         )
-
+        print("\n data inserted")
         # 3. VERIFICATION LOGIC
         results_df = spark.sql(f"SELECT * FROM {database_name}.{table_name}")
         row_count = results_df.count()
