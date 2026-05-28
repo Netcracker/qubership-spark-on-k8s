@@ -29,16 +29,6 @@ def main():
     exit_code = 0
     try:
 
-        sc = spark.sparkContext
-        Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
-        FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
-        hadoop_conf = sc._jsc.hadoopConfiguration()
-        hadoop_conf.set("fs.s3a.endpoint", s3_endpoint_url)
-        hadoop_conf.set("fs.s3a.path.style.access", "true")
-        fs = FileSystem.get(Path(table_location).toUri(), hadoop_conf)
-
-        if not fs.exists(Path(table_location)):
-            fs.mkdirs(Path(table_location))
 
         spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
 
