@@ -8,6 +8,8 @@ RUN mvn dependency:copy-dependencies -DoutputDirectory=/opt/spark/hivejars
 
 FROM $base_img_py
 
+ENV SPARK_DIST_CLASSPATH="/opt/spark/hivejars/*"
+
 USER root
 
 RUN mkdir -p /opt/spark/hivejars /opt/spark/examples && \
@@ -16,6 +18,8 @@ RUN mkdir -p /opt/spark/hivejars /opt/spark/examples && \
 WORKDIR /opt/spark/examples/
 
 COPY --from=dependency-resolver --chown=spark:spark /opt/spark/hivejars /opt/spark/hivejars
+
+RUN mv /opt/spark/hivejars/spark-hadoop-cloud*.jar /opt/spark/jars/
 
 # Remove conflicting logging jars
 RUN rm -f /opt/spark/hivejars/log4j-slf4j-impl-*.jar \
