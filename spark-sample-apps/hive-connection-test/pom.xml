@@ -7,44 +7,7 @@
 
     <dependencies>
 
-        <!-- Match Spark runtime exactly -->
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-hadoop-cloud_2.13</artifactId>
-            <version>4.1.2</version>
-            <exclusions>
-
-                <!-- Prevent Hadoop conflicts -->
-                <exclusion>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-
-            </exclusions>
-        </dependency>
-
-        <!-- S3A support matching Spark Hadoop version -->
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-aws</artifactId>
-            <version>3.4.2</version>
-            <exclusions>
-
-                <!-- Avoid duplicate logging -->
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-
-            </exclusions>
-        </dependency>
-
-        <!-- Hive support -->
+        <!-- Hive execution engine -->
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-exec</artifactId>
@@ -52,7 +15,7 @@
 
             <exclusions>
 
-                <!-- Logging conflicts -->
+                <!-- Prevent logging conflicts -->
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>*</artifactId>
@@ -63,15 +26,22 @@
                     <artifactId>*</artifactId>
                 </exclusion>
 
-                <!-- CRITICAL: prevent Hive from dragging old Hadoop -->
+                <!-- CRITICAL: Never bring Hadoop from Hive -->
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+
+                <!-- Spark already provides parquet -->
+                <exclusion>
+                    <groupId>org.apache.parquet</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
 
             </exclusions>
         </dependency>
 
+        <!-- Hive metastore -->
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-standalone-metastore-common</artifactId>
@@ -81,6 +51,16 @@
 
                 <exclusion>
                     <groupId>org.apache.hadoop</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
                     <artifactId>*</artifactId>
                 </exclusion>
 
