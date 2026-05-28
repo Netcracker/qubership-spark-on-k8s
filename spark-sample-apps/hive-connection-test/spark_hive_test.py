@@ -21,14 +21,6 @@ def main():
     )
     spark.sparkContext.setLogLevel("ERROR")
 
-    log4jLogger = spark._jvm.org.apache.log4j
-    log4jLogger.LogManager.getLogger("org.apache.spark").setLevel(
-        log4jLogger.Level.ERROR
-    )
-    log4jLogger.LogManager.getLogger("org.apache.hadoop").setLevel(
-        log4jLogger.Level.ERROR
-    )
-    log4jLogger.LogManager.getLogger("hive").setLevel(log4jLogger.Level.ERROR)
 
     table_location = f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
 
