@@ -90,11 +90,19 @@ Allow the release namespace to be overridden for multi-namespace deployments in 
 {{- end -}}
 
 {{/*
+Redis subchart enabled check
+*/}}
+{{- define "oauth2-proxy.redis.enabled" -}}
+  {{- eq (index .Values "oauth2Proxy" "redis-ha" "enabled") true -}}
+{{- end -}}
+
+{{/*
 Redis subcharts fullname
 */}}
 {{- define "oauth2-proxy.redis.fullname" -}}
-{{- if .Values.oauth2Proxy.redis.enabled -}}
-{{- include "redis-ha.fullname" (dict "Chart" (dict "Name" "redis") "Release" .Release "Values" .Values.oauth2Proxy.redis) -}}
+{{- if eq (include "oauth2-proxy.redis.enabled" .) "true" -}}
+{{- $redisValues := index .Values "oauth2Proxy" "redis-ha" | default dict -}}
+{{- include "redis-ha.fullname" (dict "Chart" (dict "Name" "redis-ha") "Release" .Release "Values" $redisValues) -}}
 {{- else -}}
 {{ fail "attempting to use redis subcharts fullname, even though the subchart is not enabled. This will lead to misconfiguration" }}
 {{- end -}}
@@ -106,10 +114,11 @@ Compute the redis url if not set explicitly.
 {{- define "oauth2-proxy.redis.StandaloneUrl" -}}
 {{- if .Values.oauth2Proxy.sessionStorage.redis.standalone.connectionUrl -}}
 {{ .Values.oauth2Proxy.sessionStorage.redis.standalone.connectionUrl }}
-{{- else if .Values.oauth2Proxy.redis.enabled -}}
-{{- printf "redis://%s:%.0f" (include "oauth2-proxy.redis.fullname" .) .Values.oauth2Proxy.redis.redis.port -}}
+{{- else if eq (include "oauth2-proxy.redis.enabled" .) "true" -}}
+{{- $redisValues := index .Values "oauth2Proxy" "redis-ha" | default dict -}}
+{{- printf "redis://%s:%.0f" (include "oauth2-proxy.redis.fullname" .) $redisValues.redis.port -}}
 {{- else -}}
-{{ fail "please set sessionStorage.redis.standalone.connectionUrl or enable the redis subchart via redis.enabled" }}
+{{ fail "please set sessionStorage.redis.standalone.connectionUrl or enable the redis subchart via redis-ha.enabled" }}
 {{- end -}}
 {{- end -}}
 
@@ -154,9 +163,52 @@ metricsServer:
 {{- end }}
 {{- end -}}
 
+{{/*
+If `config.forceLegacyConfig=false`, the chart ignores both the `config.configFile` and `config.existingConfig` overrides and only generates a minimal necessary legacy config.
+If `config.existingConfig` is set and `config.forceLegacyConfig=true`, the external ConfigMap is mounted into the mounted file.
+If `config.configFile` is set and `config.forceLegacyConfig=true`, the chart renders that inline content into the mounted file.
+*/}}
+{{- define "oauth2-proxy.legacy-config.mode" -}}
+{{- if and .Values.oauth2Proxy.alphaConfig.enabled (not .Values.oauth2Proxy.config.forceLegacyConfig) -}}
+generated-alpha-compatible
+{{- else if .Values.oauth2Proxy.config.existingConfig -}}
+existing-configmap
+{{- else if .Values.oauth2Proxy.config.configFile -}}
+inline-custom
+{{- else if .Values.oauth2Proxy.alphaConfig.enabled -}}
+generated-alpha-compatible
+{{- else -}}
+generated-legacy
+{{- end -}}
+{{- end -}}
+
+{{- define "oauth2-proxy.legacy-config.name" -}}
+{{- if eq (include "oauth2-proxy.legacy-config.mode" .) "existing-configmap" -}}
+{{- .Values.oauth2Proxy.config.existingConfig -}}
+{{- else -}}
+{{- template "oauth2-proxy.fullname" . -}}
+{{- end -}}
+{{- end -}}
+
+{{- define "oauth2-proxy.legacy-config.content" -}}
+{{- if eq (include "oauth2-proxy.legacy-config.mode" .) "inline-custom" -}}
+{{- tpl .Values.oauth2Proxy.config.configFile $ -}}
+{{- else if eq (include "oauth2-proxy.legacy-config.mode" .) "generated-alpha-compatible" -}}
+email_domains = {{ .Values.oauth2Proxy.config.emailDomains | toJson }}
+{{- else -}}
+email_domains = {{ .Values.oauth2Proxy.config.emailDomains | toJson }}
+upstreams = {{ .Values.oauth2Proxy.config.upstreams | toJson }}
+{{- end -}}
+{{- end -}}
+
 {{- define "oauth2-proxy.secrets" -}}
+{{- if has "cookie-secret" .Values.oauth2Proxy.config.requiredSecretKeys }}
 cookie-secret: {{ tpl .Values.oauth2Proxy.config.cookieSecret $ | b64enc | quote }}
+{{- end }}
+{{- if has "client-secret" .Values.oauth2Proxy.config.requiredSecretKeys }}
 client-secret: {{ tpl .Values.oauth2Proxy.config.clientSecret $ | b64enc | quote }}
+{{- end }}
+{{- if has "client-id" .Values.oauth2Proxy.config.requiredSecretKeys }}
 client-id: {{ tpl .Values.oauth2Proxy.config.clientID $ | b64enc | quote }}
 {{- end -}}
 

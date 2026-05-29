@@ -137,7 +137,7 @@
         },
         "image": {
           "type": "string",
-          "default": "ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.4",
+          "default": "ghcr.io/netcracker/qubership-deployment-status-provisioner:0.2.7",
           "description": "The image for the Deployment Status Provisioner pod."
         },
         "lifetimeAfterCompletion": {

@@ -1,5 +1,5 @@
 {{- if .Values.oauth2Proxy.enabled }}
-{{- $replicaCount := .Values.oauth2Proxy.replicas | default 1 | int }}
+{{- $replicaCount := .Values.oauth2Proxy.replicaCount | default 1 | int }}
 {{- if .Values.oauth2Proxy.autoscaling.enabled }}
   {{- $replicaCount = .Values.oauth2Proxy.autoscaling.minReplicas | default 1 | int }}
 {{- end }}
