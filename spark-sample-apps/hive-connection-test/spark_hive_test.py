@@ -48,7 +48,6 @@ def main():
         if not fs.exists(Path(table_location)):
             fs.mkdirs(Path(table_location))
 
-
         spark.sql(f"CREATE DATABASE IF NOT EXISTS {database_name}")
         print("\n creating table ")
 
