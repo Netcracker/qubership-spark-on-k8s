@@ -588,7 +588,7 @@
             },
             "tag": {
               "type": "string",
-              "default": "v7.14.2",
+              "default": "v7.15.2",
               "description": "Container image tag for oauth2-proxy"
             },
             "pullPolicy": {
@@ -627,12 +627,12 @@
             },
             "clientID": {
               "type": "string",
-              "default": "",
+              "default": "XXXXXXX",
               "description": "This parameter is not used in qubership-spark-on-k8s"
             },
             "clientSecret": {
               "type": "string",
-              "default": "",
+              "default": "XXXXXXXX",
               "description": "This parameter is not used in qubership-spark-on-k8s"
             },
             "cookieSecret": {
