@@ -21,12 +21,14 @@ COPY --from=dependency-resolver --chown=spark:spark /opt/spark/hivejars /opt/spa
 
 RUN mv /opt/spark/hivejars/spark-hadoop-cloud*.jar /opt/spark/jars/
 
+# Remove conflicting logging jars
 RUN rm -f /opt/spark/hivejars/log4j-slf4j-impl-*.jar \
            /opt/spark/hivejars/slf4j-log4j12-*.jar \
            /opt/spark/hivejars/log4j-1.2-api-*.jar \
-           /opt/spark/hivejars/bundle-*.jar           
+           /opt/spark/hivejars/bundle-*.jar
 
 COPY --chown=spark:spark spark_hive_test.py delete_s3.py ./
+
 RUN chmod 755 *.py
 
 RUN python3 -m pip install --no-cache-dir boto3==1.39.3

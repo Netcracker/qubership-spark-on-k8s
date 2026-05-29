@@ -1,4 +1,4 @@
-{{- if and .Values.oauth2Proxy.redis.enabled .Values.oauth2Proxy.initContainers.waitForRedis.enabled }}
+{{- if and (eq (include "oauth2-proxy.redis.enabled" .) "true") .Values.oauth2Proxy.initContainers.waitForRedis.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

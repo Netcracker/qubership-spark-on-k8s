@@ -26,10 +26,10 @@ spec:
       {{- include "oauth2-proxy.selectorLabels" . | nindent 6 }}
   {{- if .Values.oauth2Proxy.networkPolicy.ingress }}
   ingress:
-    {{- toYaml .Values.oauth2Proxy.networkPolicy.ingress | nindent 4 }}
+    {{- tpl (toYaml .Values.oauth2Proxy.networkPolicy.ingress) $ | nindent 4 }}
   {{- end }}
   {{- if .Values.oauth2Proxy.networkPolicy.egress }}
   egress:
-    {{- toYaml .Values.oauth2Proxy.networkPolicy.egress | nindent 4 }}
+    {{- tpl (toYaml .Values.oauth2Proxy.networkPolicy.egress) $ | nindent 4 }}
   {{- end }}
 {{- end }}
