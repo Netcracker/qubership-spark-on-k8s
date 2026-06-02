@@ -210,6 +210,7 @@ client-secret: {{ tpl .Values.oauth2Proxy.config.clientSecret $ | b64enc | quote
 {{- end }}
 {{- if has "client-id" .Values.oauth2Proxy.config.requiredSecretKeys }}
 client-id: {{ tpl .Values.oauth2Proxy.config.clientID $ | b64enc | quote }}
+{{- end }}
 {{- end -}}
 
 {{- define "oauth2_proxy.image" -}}
