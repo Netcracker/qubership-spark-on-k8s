@@ -70,14 +70,34 @@ Deployment and service only labels
 */}}
 {{- define "deployment_and_service_only_labels_sts" -}}
 name: {{ template "spark-thrift-server.fullname" . }}
-app.kubernetes.io/name: {{ template "spark-thrift-server.fullname" . }}
 {{- end }}
 
 {{/*
 All object labels
 */}}
 {{- define "all_objects_labels_sts" -}}
+{{ include "part_of_label_sts" . }}
+{{ include "name_label_sts" . }}
+{{- end }}
+
+{{/*pod labels*/}}
+{{- define "pod_labels_sts" -}}
+{{ include "part_of_label_sts" . }}
+{{ include "name_label_sts" . }}
+{{- end }}
+
+{{/*
+part of label
+*/}}
+{{- define "part_of_label_sts" -}}
 app.kubernetes.io/part-of: spark-operator
+{{- end }}
+
+{{/*
+name label
+*/}}
+{{- define "name_label_sts" -}}
+app.kubernetes.io/name: {{ template "spark-thrift-server.fullname" . }}
 {{- end }}
 
 {{/*

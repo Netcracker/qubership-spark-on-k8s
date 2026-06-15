@@ -67,6 +67,10 @@ ingress:
   # nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
   # host: 'spark-thrift-server.minio.your.cloud.qubeship.com'
   # path: '/'
+  labels: 
+    app.kubernetes.io/component: ingress
+    deployment.netcracker.com/ingress-type: public-network
+    deployment.netcracker.com/ingress-audience-type: conf-user 
 
 
 #resources: {}

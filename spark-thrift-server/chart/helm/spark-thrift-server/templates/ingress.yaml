@@ -4,7 +4,9 @@ kind: Ingress
 metadata:
   name: {{ template "spark-thrift-server.fullname" . }}
   labels:
-    {{- include "all_objects_labels_sts" . | nindent 4 }}
+    {{- $labels := fromYaml (include "all_objects_labels_sts" .) | default dict }}
+    {{- $customLabels := .Values.ingress.labels | default dict }}
+    {{- mustMerge $labels $customLabels | toYaml | nindent 4 }}
 {{- with .Values.ingress.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}

@@ -60,6 +60,10 @@ ingress:
   # path: '/'
   annotations:
     gateway-api-converter.netcracker.com/ignore: "true"
+  labels: 
+    app.kubernetes.io/component: ingress
+    deployment.netcracker.com/ingress-type: public-network
+    deployment.netcracker.com/ingress-audience-type: conf-user  
   tls:
     # Enable TLS termination for the web Ingress
     enabled: false
@@ -515,7 +519,10 @@ oauth2Proxy:
     annotations:
       gateway-api-converter.netcracker.com/ignore: "true"
 
-    labels: {}
+    labels: 
+      app.kubernetes.io/component: ingress
+      deployment.netcracker.com/ingress-type: public-network
+      deployment.netcracker.com/ingress-audience-type: conf-user 
     # annotations:
     #   kubernetes.io/ingress.class: nginx
     #   kubernetes.io/tls-acme: "true"

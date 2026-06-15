@@ -80,7 +80,6 @@ Deployment and service only labels
 */}}
 {{- define "deployment_and_service_only_labels_shs" -}}
 name: {{ template "spark-history-server.fullname" . }}
-app.kubernetes.io/name: {{ template "spark-history-server.fullname" . }}
 {{- end }}
 
 {{/*
@@ -88,6 +87,22 @@ All object labels
 */}}
 {{- define "all_objects_labels_shs" -}}
 {{ include "part_of_label_shs" . }}
+{{ include "name_label_shs" . }}
+{{- end }}
+
+{{/*
+Pod labels
+*/}}
+{{- define "pod_labels_shs" -}}
+{{ include "part_of_label_shs" . }}
+{{ include "name_label_shs" . }}
+{{- end }}
+
+{{/*
+name label
+*/}}
+{{- define "name_label_shs" -}}
+app.kubernetes.io/name: {{ template "spark-history-server.fullname" . }}
 {{- end }}
 
 {{/*
