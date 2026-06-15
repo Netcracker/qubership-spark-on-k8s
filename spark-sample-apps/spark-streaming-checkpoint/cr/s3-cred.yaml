@@ -4,8 +4,15 @@ metadata:
   name: s3-cred
   namespace: spark-apps
 type: Opaque
-data:
-  ## Access Key for MinIO, base64 encoded (echo -n 'minioaccesskey' | base64)
-  accesskey: bWluaW9hY2Nlc3NrZXk=
-  ## Secret Key for MinIO, base64 encoded (echo -n 'miniosecretkey' | base64)
-  secretkey: bWluaW9zZWNyZXRrZXk=
+stringData:
+  core-site.xml: |
+    <configuration>
+      <property>
+        <name>fs.s3a.access.key</name>
+        <value>Z4nz2bxWnWM36lf3K21y</value>
+      </property>
+      <property>
+        <name>fs.s3a.secret.key</name>
+        <value>oqtAdywaB7c7OJWHQ9rLVuJcKjpUR8iSJfXMPCLr</value>
+      </property>
+    </configuration>   

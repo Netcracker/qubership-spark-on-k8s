@@ -14,6 +14,8 @@ oauth2Proxy:
   ##
   namespaceOverride: ""
 
+  secretsAsFiles: true
+
   fullnameOverride: oauth2-proxy-spark-pi-long-run-99
 
   # Force the target Kubernetes version (it uses Helm `.Capabilities` if not set).
@@ -313,7 +315,8 @@ oauth2Proxy:
 
   # Configure Kubernetes security context for pod
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-  podSecurityContext: {}
+  podSecurityContext:
+    fsGroup: 2000
 
   # whether to use http or https
   httpScheme: http

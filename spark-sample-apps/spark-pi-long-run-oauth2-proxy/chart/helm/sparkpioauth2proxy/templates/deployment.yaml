@@ -77,6 +77,10 @@ spec:
         image: "{{ .Values.oauth2Proxy.image.repository }}:v{{ include "oauth2-proxy.version" . }}"
         imagePullPolicy: {{ .Values.oauth2Proxy.image.pullPolicy }}
         args:
+         {{- if .Values.oauth2Proxy.secretsAsFiles }}
+          - --client-secret-file=/var/run/secrets/oauth2-proxy/client-secret
+          - --cookie-secret-file=/var/run/secrets/oauth2-proxy/cookie-secret
+        {{- end }}
         {{- if .Values.oauth2Proxy.alphaConfig.enabled }}
           - --alpha-config=/etc/oauth2_proxy/oauth2_proxy.yml
         {{- else }}
@@ -238,6 +242,11 @@ spec:
         resources:
 {{ toYaml .Values.oauth2Proxy.resources | indent 10 }}
         volumeMounts:
+          {{- if .Values.oauth2Proxy.secretsAsFiles }}
+          - name: oauth-secrets
+            mountPath: /var/run/secrets/oauth2-proxy
+            readOnly: true
+          {{- end }}  
 {{- with .Values.oauth2Proxy.config.google }}
 {{- if and .adminEmail (or .serviceAccountJson .existingSecret) }}
         - name: google-secret
@@ -277,6 +286,12 @@ spec:
   {{- toYaml .Values.oauth2Proxy.extraContainers | nindent 6 }}
 {{- end }}
       volumes:
+        {{- if .Values.oauth2Proxy.secretsAsFiles }}
+        - name: oauth-secrets
+          secret:
+            secretName: {{ template "oauth2-proxy.secretName" . }}
+            defaultMode: 0400
+        {{- end }} 
 {{- with .Values.oauth2Proxy.config.google }}
 {{- if and .adminEmail (or .serviceAccountJson .existingSecret) }}
       - name: google-secret

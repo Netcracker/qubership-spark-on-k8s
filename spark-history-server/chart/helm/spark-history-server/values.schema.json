@@ -981,7 +981,7 @@
               },
               "description": "Labels to add to the Ingress resource for oauth2-proxy. This can be used to add additional labels for organizational or selection purposes.",
               "additionalProperties": {
-              "type": "string"
+                "type": "string"
               }
             }
           }
