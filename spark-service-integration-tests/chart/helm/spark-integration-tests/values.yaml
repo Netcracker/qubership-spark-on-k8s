@@ -40,11 +40,6 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-#ToDo store in secrets
-testsS3Endpoint: http://your.minio.endpoint.com
-testsS3AccessKey: miniokey
-testsS3SecretKey: miniopass
-
 s3:
   endpointUrl: http://your.minio.endpoint.com
   accessKey: miniokey
