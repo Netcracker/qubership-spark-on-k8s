@@ -230,6 +230,18 @@
           "type": "string",
           "default": "/",
           "description": "Path for the Ingress rule. It should be set to '/'."
+        },
+        "labels": {
+          "type": "object",
+          "default": {
+            "app.kubernetes.io/component": "ingress",
+            "deployment.netcracker.com/ingress-type": "public-network",
+            "deployment.netcracker.com/ingress-audience-type": "conf-user"
+          },
+          "description": "Labels to add to the Ingress resource for spark-thrift-server.",
+          "additionalProperties": {
+            "type": "string"
+          }
         }
       }
     },
