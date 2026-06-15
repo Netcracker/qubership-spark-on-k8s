@@ -164,7 +164,8 @@
           "description": "Labels to add to the spark-history-server ingress",
           "additionalProperties": {
             "type": "string"
-          },
+          }
+        },
         "annotations": {
           "type": "object",
           "default": {
@@ -961,6 +962,16 @@
               "default": [],
               "description": "It is the ingress host and should be compatible with the cluster's ingress URL routing rules."
             },
+            "annotations": {
+              "type": "object",
+              "default": {
+                "gateway-api-converter.netcracker.com/ignore": "true"
+              },
+              "description": "Annotations to add to the Ingress resource for oauth2-proxy. By default, the Ingress is annotated to be ignored by the gateway-api-converter if that is being used in the cluster. This can be used to add additional annotations for organizational or management purposes.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
             "labels": {
               "type": "object",
               "default": {
@@ -971,16 +982,6 @@
               "description": "Labels to add to the Ingress resource for oauth2-proxy. This can be used to add additional labels for organizational or selection purposes.",
               "additionalProperties": {
               "type": "string"
-              }
-            },
-            "annotations": {
-              "type": "object",
-              "default": {
-                "gateway-api-converter.netcracker.com/ignore": "true"
-              },
-              "description": "Annotations to add to the Ingress resource for oauth2-proxy. By default, the Ingress is annotated to be ignored by the gateway-api-converter if that is being used in the cluster. This can be used to add additional annotations for organizational or management purposes.",
-              "additionalProperties": {
-                "type": "string"
               }
             }
           }
