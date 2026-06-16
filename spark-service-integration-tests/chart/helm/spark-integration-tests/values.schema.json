@@ -135,21 +135,6 @@
         "runAsNonRoot": true
       }
     },
-    "testsS3Endpoint": {
-      "type": "string",
-      "default": "http://your.minio.endpoint.com",
-      "description": "Endpoint URL for the S3-compatible storage used in integration tests. This should be the URL of the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
-    },
-    "testsS3AccessKey": {
-      "type": "string",
-      "default": "miniokey",
-      "description": "Access key for the S3-compatible storage used in integration tests. This should be the access key for the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
-    },
-    "testsS3SecretKey": {
-      "type": "string",
-      "default": "miniopass",
-      "description": "Secret key for the S3-compatible storage used in integration tests. This should be the secret key for the MinIO server or any other S3-compatible storage service that will be used to store test data during the Spark integration tests."
-    },
     "s3": {
       "type": "object",
       "properties": {

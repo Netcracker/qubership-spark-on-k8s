@@ -4,9 +4,6 @@ ${SPARK_APPS_SERVICEACCOUNT}  %{SPARK_APPS_SERVICEACCOUNT}
 ${BASE_APP_IMAGE}             %{BASE_APP_IMAGE}
 ${BASE_PY_APP_IMAGE}          %{BASE_PY_APP_IMAGE}
 ${SPARK_HIVE_IMAGE}           %{SPARK_HIVE_IMAGE}
-${S3_ENDPOINT}                %{S3_ENDPOINT}
-${S3_ACCESS_KEY}              %{S3_ACCESS_KEY}
-${S3_SECRET_KEY}              %{S3_SECRET_KEY}
 ${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}  %{SPARK_HIVE_INTEGRATION_TESTS_ENABLED}
 ${VOLCANO_INTEGRATION_TESTS_ENABLED}     %{VOLCANO_INTEGRATION_TESTS_ENABLED}
 ${MANAGED_BY_OPERATOR}        true
@@ -34,10 +31,7 @@ Create CR For Spark Application
     ${body}=    Update App Yaml    
     ...    app_image=${APP_IMAGE}    
     ...    path_to_app=${PATH_TO_APP}    
-    ...    sa_name=${SPARK_APPS_SERVICEACCOUNT}    
-    ...    s3_path=${S3_ENDPOINT}    
-    ...    s3_a_key=${S3_ACCESS_KEY}    
-    ...    s3_s_key=${S3_SECRET_KEY}    
+    ...    sa_name=${SPARK_APPS_SERVICEACCOUNT}       
     ...    use_volcano=${VOLCANO}
     
     Create Namespaced Custom Object  ${GROUP}  ${VERSION}  ${SPARK_APPS_NAMESPACE}  ${PLURAL}  ${body}

@@ -6,7 +6,9 @@ kind: Ingress
 metadata:
   name: {{ template "spark-history-server.fullname" . }}
   labels:
-    {{- include "all_objects_labels_shs" . | nindent 4 }}
+    {{- $labels := fromYaml (include "all_objects_labels_shs" .) | default dict }}
+    {{- $customLabels := .Values.ingress.labels | default dict }}
+    {{- mustMerge $labels $customLabels | toYaml | nindent 4 }}
 {{- with .Values.ingress.annotations }}
   annotations:
 {{ toYaml . | indent 4 }}
