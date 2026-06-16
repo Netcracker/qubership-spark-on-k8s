@@ -46,7 +46,7 @@ Alternatively, it is possible to submit the applications using Kubernetes dashbo
 
 An Airflow DAG can be used to submit a Spark application to the Kubernetes cluster.  
 
-![Airflow DAG to submit Spark apps](/docs/public/images/airflow_spark_streaming_dag_graph_view.png)
+![Airflow DAG to submit Spark apps](/docs/images/airflow_spark_streaming_dag_graph_view.png)
 
 * Airflow provides [airflow.providers.cncf.kubernetes.operators.spark_kubernetes](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/_api/airflow/providers/cncf/kubernetes/operators/spark_kubernetes/index.html). It can be used to submit Spark applications to the Spark Operator in Kubernetes.  
   The task that submits an application completes after the submission.
@@ -54,7 +54,7 @@ An Airflow DAG can be used to submit a Spark application to the Kubernetes clust
 * In order to monitor the submitted Spark application, [airflow.providers.cncf.kubernetes.sensors.spark_kubernetes](https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/_api/airflow/providers/cncf/kubernetes/sensors/spark_kubernetes/index.html) can be used.  
   The task continuously runs and shows the Spark application status in the logs.
 
- ![Airflow DAG Sensor Task](/docs/public/images/airflow_spark_streaming_dag_sensor_task.png)
+ ![Airflow DAG Sensor Task](/docs/images/airflow_spark_streaming_dag_sensor_task.png)
 
 ## TLS Enabled for Application
 

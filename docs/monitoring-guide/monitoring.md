@@ -16,7 +16,7 @@ To access the dashboard:
 1. Select the operator's `pod`.
 1. Select the time range.
 
-![Dashboard Variables](/docs/public/images/operator_dashboard_variables.png)
+![Dashboard Variables](/docs/images/operator_dashboard_variables.png)
 
 ## DR Cluster
 
@@ -38,7 +38,7 @@ Note that an appropriate proxy datasource should be selected to enable cluster f
 
 This section describes the Spark Operator overall state.
 
-![Operator Overview](/docs/public/images/operator_overview.png)
+![Operator Overview](/docs/images/operator_overview.png)
 
 #### Operator Status
 
@@ -77,7 +77,7 @@ This displays the number of each container restarts in the pod.
 
 If History Server is installed, this section describes the overall state of the Spark History Server.
 
-![History Server Overview](/docs/public/images/history_server_overview.png)
+![History Server Overview](/docs/images/history_server_overview.png)
 
 #### Spark History Server Status
 
@@ -111,7 +111,7 @@ This displays the number of each container restarts in the pod.
 
 This displays the Spark applications' overall metrics.
 
-![Spark Applications](/docs/public/images/spark_applications.png)
+![Spark Applications](/docs/images/spark_applications.png)
 
 #### Total Apps Count
 
@@ -154,7 +154,7 @@ The value is reset to 0 after the Spark Operator restarts. The restarts are disp
 ### Spark Applications Timing Metrics
 
 
-![Spark Applications Timing Metrics](/docs/public/images/spark-applications-timing-metrics.png)
+![Spark Applications Timing Metrics](/docs/images/spark-applications-timing-metrics.png)
 
 #### Average startup latency of Applications 
 
@@ -176,23 +176,23 @@ This displays the `average execution time of successful applications`in seconds.
 
 This displays the CPU consumption in the Spark Operator pods based on the metrics collected from the docker.
 
-![CPU](/docs/public/images/cpu.png)
+![CPU](/docs/images/cpu.png)
 
 ### Memory Usage
 
 This displays the memory consumption in the Spark Operator pods based on the metrics collected from the docker.
 
-![Memory](/docs/public/images/memory.png)
+![Memory](/docs/images/memory.png)
 
 ### Disk Space Usage
 
 This displays the disk usage for the Spark Operator pods.
 
-![Disk](/docs/public/images/disk.png)
+![Disk](/docs/images/disk.png)
 
 ### Network
 
-![Network](/docs/public/images/network.png)
+![Network](/docs/images/network.png)
 
 #### Receive/Transmit Bandwidth
 

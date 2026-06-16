@@ -20,7 +20,7 @@ This section provides an overview of Kubeflow Spark operator and related entitie
 Kubeflow Spark Operator is a Kubernetes Operator for Apache Spark. Kubeflow spark operator chart is used as a subchart in qubership-spark-on-k8s helm charts. The operator makes specifying and running Spark applications easier. It uses Kubernetes custom resources for specifying and managing Spark applications. Application configuration details are specified in the CR file and submitted to the Kubernetes cluster.
 Spark Operator handles the CR file and executes spark-submit for the application.
 
-![Spark Operator Architecture](/docs/public/images/architecture/spark-operator-architecture.png)
+![Spark Operator Architecture](/docs/images/architecture/spark-operator-architecture.png)
 
 ## Spark History Server
 
@@ -28,7 +28,7 @@ Spark History Server is an optional component. It is a part of the Spark base im
 Spark History Server tracks completed and running Spark applications. The History Server and applications should point to the same log directory. Currently, S3 storage is the only fully supported log storage.
 The authentication for the Spark History Server user interface is implemented through OAuth2 Proxy. It is deployed as a sidecar container for the History Server.
 
-![Spark History Server](/docs/public/images/architecture/spark-history-server.png)
+![Spark History Server](/docs/images/architecture/spark-history-server.png)
 
 ### Authentication for Spark History Server
 
@@ -40,7 +40,7 @@ The service at this URL, in our case OAuth2 Proxy, is responsible for validating
 If the user is authenticated, then the service returns a 2xx status code, and the request is passed onto the Spark History Server. 
 If it is not authenticated, then it is passed to the URL specified in `nginx.ingress.kubernetes.io/auth-signin` to start the authentication.
 
-![Spark History Server with OAuth2 Proxy](/docs/public/images/architecture/oauth2-proxy-spark-history-server.png)
+![Spark History Server with OAuth2 Proxy](/docs/images/architecture/oauth2-proxy-spark-history-server.png)
 
 ## Spark Thrift Server
 
@@ -53,13 +53,13 @@ As a Spark application, Spark Thrift server consists of a driver and multiple ex
 When a query is submitted, the driver requests resources required for processing the query and creates as many executors as need (dynamic allocation is enabled by default) to perform the tasks.  
 Spark Thrift Server communicates with Hive Metastore to get the metadata required for query compilation.
 
-![Spark Thrift Server in Cluster Mode](/docs/public/images/architecture/spark-thrift-cluster.png)
+![Spark Thrift Server in Cluster Mode](/docs/images/architecture/spark-thrift-cluster.png)
 
 ## Local Mode
 
 In local mode, the Spark driver executes queries in local threads, it does not create executor pods.
 
-![Spark Thrift Server in Local Mode](/docs/public/images/architecture/spark-thrift-local.png)
+![Spark Thrift Server in Local Mode](/docs/images/architecture/spark-thrift-local.png)
 
 # Supported Deployment Scheme
 
@@ -71,7 +71,7 @@ The information about supported deployment scheme s provided in the below sub-se
 
 Spark Operator in the non-HA mode has only one replica of each component. Spark History Server is optional component.
 
-![Spark Operator non-HA Scheme](/docs/public/images/architecture/spark-operator-non-ha-scheme.png)
+![Spark Operator non-HA Scheme](/docs/images/architecture/spark-operator-non-ha-scheme.png)
 
 ## HA Deployment Scheme
 
@@ -79,11 +79,11 @@ Spark Operator supports the HA mode, in which there can be more than one replica
 If the leader replica fails, the leader election process is engaged again to determine a new leader from the replicas available.
 Spark History Server is optional component and it does not support the HA mode.
 
-![Spark Operator HA Scheme](/docs/public/images/architecture/spark-operator-ha-scheme.png)
+![Spark Operator HA Scheme](/docs/images/architecture/spark-operator-ha-scheme.png)
 
 ### DR Deployment Scheme
 
 Spark Operator supports DR deployment in the Active-Active scheme. An independent instance of Spark Operator is installed on each site.  
 The Spark Operator deployment in the DR deployment is as shown in the following scheme.
 
-![Spark Operator DR Scheme](/docs/public/images/architecture/spark-operator-dr-scheme.png)
+![Spark Operator DR Scheme](/docs/images/architecture/spark-operator-dr-scheme.png)

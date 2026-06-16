@@ -15,7 +15,7 @@ This section describes the details of the Spark History Server.
 The Spark application user interface becomes unavailable after the Spark application's driver completes. To be able to access the application's user interface, after the completion, they can be configured to the log events to be rendered by the Spark History Server.
 
 The Spark History Server tracks the completed and running Spark applications. The History server and applications should point to the same log directory.  
-![Spark History Server](/docs/public/images/spark-history-server.png)
+![Spark History Server](/docs/images/spark-history-server.png)
 
 ## Official Documents
 
