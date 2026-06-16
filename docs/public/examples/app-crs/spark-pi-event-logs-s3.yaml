@@ -39,9 +39,6 @@ spec:
     "spark.kubernetes.driver.connectionTimeout": "60000000"
     "spark.kubernetes.driver.requestTimeout": "60000000"
   hadoopConf:
-    "fs.s3a.endpoint": http://your.minio.endpoint.com
-    "fs.s3a.access.key": miniokey
-    "fs.s3a.secret.key": miniopass
     "fs.s3a.impl": org.apache.hadoop.fs.s3a.S3AFileSystem
     "fs.s3a.connection.ssl.enabled": "false"
     "fs.s3a.path.style.access": "true"
@@ -50,10 +47,21 @@ spec:
     "fs.s3a.committer.staging.abort.pending.uploads": "true"
     "fs.s3a.committer.staging.conflict-mode": append
     "fs.s3a.connection.timeout": "200000"
+
+  volumes:
+    - name: s3-connection-config-volume
+      secret:
+        secretName: s3-connection-config
+        defaultMode: 444    
   driver:
     cores: 1
     coreLimit: "1200m"
     memory: "512m"
+    env:
+      - name: HADOOP_CONF_DIR
+        value: /opt/spark/s3config
+      - name: SPARK_CONF_DIR
+        value: /opt/spark/s3config
     labels:
       version: 4.1.2
     serviceAccount: sparkapps-sa
@@ -66,10 +74,20 @@ spec:
       capabilities:
         drop:
           - ALL
+    volumeMounts:
+      - name: s3-connection-config-volume
+        mountPath: /opt/spark/s3config
+        readOnly: true    
+
   executor:
     cores: 1
     instances: 1
     memory: "512m"
+    env:
+      - name: HADOOP_CONF_DIR
+        value: /opt/spark/s3config
+      - name: SPARK_CONF_DIR
+        value: /opt/spark/s3config
     labels:
       version: 4.1.2
     securityContext:
@@ -81,3 +99,7 @@ spec:
       capabilities:
         drop:
           - ALL
+    volumeMounts:
+      - name: s3-connection-config-volume
+        mountPath: /opt/spark/s3config
+        readOnly: true      
