@@ -29,7 +29,7 @@ The `/opt/spark/sbin/start-history-server.sh` script runs the History Server.
 ## Deployment
 
 You can enable the Spark History Server deployment by the Spark Operator GCP `spark-history-server.enable` deployment parameter.
-All possible parameters are listed in a table in the [Spark History Server Subchart Deployment Parameters](/docs/public/installation.md#spark-history-server) section.
+All possible parameters are listed in a table in the [Spark History Server Subchart Deployment Parameters](/docs/public/installation.md#spark-history-server) section of Installation guide.
 
 The Spark History Server has its separate helm chart. This chart is a sub-chart of the spark-on-k8s helm chart.
 
