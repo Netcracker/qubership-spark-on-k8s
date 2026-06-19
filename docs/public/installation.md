@@ -2030,6 +2030,7 @@ The geographic region where the bucket is hosted.
 Examples:
 
 * us-east-1
+* us-east-2
 * us-west-2
 * ap-south-1
 
@@ -2047,7 +2048,7 @@ Some S3-compatible systems may require a specific addressing style (e.g., virtua
 * AWS S3 (default region fallback): `aws::s3`
 * MinIO (S3-compatible storage): `s3:s3:us-east-1:s3`
 
-
+**Note**: If the configuration values are unknown, it is possible to try using the string pattern `aws:sigv4:us-east-2:s3`
 
 ### TLS
 
