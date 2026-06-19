@@ -2012,6 +2012,14 @@ Configuration string format: <provider1[:prvdr2[:reg[:srv]]]>
 - The region argument is a string that points to a geographic area of a resources collection (region-code) when the region name is omitted from the endpoint.
 - The service argument is a string that points to a function provided by a cloud (service-code) when the service name is omitted from the endpoint.
 
+#### Examples
+
+* AWS S3 (typical): `aws:us-east-1:s3`
+* AWS S3 (default region fallback): `aws::s3`
+* MinIO (S3-compatible storage): `s3:s3:us-east-1:s3`
+
+**Note**: If the configuration values are unknown, it is possible to try using the string pattern `aws:sigv4:us-east-2:s3`
+
 ### TLS
 
 TLS configuration is described in the [Using Secure S3 Endpoint For Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) section.
