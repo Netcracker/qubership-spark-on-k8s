@@ -2006,41 +2006,11 @@ By default, `s3InitJob.awsSigV4: "aws:minio:s3:s3"` to work with S3 MinIO. If a 
 
 ### AWS V4 Signature Configuration
 
-AWS Signature Version 4  is used to authenticate requests to S3-compatible storage systems such as Amazon S3 and other S3-compatible providers (e.g., MinIO).
+Configuration string format: <provider1[:prvdr2[:reg[:srv]]]>
 
-This configuration defines how the client signs outgoing requests.
-
-Configuration Format: <provider1[:provider2[:region[:service[:endpoint-style]]]]>
-
-Fields Description:
-
-#### provider (required)
-
-A short identifier used by the client to determine signing behavior and compatibility.
-
-Common values:
-
-* aws → Amazon S3 (default for AWS-compatible storage)
-* minio → MinIO S3-compatible storage
-
-#### region (optional but recommended)
-
-The geographic region where the bucket is hosted.
-
-Examples:
-
-* us-east-1
-* us-east-2
-* us-west-2
-* ap-south-1
-
-#### service (optional)
-
-The cloud service identifier. For S3-compatible storage, this is almost always: `s3`
-
-#### endpoint-style (optional, if supported)
-
-Some S3-compatible systems may require a specific addressing style (e.g., virtual-hosted vs path-style). Only configure this if explicitly required by the provider.
+- The provider argument is a string that is used by the algorithm, when creating outgoing authentication headers.
+- The region argument is a string that points to a geographic area of a resources collection (region-code) when the region name is omitted from the endpoint.
+- The service argument is a string that points to a function provided by a cloud (service-code) when the service name is omitted from the endpoint.
 
 #### Examples
 
