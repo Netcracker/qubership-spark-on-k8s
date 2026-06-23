@@ -49,7 +49,7 @@ spec:
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
         args:
-          -/opt/spark/sbin/start-history-server.sh
+          - /opt/spark/sbin/start-history-server.sh
         env:
           {{- if .Values.extraEnv }}
           {{ tpl (toYaml .Values.extraEnv) . | nindent 10 }}
