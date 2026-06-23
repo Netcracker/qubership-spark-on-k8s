@@ -151,6 +151,7 @@ if ! [ -z "${PYSPARK_DRIVER_PYTHON+x}" ]; then
 fi
 
 # If HADOOP_HOME is set and SPARK_DIST_CLASSPATH is not set, set it here so Hadoop jars are available to the executor.
+# It does not set SPARK_DIST_CLASSPATH if already set, to avoid overriding customizations of this value from elsewhere e.g. Docker/K8s.
 if [ -n "${HADOOP_HOME}"  ] && [ -z "${SPARK_DIST_CLASSPATH}"  ]; then
   echo "[ENTRYPOINT INFO] HADOOP_HOME found and SPARK_DIST_CLASSPATH is empty. Resolving Hadoop classpath..."
   export SPARK_DIST_CLASSPATH="$($HADOOP_HOME/bin/hadoop classpath)"
@@ -193,6 +194,7 @@ case "$1" in
       "$@"
     )
     attempt_setup_fake_passwd_entry
+    # Execute the container CMD under tini for better hygiene
     echo "[ENTRYPOINT INFO] Handing off lifecycle control to Tini driver process..."
     exec $(switch_spark_if_root) /usr/bin/tini -s -- "${CMD[@]}"
     ;;
@@ -215,6 +217,7 @@ case "$1" in
       --podName "$SPARK_EXECUTOR_POD_NAME"
     )
     attempt_setup_fake_passwd_entry
+    # Execute the container CMD under tini for better hygiene
     echo "[ENTRYPOINT INFO] Handing off lifecycle control to Tini executor process..."
     exec $(switch_spark_if_root) /usr/bin/tini -s -- "${CMD[@]}"
     ;;
@@ -227,6 +230,7 @@ case "$1" in
     exec "$@"
     ;;
   *)
+    # Non-spark-on-k8s command provided, proceeding in pass-through mode...
     echo "[ENTRYPOINT WARN] Non-spark-on-k8s command provided ('$1'). Proceeding in pass-through mode..."
     exec "$@"
     ;;
