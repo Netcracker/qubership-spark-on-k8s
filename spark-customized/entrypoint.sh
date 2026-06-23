@@ -168,7 +168,6 @@ case "$1" in
     exec $(switch_spark_if_root) /usr/bin/tini -s -- "${CMD[@]}"
     ;;
   executor)
-    echo "[ENTRYPOINT INFO] Target branch: executor. Preparing KubernetesExecutorBackend payload..."
     shift 1
     CMD=(
       ${JAVA_HOME}/bin/java
@@ -187,7 +186,6 @@ case "$1" in
     )
     attempt_setup_fake_passwd_entry
     # Execute the container CMD under tini for better hygiene
-    echo "[ENTRYPOINT INFO] Handing off lifecycle control to Tini executor process..."
     exec $(switch_spark_if_root) /usr/bin/tini -s -- "${CMD[@]}"
     ;;
   # Spark History
