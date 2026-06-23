@@ -29,6 +29,30 @@ attempt_setup_fake_passwd_entry() {
   fi
 }
 
+create_jceks() {
+  JCEKS_PATH=/opt/spark/secrets/s3.jceks
+  echo "Creating JCEKS for S3 credentials..."
+
+  rm -f ${JCEKS_PATH}
+
+  ACCESS=$(cat /opt/spark/raw-creds/access-key)
+  SECRET=$(cat /opt/spark/raw-creds/secret-key)
+
+  export HADOOP_CREDSTORE_PASSWORD=$(cat /opt/spark/raw-creds/jceks.pass)
+
+  /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.access.key \
+      -value "$ACCESS" \
+      -provider jceks://file${JCEKS_PATH}
+
+  /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.secret.key \
+      -value "$SECRET" \
+      -provider jceks://file${JCEKS_PATH}
+
+  chmod 600 ${JCEKS_PATH}
+
+  echo "JCEKS created successfully"
+}
+
 # QB change: patch certs
 
 if [ -z "$JAVA_HOME" ]; then
@@ -162,6 +186,7 @@ case "$1" in
   # Spark History
   /opt/spark/sbin/start-history-server.sh)
     attempt_setup_fake_passwd_entry
+    create_jceks
     exec "$@"
     ;;
   *)
