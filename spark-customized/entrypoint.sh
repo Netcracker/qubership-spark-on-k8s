@@ -152,7 +152,6 @@ switch_spark_if_root() {
   fi
 }
 
-
 case "$1" in
   driver)
     shift 1
