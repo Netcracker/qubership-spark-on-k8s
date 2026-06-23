@@ -38,6 +38,12 @@ attempt_setup_fake_passwd_entry() {
 
 create_jceks() {
   echo "[ENTRYPOINT INFO] Running create_jceks()..."
+
+  if [ ! -f /opt/spark/raw-creds/access-key ] || [ ! -f /opt/spark/raw-creds/secret-key ]; then
+      echo "[ENTRYPOINT WARN] S3 creds files not found. Skipping JCEKS generation."
+      return 0
+  fi
+
   JCEKS_PATH=/opt/spark/secrets/s3.jceks
   echo "[ENTRYPOINT INFO] Creating JCEKS for S3 credentials at ${JCEKS_PATH}..."
 

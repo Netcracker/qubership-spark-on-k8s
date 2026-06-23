@@ -52,7 +52,7 @@ spec:
           - /bin/sh
           - -c
         args:
-          - /opt/spark/sbin/start-history-server.sh
+          - /opt/entrypoint.sh /opt/spark/sbin/start-history-server.sh
         env:
           {{- if .Values.extraEnv }}
           {{ tpl (toYaml .Values.extraEnv) . | nindent 10 }}
