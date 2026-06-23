@@ -55,28 +55,27 @@ spec:
           - |
             set -e
             JCEKS_PATH=/opt/spark/secrets/s3.jceks
-            if [ ! -f ${JCEKS_PATH} ]; then
-              echo "Creating JCEKS for S3 credentials..."
+            echo "Creating JCEKS for S3 credentials..."
 
-              ACCESS=$(cat /opt/spark/raw-creds/access-key)
-              SECRET=$(cat /opt/spark/raw-creds/secret-key)
+            # Always start clean by removing any existing JCEKS file to avoid conflicts with old credentials
+            rm -f ${JCEKS_PATH}
 
-              export HADOOP_CREDSTORE_PASSWORD=$(cat /opt/spark/raw-creds/jceks.pass)
+            ACCESS=$(cat /opt/spark/raw-creds/access-key)
+            SECRET=$(cat /opt/spark/raw-creds/secret-key)
 
-              /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.access.key \
-                  -value "$ACCESS" \
-                  -provider jceks://file/opt/spark/secrets/s3.jceks
+            export HADOOP_CREDSTORE_PASSWORD=$(cat /opt/spark/raw-creds/jceks.pass)
 
-              /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.secret.key \
-                  -value "$SECRET" \
-                  -provider jceks://file/opt/spark/secrets/s3.jceks
-                  
-              chmod 600 ${JCEKS_PATH}
+            /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.access.key \
+                -value "$ACCESS" \
+                -provider jceks://file${JCEKS_PATH}
 
-              echo "JCEKS created successfully"  
-            else
-              echo "JCEKS already exists, skipping creation."
-            fi    
+            /opt/spark/bin/spark-class org.apache.hadoop.security.alias.CredentialShell create fs.s3a.secret.key \
+                -value "$SECRET" \
+                -provider jceks://file${JCEKS_PATH}
+
+            chmod 600 ${JCEKS_PATH}
+
+            echo "JCEKS created successfully"  
             exec /opt/entrypoint.sh /opt/spark/sbin/start-history-server.sh  
         env:
           {{- if .Values.extraEnv }}
