@@ -64,6 +64,8 @@ spec:
                {{- end }}"
           - name: SPARK_CONF_DIR
             value: /opt/spark/conf
+          - name: SPARK_LOG_DIR
+            value: /tmp  
           {{- if or .Values.hdfs.enabled .Values.s3.enabled }}
           - name: HADOOP_CONF_DIR
             value: /etc/hadoop/conf
@@ -85,9 +87,6 @@ spec:
           - name: common-volume
             mountPath: /tmp
             subPath: tmp
-          - name: common-volume
-            mountPath: /opt/spark/logs
-            subPath: logs
           - name: java-cacerts-dir     
             mountPath: /java-security
             subPath: java-security   
