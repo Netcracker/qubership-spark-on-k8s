@@ -2041,7 +2041,6 @@ The following volumes are already provisioned in the deployment to handle the st
  | Volume Name | Mount Path | sub path | Purpose | 
  |:-------------:|:---------:|:------------:|:------------:|
  | common-volume | /tmp | tmp | Provides a writable area for temporary files, and general OS-level buffers. |
- | common-volume | /opt/spark/logs | logs | Used specifically for logs. |
  | java-cacerts-dir| /java-security | java-security | Used specifically for managing Java truststores and security certificates at runtime. |
 
  #### Replace Secret to ENV Mapping with File Based Secret Mounts

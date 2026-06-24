@@ -89,9 +89,6 @@ spec:
       - name: common-volume
         mountPath: /tmp
         subPath: tmp
-      - name: common-volume
-        mountPath: /opt/spark/logs
-        subPath: logs  
     initContainers:
       - name: delete-s3
         image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
@@ -112,9 +109,6 @@ spec:
           - name: common-volume
             mountPath: /tmp
             subPath: tmp
-          - name: common-volume
-            mountPath: /opt/spark/logs
-            subPath: logs  
         securityContext:
           seccompProfile:
             type: RuntimeDefault
@@ -150,6 +144,3 @@ spec:
       - name: common-volume
         mountPath: /tmp
         subPath: tmp
-      - name: common-volume
-        mountPath: /opt/spark/logs
-        subPath: logs  
