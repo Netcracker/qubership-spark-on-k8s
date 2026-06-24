@@ -384,7 +384,7 @@
         },
         "awsSigV4": {
           "type": "string",
-          "default": "aws:minio:s3:s3",
+          "default": "aws:sigv4:us-east-2:s3",
           "description": "AWS V4 signature authentication configuration of the following format <provider1[:prvdr2[:reg[:srv]]]>. Used to authenticate requests to S3 storage. Configured to work with S3 MinIO by default. Details at https://curl.se/docs/manpage.html."
         },
         "priorityClassName": {

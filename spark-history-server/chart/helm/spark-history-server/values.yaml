@@ -126,7 +126,7 @@ initJobCredentialsSecret:
 
 s3InitJob:
   enabled: true
-  awsSigV4: "aws:minio:s3:s3"
+  awsSigV4: "aws:sigv4:us-east-2:s3"
   priorityClassName: ~
   initAnnotations:
     "helm.sh/hook": pre-install, pre-upgrade
