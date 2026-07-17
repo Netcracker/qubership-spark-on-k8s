@@ -1,5 +1,6 @@
 import yaml
 from PlatformLibrary import PlatformLibrary
+from kubernetes import client, config
 
 
 def parse_yaml_from_file(file_path):
@@ -7,11 +8,36 @@ def parse_yaml_from_file(file_path):
 
 
 def check_existence_and_status_of_pod(pod_name, body, state="Running"):
+    """
+    Checks if a pod with the given string in its name matches the desired state.
+    """
     for pod in body:
         if pod_name in pod.metadata.name and pod.status.phase == state:
             return True
-        else:
-            return False
+    return False  # Fixed: Only return False after evaluating all pods in the list
+
+
+def check_webhook_ca_bundle(webhook_name):
+    """
+    Queries the Kubernetes API to check if the MutatingWebhookConfiguration 
+    has been populated with a valid CA bundle. Returns True if present, False otherwise.
+    """
+    try:
+        try:
+            config.load_incluster_config()
+        except config.ConfigException:
+            config.load_kubeconfig()
+            
+        api = client.AdmissionregistrationV1Api()
+        webhook_config = api.read_mutating_webhook_configuration(name=webhook_name)
+        
+        if webhook_config.webhooks:
+            ca_bundle = webhook_config.webhooks[0].client_config.ca_bundle
+            if ca_bundle:
+                return True
+    except Exception as e:
+        print(f"Error querying webhook configuration: {e}")
+    return False
 
 
 def update_app_yaml(

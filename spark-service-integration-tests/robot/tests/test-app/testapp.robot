@@ -25,7 +25,7 @@ Library  OperatingSystem
 Library  PlatformLibrary   managed_by_operator=${MANAGED_BY_OPERATOR}
 Library  ../lib/jsonObject.py
 
-# Automatically waits for the webhook configuration to be fully injected and ready
+# This will run dynamically once before any test cases start execution
 Suite Setup      Wait For Spark Webhook Readiness
 
 
@@ -33,14 +33,12 @@ Suite Setup      Wait For Spark Webhook Readiness
 Wait For Spark Webhook Readiness
     [Documentation]  Dynamically waits for the mutating webhook configuration to be patched with the CA bundle.
     Log To Console  \nWaiting for Spark Operator Webhook configurations to stabilize...
-    # Replaces the static 50s sleep with a dynamic verification loop
     Wait Until Keyword Succeeds  12x  5s  Verify Webhook CA Bundle Injected
 
 Verify Webhook CA Bundle Injected
-    # If using a customized K8s library keyword, use that. Otherwise, this shell command dynamically checks the bundle presence.
-    ${rc}  ${output}=  Run And Return Rc And Output  kubectl get mutatingwebhookconfiguration sparkoperator-spark-operator-webhook -o jsonpath='{.webhooks[0].clientConfig.caBundle}'
-    Should Be Equal As Integers  ${rc}  0
-    Should Not Be Empty  ${output}
+    [Documentation]  Calls the native Python client wrapper in jsonobject.py to verify the CA bundle.
+    ${status}=  Check Webhook Ca Bundle  sparkoperator-spark-operator-webhook
+    Should Be True  ${status}
     Log To Console  Webhook CA Bundle verified! Moving to test execution...
 
 Create CR For Spark Application
