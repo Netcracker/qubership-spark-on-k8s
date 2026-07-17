@@ -17,7 +17,7 @@ def check_existence_and_status_of_pod(pod_name, body, state="Running"):
 def wait_for_webhook_log_readiness(webhook_pod_prefix, namespace="spark", timeout=120):
     """
     Scans namespaced operator pod logs dynamically to detect when the 
-    CA bundle update sequence completes, avoiding cluster RBAC blocks.
+    CA bundle update sequence completes.
     """
     timeout_start = time.time()
     
@@ -36,7 +36,7 @@ def wait_for_webhook_log_readiness(webhook_pod_prefix, namespace="spark", timeou
                 logs = pl_lib.get_pod_logs(pod_name=target_pod_name, namespace=namespace, tail_lines=50)
                 
                 # Verify that the internal controllers finished the validation bundle sync
-                if "Updating CA bundle of ValidatingWebhookConfiguration" in logs:
+                if "successfully acquired lease spark/sparkoperator-spark-operator-webhook-lock" in logs:
                     print(f"DEBUG: Webhook {target_pod_name} initialization confirmed via logs.")
                     return True
                     
