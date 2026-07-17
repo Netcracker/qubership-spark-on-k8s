@@ -31,9 +31,10 @@ Suite Setup      Wait For Spark Webhook Readiness
 
 *** Keywords ***
 Wait For Spark Webhook Readiness
-    [Documentation]  Dynamically waits for the mutating webhook configuration to be patched with the CA bundle.
+    [Documentation]  Dynamically waits longer for the mutating webhook configuration to settle.
     Log To Console  \nWaiting for Spark Operator Webhook configurations to stabilize...
-    Wait Until Keyword Succeeds  12x  5s  Verify Webhook CA Bundle Injected
+    # Increased retries to 24 times (2 minutes total testing window)
+    Wait Until Keyword Succeeds  24x  5s  Verify Webhook CA Bundle Injected
 
 Verify Webhook CA Bundle Injected
     [Documentation]  Calls the native Python client wrapper in jsonobject.py to verify the CA bundle.

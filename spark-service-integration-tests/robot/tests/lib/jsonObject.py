@@ -20,7 +20,7 @@ def check_existence_and_status_of_pod(pod_name, body, state="Running"):
 def check_webhook_ca_bundle(webhook_name):
     """
     Queries the Kubernetes API to check if the MutatingWebhookConfiguration 
-    has been populated with a valid CA bundle. Returns True if present, False otherwise.
+    has been populated with a valid CA bundle.
     """
     try:
         try:
@@ -34,9 +34,17 @@ def check_webhook_ca_bundle(webhook_name):
         if webhook_config.webhooks:
             ca_bundle = webhook_config.webhooks[0].client_config.ca_bundle
             if ca_bundle:
+                print(f"DEBUG: Found CA Bundle for {webhook_name}")
                 return True
+            else:
+                print(f"DEBUG: Webhook {webhook_name} exists, but caBundle is empty.")
+        else:
+            print(f"DEBUG: Webhook {webhook_name} has no webhooks configured.")
+            
     except Exception as e:
-        print(f"Error querying webhook configuration: {e}")
+        # This will dump the exact error (like 403 Forbidden) into your test execution log
+        print(f"ERROR querying webhook configuration: {str(e)}")
+        
     return False
 
 
