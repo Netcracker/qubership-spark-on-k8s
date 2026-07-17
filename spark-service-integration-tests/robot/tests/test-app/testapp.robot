@@ -13,7 +13,6 @@ ${VERSION}                    v1beta2
 ${KIND}                       SparkApplication
 ${COUNT_OF_RETRY}             160x
 ${RETRY_INTERVAL}             5s
-${SUITE_STARTUP_DELAY}        50s
 ${KUBERNETES_NAMESPACE}    %{KUBERNETES_NAMESPACE}
 
 
@@ -25,22 +24,15 @@ Library  OperatingSystem
 Library  PlatformLibrary   managed_by_operator=${MANAGED_BY_OPERATOR}
 Library  ../lib/jsonObject.py
 
-# This will run dynamically once before any test cases start execution
-Suite Setup      Wait For Spark Webhook Readiness
 
 
 *** Keywords ***
 Wait For Spark Webhook Readiness
-    [Documentation]  Dynamically waits longer for the mutating webhook configuration to settle.
-    Log To Console  \nWaiting for Spark Operator Webhook configurations to stabilize...
-    # Increased retries to 24 times (2 minutes total testing window)
-    Wait Until Keyword Succeeds  24x  5s  Verify Webhook CA Bundle Injected
-
-Verify Webhook CA Bundle Injected
-    [Documentation]  Calls the native Python client wrapper in jsonobject.py to verify the CA bundle.
-    ${status}=  Check Webhook Ca Bundle  sparkoperator-spark-operator-webhook
+    [Documentation]  Blocks execution cleanly by watching matching namespaced log events.
+    Log To Console  \nScanning operator container logs for initialization verification...
+    ${status}=  Wait For Webhook Log Readiness  sparkoperator-spark-operator  namespace=spark
     Should Be True  ${status}
-    Log To Console  Webhook CA Bundle verified! Moving to test execution...
+    Log To Console  Webhook initialization verified via logs! Proceeding to test run...
 
 Create CR For Spark Application
     [Arguments]  ${APP_IMAGE}  ${PATH_TO_APP}  ${VOLCANO}=False

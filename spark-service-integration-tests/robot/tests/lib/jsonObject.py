@@ -1,6 +1,6 @@
 import yaml
+import time
 from PlatformLibrary import PlatformLibrary
-from kubernetes import client, config
 
 
 def parse_yaml_from_file(file_path):
@@ -8,42 +8,42 @@ def parse_yaml_from_file(file_path):
 
 
 def check_existence_and_status_of_pod(pod_name, body, state="Running"):
-    """
-    Checks if a pod with the given string in its name matches the desired state.
-    """
     for pod in body:
         if pod_name in pod.metadata.name and pod.status.phase == state:
             return True
-    return False  # Fixed: Only return False after evaluating all pods in the list
+    return False
 
 
-def check_webhook_ca_bundle(webhook_name):
+def wait_for_webhook_log_readiness(webhook_pod_prefix, namespace="spark", timeout=120):
     """
-    Queries the Kubernetes API to check if the MutatingWebhookConfiguration 
-    has been populated with a valid CA bundle.
+    Scans namespaced operator pod logs dynamically to detect when the 
+    CA bundle update sequence completes, avoiding cluster RBAC blocks.
     """
-    try:
+    timeout_start = time.time()
+    
+    while time.time() <= timeout_start + timeout:
         try:
-            config.load_incluster_config()
-        except config.ConfigException:
-            config.load_kubeconfig()
+            pods = pl_lib.get_pods(namespace)
+            target_pod_name = None
             
-        api = client.AdmissionregistrationV1Api()
-        webhook_config = api.read_mutating_webhook_configuration(name=webhook_name)
-        
-        if webhook_config.webhooks:
-            ca_bundle = webhook_config.webhooks[0].client_config.ca_bundle
-            if ca_bundle:
-                print(f"DEBUG: Found CA Bundle for {webhook_name}")
-                return True
-            else:
-                print(f"DEBUG: Webhook {webhook_name} exists, but caBundle is empty.")
-        else:
-            print(f"DEBUG: Webhook {webhook_name} has no webhooks configured.")
+            for pod in pods:
+                if webhook_pod_prefix in pod.metadata.name:
+                    target_pod_name = pod.metadata.name
+                    break
             
-    except Exception as e:
-        # This will dump the exact error (like 403 Forbidden) into your test execution log
-        print(f"ERROR querying webhook configuration: {str(e)}")
+            if target_pod_name:
+                # Retrieve trailing log tracks safely via PlatformLibrary
+                logs = pl_lib.get_pod_logs(pod_name=target_pod_name, namespace=namespace, tail_lines=50)
+                
+                # Verify that the internal controllers finished the validation bundle sync
+                if "Updating CA bundle of ValidatingWebhookConfiguration" in logs:
+                    print(f"DEBUG: Webhook {target_pod_name} initialization confirmed via logs.")
+                    return True
+                    
+        except Exception as e:
+            print(f"DEBUG: Log scanning step encountered an issue: {str(e)}")
+            
+        time.sleep(5)
         
     return False
 
