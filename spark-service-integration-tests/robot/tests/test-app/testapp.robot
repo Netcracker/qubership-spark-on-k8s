@@ -13,6 +13,8 @@ ${VERSION}                    v1beta2
 ${KIND}                       SparkApplication
 ${COUNT_OF_RETRY}             160x
 ${RETRY_INTERVAL}             5s
+${SUITE_STARTUP_DELAY}        50s
+${KUBERNETES_NAMESPACE}    %{KUBERNETES_NAMESPACE}
 
 
 *** Settings ***
@@ -22,6 +24,9 @@ Library  RequestsLibrary
 Library  OperatingSystem
 Library  PlatformLibrary  managed_by_operator=${MANAGED_BY_OPERATOR}
 Library  ../lib/jsonObject.py
+
+# This will run once before any test cases start execution
+Suite Setup     Sleep    ${SUITE_STARTUP_DELAY}
 
 
 *** Keywords ***
@@ -162,3 +167,7 @@ Run History-Server Spark Application
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-pi-event-logs-s3-integration-tests  COMPLETED
     Log To Console  History server application is completed
+
+Test Container Hardening
+    [Tags]    spark_container_hardening    spark_container_hardening_test
+    Check Container Hardening    ${KUBERNETES_NAMESPACE }
