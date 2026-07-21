@@ -1,5 +1,4 @@
 import yaml
-import time
 from PlatformLibrary import PlatformLibrary
 
 
@@ -11,41 +10,8 @@ def check_existence_and_status_of_pod(pod_name, body, state="Running"):
     for pod in body:
         if pod_name in pod.metadata.name and pod.status.phase == state:
             return True
-    return False
-
-
-def wait_for_webhook_log_readiness(webhook_pod_prefix, namespace="spark", timeout=120):
-    """
-    Scans namespaced operator pod logs dynamically to detect when the 
-    CA bundle update sequence completes.
-    """
-    timeout_start = time.time()
-    
-    while time.time() <= timeout_start + timeout:
-        try:
-            pods = pl_lib.get_pods(namespace)
-            target_pod_name = None
-            
-            for pod in pods:
-                if webhook_pod_prefix in pod.metadata.name:
-                    target_pod_name = pod.metadata.name
-                    break
-            
-            if target_pod_name:
-                # Retrieve trailing log tracks safely via PlatformLibrary
-                logs = pl_lib.get_pod_logs(pod_name=target_pod_name, namespace=namespace, tail_lines=50)
-                
-                # Verify that the internal controllers finished the validation bundle sync
-                if "successfully acquired lease spark/sparkoperator-spark-operator-webhook-lock" in logs:
-                    print(f"DEBUG: Webhook {target_pod_name} initialization confirmed via logs.")
-                    return True
-                    
-        except Exception as e:
-            print(f"DEBUG: Log scanning step encountered an issue: {str(e)}")
-            
-        time.sleep(5)
-        
-    return False
+        else:
+            return False
 
 
 def update_app_yaml(

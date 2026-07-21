@@ -6,7 +6,7 @@ ${BASE_PY_APP_IMAGE}          %{BASE_PY_APP_IMAGE}
 ${SPARK_HIVE_IMAGE}           %{SPARK_HIVE_IMAGE}
 ${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}  %{SPARK_HIVE_INTEGRATION_TESTS_ENABLED}
 ${VOLCANO_INTEGRATION_TESTS_ENABLED}     %{VOLCANO_INTEGRATION_TESTS_ENABLED}
-${MANAGED_BY_OPERATOR}       true
+${MANAGED_BY_OPERATOR}        true
 ${PLURAL}                     sparkapplications
 ${GROUP}                      sparkoperator.k8s.io
 ${VERSION}                    v1beta2
@@ -15,27 +15,16 @@ ${COUNT_OF_RETRY}             160x
 ${RETRY_INTERVAL}             5s
 ${KUBERNETES_NAMESPACE}    %{KUBERNETES_NAMESPACE}
 
-
 *** Settings ***
 Library  String
 Library  Collections
 Library  RequestsLibrary
 Library  OperatingSystem
-Library  PlatformLibrary   managed_by_operator=${MANAGED_BY_OPERATOR}
+Library  PlatformLibrary  managed_by_operator=${MANAGED_BY_OPERATOR}
 Library  ../lib/jsonObject.py
-
-# Safe namespaced dynamic gate entry verification
-Suite Setup      Wait For Spark Webhook Readiness
 
 
 *** Keywords ***
-Wait For Spark Webhook Readiness
-    [Documentation]  Blocks execution cleanly by watching matching namespaced log events.
-    Log To Console  \nScanning operator container logs for initialization verification...
-    ${status}=  Wait For Webhook Log Readiness  sparkoperator-spark-operator  namespace=spark
-    Should Be True  ${status}
-    Log To Console  Webhook initialization verified via logs! Proceeding to test run...
-
 Create CR For Spark Application
     [Arguments]  ${APP_IMAGE}  ${PATH_TO_APP}  ${VOLCANO}=False
     
@@ -82,12 +71,12 @@ Verify Volcano Is Managing The Queue
     Should Be True    ${status1} or ${status2}
     Log To Console    \nSUCCESS: Volcano is actively managing the resource queue!
 
-
 *** Test Cases ***
 
 Test Container Hardening
     [Tags]    spark_container_hardening    spark_container_hardening_test
-    Check Container Hardening    ${KUBERNETES_NAMESPACE}
+    ${part_of}=       Create List    ""
+    Check Container Hardening    ${part_of}    ${KUBERNETES_NAMESPACE }
 
 Run Spark to Hive Connection Application
     [Tags]  hive-connection  test_app
@@ -102,6 +91,7 @@ Run Spark to Hive Connection Application
     Log To Console  Spark to Hive connection application is running
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-hive-test-integration-tests  COMPLETED
+
     Log To Console  Spark to Hive connection application is completed
 
 Run Dual Volcano Scheduled Applications
@@ -113,6 +103,7 @@ Run Dual Volcano Scheduled Applications
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi.yaml    VOLCANO=True
     Create CR For Spark Application    ${BASE_PY_APP_IMAGE}    tests/test-app/spark-pi-long-run.yaml    VOLCANO=True
     Log To Console    \nBoth applications submitted to the Volcano queue.
+
     
     Wait Until Keyword Succeeds    15x    3s
     ...    Verify Volcano Is Managing The Queue    spark-pi-integration-tests    spark-pi-long-run-integration-tests
@@ -131,7 +122,8 @@ Run Dual Volcano Scheduled Applications
 
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-pi-long-run-integration-tests  COMPLETED
-    Log To Console    Volcano test is completed
+
+    Log To Console  Volcano test is completed
 
 Run JAVA Spark Application
     [Tags]  java  test_app
@@ -176,4 +168,3 @@ Run History-Server Spark Application
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
     ...  Check Status CR  spark-pi-event-logs-s3-integration-tests  COMPLETED
     Log To Console  History server application is completed
-
