@@ -75,7 +75,7 @@ Verify Volcano Is Managing The Queue
 
 Test Container Hardening
     [Tags]    spark_container_hardening    spark_container_hardening_test
-    ${part_of}=       Create List    "spark-operator, spark-operator-gcp"
+    ${part_of}=       Create List    spark-operator, spark-operator-gcp
     Check Container Hardening    ${part_of}    ${KUBERNETES_NAMESPACE }
 
 Run Spark to Hive Connection Application
