@@ -8,7 +8,7 @@ to inform the team about the vulnerability, so we may start the patch, release, 
 # Security Release Process
 
 If the vulnerability is found in the latest stable release, then it would be fixed in patch version for that release.
-E.g., issue is found in 2.5.0 release, then 2.5.1 version with a fix will be released.
+E.g., issue is found in 2.5.1 release, then 2.5.1 version with a fix will be released.
 By default, older versions will not have security releases.
 
 If the issue doesn't affect any existing public releases, the fix for medium and high issues is performed
