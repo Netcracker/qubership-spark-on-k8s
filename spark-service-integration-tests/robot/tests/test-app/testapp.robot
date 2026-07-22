@@ -73,6 +73,25 @@ Verify Volcano Is Managing The Queue
 
 *** Test Cases ***
 
+Run JAVA Spark Application
+    [Tags]  java  test_app
+    [Teardown]  Delete CR  spark-pi-integration-tests
+
+    Wait Until Keyword Succeeds    30x    5s
+    ...    Create CR For Spark Application
+    ...    ${BASE_APP_IMAGE}
+    ...    tests/test-app/spark-pi.yaml
+
+    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
+    ...  Check Status CR  spark-pi-integration-tests  RUNNING
+
+    Log To Console  JAVA application is running
+
+    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
+    ...  Check Status CR  spark-pi-integration-tests  COMPLETED
+
+    Log To Console  JAVA application is completed
+    
 Test Container Hardening
     [Tags]    spark_container_hardening    spark_container_hardening_test
     ${part_of}=    Create List
@@ -124,17 +143,6 @@ Run Dual Volcano Scheduled Applications
     ...  Check Status CR  spark-pi-long-run-integration-tests  COMPLETED
 
     Log To Console  Volcano test is completed
-
-Run JAVA Spark Application
-    [Tags]  java  test_app
-    [Teardown]  Delete CR  spark-pi-integration-tests
-    Create CR For Spark Application  ${BASE_APP_IMAGE}  tests/test-app/spark-pi.yaml
-    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
-    ...  Check Status CR  spark-pi-integration-tests  RUNNING
-    Log To Console  JAVA application is running
-    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
-    ...  Check Status CR  spark-pi-integration-tests  COMPLETED
-    Log To Console  JAVA application is completed
 
 Run PYTHON Spark Application
     [Tags]  py  test_app
