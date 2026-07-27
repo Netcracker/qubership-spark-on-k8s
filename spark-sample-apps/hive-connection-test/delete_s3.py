@@ -20,9 +20,7 @@ def main():
     db_name = get_secret("DB_NAME") or "mysparkdb.db"
     s3_prefix = f"warehouse/{db_name}/"
 
-    if not all(
-        [aws_access_key, aws_secret_key, s3_endpoint_url, bucket_name]
-    ):
+    if not all([aws_access_key, aws_secret_key, s3_endpoint_url, bucket_name]):
         print("Missing required variables for S3 connection.")
         exit(1)
 
@@ -51,8 +49,7 @@ def main():
 
         # Bucket exists, so delete existing objects under the prefix
         response = s3_w.list_objects_v2(
-            Bucket=bucket_name,
-            Prefix=s3_prefix.rstrip("/")
+            Bucket=bucket_name, Prefix=s3_prefix.rstrip("/")
         )
 
         if "Contents" in response:
@@ -63,10 +60,7 @@ def main():
                 )
                 print(f"Deleted: {obj['Key']}")
 
-            print(
-                f"Deleted all objects from "
-                f"s3://{bucket_name}/{s3_prefix}"
-            )
+            print(f"Deleted all objects from " f"s3://{bucket_name}/{s3_prefix}")
         else:
             print(
                 f"Path s3://{bucket_name}/{s3_prefix} "
@@ -77,10 +71,7 @@ def main():
         error_code = e.response["Error"].get("Code")
 
         if error_code in ("404", "NoSuchBucket"):
-            print(
-                f"Bucket '{bucket_name}' does not exist. "
-                f"Creating bucket."
-            )
+            print(f"Bucket '{bucket_name}' does not exist. " f"Creating bucket.")
 
             s3_w.create_bucket(Bucket=bucket_name)
 
@@ -97,10 +88,7 @@ def main():
         Body=b"",
     )
 
-    print(
-        f"Created placeholder at "
-        f"s3://{bucket_name}/{s3_prefix}"
-    )
+    print(f"Created placeholder at " f"s3://{bucket_name}/{s3_prefix}")
 
 
 if __name__ == "__main__":
