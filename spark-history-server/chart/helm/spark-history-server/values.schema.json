@@ -600,7 +600,7 @@
             },
             "tag": {
               "type": "string",
-              "default": "v7.15.2",
+              "default": "v7.15.3",
               "description": "Container image tag for oauth2-proxy"
             },
             "pullPolicy": {
