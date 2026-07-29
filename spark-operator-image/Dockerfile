@@ -1,7 +1,7 @@
 FROM alpine:latest AS unpacker
 ENV HADOOP_VERSION=3.4.1
 ENV SPARK_JARS_DIR=/opt/spark/jars
-ENV netty_version=4.1.136
+ENV netty_version=4.1.136.Final
 ENV jackson_version=2.18.8
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
