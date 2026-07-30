@@ -8,6 +8,7 @@ RUN apk add curl
 RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/software/amazon/awssdk/bundle/2.49.5/bundle-2.49.5.jar --output $SPARK_JARS_DIR/bundle-2.49.5.jar && \
     curl -k -L $MAVEN_REPO/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar --output $SPARK_JARS_DIR/hadoop-aws-$HADOOP_VERSION.jar && \
+    curl -k -L ${MAVEN_REPO}/software/amazon/s3/analyticsaccelerator/analyticsaccelerator-s3/1.3.1/analyticsaccelerator-s3-1.3.1.jar --output $SPARK_JARS_DIR/analyticsaccelerator-s3-1.3.1.jar && \
     curl -k -L $MAVEN_REPO/com/fasterxml/jackson/core/jackson-core/$jackson_version/jackson-core-$jackson_version.jar --output $SPARK_JARS_DIR/jackson-core-$jackson_version.jar && \
     curl -k -L $MAVEN_REPO/com/fasterxml/jackson/core/jackson-databind/$jackson_version/jackson-databind-$jackson_version.jar --output $SPARK_JARS_DIR/jackson-databind-$jackson_version.jar && \
     curl -k -L $MAVEN_REPO/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/$jackson_version/jackson-dataformat-yaml-$jackson_version.jar --output $SPARK_JARS_DIR/jackson-dataformat-yaml-$jackson_version.jar && \

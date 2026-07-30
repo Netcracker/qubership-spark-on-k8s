@@ -95,7 +95,7 @@ Run JAVA Spark Application
 Test Container Hardening
     [Tags]    spark_container_hardening    spark_container_hardening_test
     ${part_of}=    Create List
-    ${exclusions}=    Create Dictionary    spark-history-server-cruise-control=CH12
+    ${exclusions}=    Create Dictionary    ${KUBERNETES_NAMESPACE}-cruise-control=CH12
     Check Container Hardening    ${part_of}    ${KUBERNETES_NAMESPACE}   ${exclusions}
 
 Run Spark to Hive Connection Application
