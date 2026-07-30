@@ -29,12 +29,12 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport/$netty_version/netty-transport-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-$netty_version.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-classes-epoll/$netty_version/netty-transport-classes-epoll-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-classes-epoll-$netty_version.jar && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-classes-kqueue/$netty_version/netty-transport-classes-kqueue-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-classes-kqueue-$netty_version.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version.Final/netty-transport-native-epoll-$netty_version.Final-linux-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version.Final-linux-aarch_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version.Final/netty-transport-native-epoll-$netty_version.Final-linux-riscv64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version.Final-linux-riscv64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version.Final/netty-transport-native-epoll-$netty_version.Final-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version.Final-linux-x86_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/$netty_version.Final/netty-transport-native-kqueue-$netty_version.Final-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-$netty_version.Final-osx-aarch_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/$netty_version.Final/netty-transport-native-kqueue-$netty_version.Final-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-$netty_version.Final-osx-x86_64.jar && \
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/$netty_version.Final/netty-transport-native-unix-common-$netty_version.Final.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-$netty_version.Final.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version/netty-transport-native-epoll-$netty_version-linux-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version-linux-aarch_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version/netty-transport-native-epoll-$netty_version-linux-riscv64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version-linux-riscv64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version/netty-transport-native-epoll-$netty_version-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version-linux-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/$netty_version/netty-transport-native-kqueue-$netty_version-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-$netty_version-osx-aarch_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/$netty_version/netty-transport-native-kqueue-$netty_version-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-$netty_version-osx-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/$netty_version/netty-transport-native-unix-common-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-$netty_version.jar && \
     curl -k -L $MAVEN_REPO/org/glassfish/jersey/core/jersey-client/3.0.17/jersey-client-3.0.17.jar --output $SPARK_JARS_DIR/jersey-client-3.0.17.jar
 
 FROM ghcr.io/kubeflow/spark-operator/controller:2.5.1
