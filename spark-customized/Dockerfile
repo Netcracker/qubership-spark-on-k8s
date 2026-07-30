@@ -1,6 +1,6 @@
 FROM alpine:latest AS unpacker
 ENV HADOOP_VERSION=3.5.0
-ENV netty_version=4.2.13.Final
+ENV netty_version=4.2.16.Final
 ENV jackson_version=2.21.4
 ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
