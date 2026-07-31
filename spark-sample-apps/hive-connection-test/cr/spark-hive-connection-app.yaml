@@ -33,6 +33,7 @@ spec:
     "spark.hadoop.fs.s3a.connection.ssl.enabled": "false"
     "spark.hadoop.fs.s3.buckets.create.enabled": "true"
     "spark.hadoop.fs.s3a.metadatastore.authoritative": "true"
+    "spark.hadoop.fs.s3a.input.stream.type": "classic"
 
     # --- S3A Magic Committer & Spark SQL Bridge ---
     "spark.hadoop.fs.s3a.committer.magic.enabled": "true"
