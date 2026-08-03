@@ -1,5 +1,6 @@
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 
 
 def get_secret(key_name):
@@ -33,25 +34,61 @@ def main():
         verify="/certs/trust/s3.pem" if use_https else False,
         config=Config(
             signature_version="s3v4",
-            s3={"addressing_style": "path", "payload_signing_enabled": True},
+            s3={
+                "addressing_style": "path",
+                "payload_signing_enabled": True,
+            },
         ),
     )
 
-    response = s3_w.list_objects_v2(Bucket=bucket_name, Prefix=s3_prefix.rstrip("/"))
+    try:
+        # Check whether the bucket exists
+        s3_w.head_bucket(Bucket=bucket_name)
 
-    if "Contents" in response:
-        for obj in response["Contents"]:
-            s3_w.delete_object(Bucket=bucket_name, Key=obj["Key"])
-            print(f"Deleted: {obj['Key']}")
-        print(f"Deleted all objects from s3://{bucket_name}/{s3_prefix}")
-    else:
-        print(
-            f"Path s3://{bucket_name}/{s3_prefix} does NOT exist or is already empty."
+        print(f"Bucket '{bucket_name}' exists.")
+
+        # Bucket exists, so delete existing objects under the prefix
+        response = s3_w.list_objects_v2(
+            Bucket=bucket_name, Prefix=s3_prefix.rstrip("/")
         )
 
-    s3_w.put_object(Bucket=bucket_name, Key=s3_prefix, Body=b"")
+        if "Contents" in response:
+            for obj in response["Contents"]:
+                s3_w.delete_object(
+                    Bucket=bucket_name,
+                    Key=obj["Key"],
+                )
+                print(f"Deleted: {obj['Key']}")
 
-    print(f"Created placeholder at s3://{bucket_name}/{s3_prefix}")
+            print(f"Deleted all objects from " f"s3://{bucket_name}/{s3_prefix}")
+        else:
+            print(
+                f"Path s3://{bucket_name}/{s3_prefix} "
+                f"does not exist or is already empty."
+            )
+
+    except ClientError as e:
+        error_code = e.response["Error"].get("Code")
+
+        if error_code in ("404", "NoSuchBucket"):
+            print(f"Bucket '{bucket_name}' does not exist. " f"Creating bucket.")
+
+            s3_w.create_bucket(Bucket=bucket_name)
+
+            print(f"Created bucket '{bucket_name}'.")
+
+        else:
+            raise
+
+    # Create the placeholder regardless of whether
+    # the bucket already existed or was newly created.
+    s3_w.put_object(
+        Bucket=bucket_name,
+        Key=s3_prefix,
+        Body=b"",
+    )
+
+    print(f"Created placeholder at " f"s3://{bucket_name}/{s3_prefix}")
 
 
 if __name__ == "__main__":

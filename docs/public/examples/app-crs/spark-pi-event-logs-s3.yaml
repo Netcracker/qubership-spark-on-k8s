@@ -25,8 +25,8 @@ spec:
   image: "ghcr.io/netcracker/qubership-spark-customized:main"
   imagePullPolicy: Always
   mainClass: org.apache.spark.examples.SparkPi
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.1.2.jar"
-  sparkVersion: "4.1.2"
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.2.0.jar"
+  sparkVersion: "4.2.0"
   restartPolicy:
     type: Never
   sparkConf:
@@ -63,7 +63,7 @@ spec:
       - name: SPARK_CONF_DIR
         value: /opt/spark/s3config
     labels:
-      version: 4.1.2
+      version: 4.2.0
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -89,7 +89,7 @@ spec:
       - name: SPARK_CONF_DIR
         value: /opt/spark/s3config
     labels:
-      version: 4.1.2
+      version: 4.2.0
     securityContext:
       seccompProfile:
         type: RuntimeDefault

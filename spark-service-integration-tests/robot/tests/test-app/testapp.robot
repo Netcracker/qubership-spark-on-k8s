@@ -13,7 +13,7 @@ ${VERSION}                    v1beta2
 ${KIND}                       SparkApplication
 ${COUNT_OF_RETRY}             160x
 ${RETRY_INTERVAL}             5s
-
+${KUBERNETES_NAMESPACE}    %{KUBERNETES_NAMESPACE}
 
 *** Settings ***
 Library  String
@@ -72,6 +72,31 @@ Verify Volcano Is Managing The Queue
     Log To Console    \nSUCCESS: Volcano is actively managing the resource queue!
 
 *** Test Cases ***
+
+Run JAVA Spark Application
+    [Tags]  java  test_app
+    [Teardown]  Delete CR  spark-pi-integration-tests
+
+    Wait Until Keyword Succeeds    30x    5s
+    ...    Create CR For Spark Application
+    ...    ${BASE_APP_IMAGE}
+    ...    tests/test-app/spark-pi.yaml
+
+    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
+    ...  Check Status CR  spark-pi-integration-tests  RUNNING
+
+    Log To Console  JAVA application is running
+
+    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
+    ...  Check Status CR  spark-pi-integration-tests  COMPLETED
+
+    Log To Console  JAVA application is completed
+    
+Test Container Hardening
+    [Tags]    spark_container_hardening    spark_container_hardening_test
+    ${part_of}=    Create List
+    Check Container Hardening    ${part_of}    ${KUBERNETES_NAMESPACE}
+
 Run Spark to Hive Connection Application
     [Tags]  hive-connection  test_app
     Skip If    '${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Hive integration tests since it is disabled.
@@ -118,17 +143,6 @@ Run Dual Volcano Scheduled Applications
     ...  Check Status CR  spark-pi-long-run-integration-tests  COMPLETED
 
     Log To Console  Volcano test is completed
-
-Run JAVA Spark Application
-    [Tags]  java  test_app
-    [Teardown]  Delete CR  spark-pi-integration-tests
-    Create CR For Spark Application  ${BASE_APP_IMAGE}  tests/test-app/spark-pi.yaml
-    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
-    ...  Check Status CR  spark-pi-integration-tests  RUNNING
-    Log To Console  JAVA application is running
-    Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
-    ...  Check Status CR  spark-pi-integration-tests  COMPLETED
-    Log To Console  JAVA application is completed
 
 Run PYTHON Spark Application
     [Tags]  py  test_app

@@ -600,7 +600,7 @@
             },
             "tag": {
               "type": "string",
-              "default": "v7.15.2",
+              "default": "v7.15.3",
               "description": "Container image tag for oauth2-proxy"
             },
             "pullPolicy": {
@@ -1061,7 +1061,7 @@
         },
         "proxyVarsAsSecrets": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Whether to store the OAuth2 client ID, client secret, and cookie secret as Kubernetes secrets and reference them in the oauth2-proxy configuration instead of including them directly in the configuration file. If enabled, these values will be stored in a Kubernetes secret and the oauth2-proxy configuration will be set to reference the secrets for these values. This can be used to enhance security by not including sensitive values directly in the configuration file and instead referencing them from Kubernetes secrets."
         },
         "secretsAsFiles": {

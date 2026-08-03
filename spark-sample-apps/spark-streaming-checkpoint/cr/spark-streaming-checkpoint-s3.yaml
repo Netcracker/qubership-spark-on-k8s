@@ -25,7 +25,7 @@ spec:
   imagePullPolicy: Always
   mainClass: com.qubership.spark.app.sample.JavaRecoverableKafkaWordCount
   mainApplicationFile: "local:///opt/spark/examples/spark-streaming-checkpoint-1.0-SNAPSHOT-jar-with-dependencies.jar"
-  sparkVersion: "4.1.2"
+  sparkVersion: "4.2.0"
   restartPolicy:
     type: Always
   #sparkConfigMap: log4j-properties
@@ -70,7 +70,7 @@ spec:
     coreLimit: "1200m"
     memory: "512m"
     labels:
-      version: 4.1.2
+      version: 4.2.0
     serviceAccount: sparkapps-sa
     securityContext:
       seccompProfile:
@@ -95,7 +95,7 @@ spec:
         value: /opt/spark/s3cred
     memory: "512m"
     labels:
-      version: 4.1.2
+      version: 4.2.0
     securityContext:
       seccompProfile:
         type: RuntimeDefault

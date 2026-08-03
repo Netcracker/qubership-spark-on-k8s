@@ -65,6 +65,8 @@ spec:
               value: {{ .Values.sparkOperatorControllerDeploymentName }}
             - name: SPARK_OPEROTOR_WEBHOOK_DEPLOYMENT_NAME
               value: {{ .Values.sparkOperatorWebhookDeploymentName }}
+            - name: KUBERNETES_NAMESPACE
+              value: {{ .Release.Namespace }}             
             {{- if (eq true .Values.status_writing_enabled) }}
             - name: ONLY_INTEGRATION_TESTS
               value: {{ .Values.cr_status_writing.only_integration_tests | quote }}

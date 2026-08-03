@@ -1,0 +1,17 @@
+{{- if .Values.serviceAccount.create }}
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spark-container-hardening-role
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "all_objects_labels_ssit" . | nindent 4 }}
+rules:
+  - verbs:
+      - get
+    apiGroups:
+      - apps
+    resources:
+      - deployments
+      - statefulsets
+{{- end }}      
