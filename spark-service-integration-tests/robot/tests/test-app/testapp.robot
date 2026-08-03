@@ -95,7 +95,7 @@ Run JAVA Spark Application
 Test Container Hardening
     [Tags]    spark_container_hardening    spark_container_hardening_test
     ${part_of}=    Create List
-    Check Container Hardening    ${part_of}    ${KUBERNETES_NAMESPACE}   ${exclusions}
+    Check Container Hardening    ${part_of}    ${KUBERNETES_NAMESPACE}
 
 Run Spark to Hive Connection Application
     [Tags]  hive-connection  test_app
