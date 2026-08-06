@@ -2073,7 +2073,19 @@ The following configurations have been applied:
    - --cookie-secret-file=/var/run/secrets/oauth2-proxy/cookie-secret
    {{- end }}
  ```  
- By default, `.Values.oauth2Proxy.secretsAsFiles` is set to `true`, and these secret files override the corresponding environment variables and flags.
+ By default, `.Values.oauth2Proxy.secretsAsFiles` is set to `true`, and `.Values.oauth2Proxy.proxyVarsAsSecrets` is set to `false`. These secret files override the corresponding environment variables and flags.
+
+ Since `.Values.oauth2Proxy.proxyVarsAsSecrets` is set to `false`, the `client_id` needs to be passed in configFile as shown below:
+ ```yaml
+ spark-history-server:
+   oauth2Proxy:
+     config:
+       clientSecret: KEYCLOAK_CLIENT_SECRET(dummy string)
+       configFile: >-
+         email_domains = ["*"]
+
+         client_id = "oauth2-proxy-client-id"
+ ```
 
  The following volumes are provisioned in the deployment to support the above configuration:
  | Volume Name | Mount Path | Purpose|
