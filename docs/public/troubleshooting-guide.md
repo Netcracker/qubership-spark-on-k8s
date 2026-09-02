@@ -63,7 +63,7 @@ Kubernetes service and ingress are created automatically for each application su
 
   *Solution*:
 
-  Check spark operator resources, more than 1CPU/1GB of resources may be needed.
+  Check spark operator webhook resources, more than 1CPU/1GB of resources may be needed.
 
 * CRD Validation Error When Applying SparkApplication CRD
  When applying the CustomResourceDefinition (CRD) for sparkapplications.sparkoperator.k8s.io, and sparkoperator.k8s.io_scheduledsparkapplications users might encounter the following error:
@@ -88,4 +88,30 @@ Kubernetes service and ingress are created automatically for each application su
   *Solution*:
 
   Update minio version. It also might be necessary to set AWS java SDK v2 properties `RequestChecksumCalculation` and `ResponseChecksumValidation` to `WHEN_REQUIRED`.
+
+* Spark operator pod restarts with leader election issues
+  *Error example*:
+```
+2025-10-28T11:51:05.128Z ERROR controller/start.go:328 Failed to start manager {"error": "leader election lost"
+```
+
+  *Cause*
+
+  Usually is caused by slow Kubernetes API.
+
+  *Solution*
+
+  Increase K8S API responsiveness (requires changes in K8S). Alternatively, it's possible to disable leader election using `webhook.leaderElection.enable` and `controller.leaderElection.enable` (For controller it is not recommended when running multiple controller instances, so in this case `controller.replicas` should be set to `1`). Another option is to configure controller leader election timing using `controller.leaderElection.leaseDuration`, `controller.leaderElection.renewDeadline`, `controller.leaderElection.retryPeriod` parameters (note that in current spark operator version the same is not possible for webhook). 
+
+* Spark operator controller restarts with no visible errors or with OOM error or with probe issues.
+
+  *Cause*
+
+  Usually it is a resources issue. Despite being written in Go, spark-operator launches spark-submit (Java process) for each submitted application. It can consume a lot of resources, especially when there are multiple spark applications are being submitted.
+
+  *Solution*
+
+  Increase spark operator controller resources and/or reduce spark application submit rate.
+
+* Spark applications are being submitted, but pods are not appearing
 
