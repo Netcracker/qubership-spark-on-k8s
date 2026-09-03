@@ -113,5 +113,22 @@ Kubernetes service and ingress are created automatically for each application su
 
   Increase spark operator controller resources and/or reduce spark application submit rate.
 
-* Spark applications are being submitted, but pods are not appearing
+* Spark applications are being submitted, but application pods are not appearing and there are no errors/restarts in spark-operator pods.
 
+  *Cause*
+
+  Spark operator is often used with volcano integration when volcano itself and the integration are not always configured correctly.
+
+  *Solution*
+
+  Check Volcano configuration, Volcano logs, Volcano Queue configuration, Volcano pod groups in spark applications namespace, resources in the queue, resources in the cluster. Consider configuring volcano to run spark applications on a separate set of volcano nodes if there are "not schedulable" errors on volcano side.
+  
+* Certificate errors when installing spark-operator in update mode
+
+  *Cause*
+
+  Some of the older spark operator releases did not support helm upgrade.
+
+  *Solution*
+
+  Do a clean install of spark operator with cleaning all objects form spark-operator namespace.
