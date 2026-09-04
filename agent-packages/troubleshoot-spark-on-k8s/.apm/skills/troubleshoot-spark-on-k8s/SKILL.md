@@ -35,7 +35,7 @@ the leading `*`) with issue bullets (`* ` — asterisk plus space).
 | MD5 checksum error connecting to MinIO S3 | MD 5 error when connecting to minio s3 |
 | Spark Operator pod restarts; log shows `"error": "leader election lost"` | Spark operator pod restarts with leader election issues |
 | Spark Operator controller restarts with no visible error, an OOM kill, or failed liveness/readiness probes | Spark operator controller restarts with no visible errors or with OOM error or with probe issues |
-| Spark applications submit successfully but driver/executor pods never appear, and the operator logs show no errors/restarts (Volcano-scheduled clusters) | Spark applications are being submitted, but application pods are not appearing and there are no errors/restarts in spark-operator pods |
+| Spark applications submit successfully but driver/executor pods never appear at all, and `spark-operator` pods don't restart (Volcano-scheduled clusters) — see Guardrails below if the driver pod *does* appear but stays `Pending` | Spark applications are being submitted, but application pods are not appearing and there are no errors/restarts in spark-operator pods |
 | Certificate errors during `helm upgrade` of the Spark Operator | Certificate errors when installing spark-operator in update mode |
 
 Start every diagnosis by getting the exact error text or log line and which component it came from (Spark Operator
@@ -47,3 +47,87 @@ If the symptom plausibly matches more than one row, ask which one applies rather
 If the symptom doesn't match any row, fall back to a general checklist: check Spark Operator controller/webhook pod
 logs and resource usage, check the SparkApplication CR's status/events (`kubectl describe sparkapplication ...`),
 and check driver/executor pod events and logs — before concluding the issue is undocumented.
+
+## Guardrails
+
+Facts below are grounded in the actual Spark Operator source
+([kubeflow/spark-operator](https://github.com/kubeflow/spark-operator), tag `v2.5.1` — the version
+`docker-transfer/Dockerfile` vendors for both the chart and the controller/webhook image) and this chart's
+`chart/helm/spark-on-k8s/values.yaml`, not assumptions:
+
+- Don't recommend "just patch the `SparkApplication` spec to fix a running job." The controller's update predicate
+  treats any spec change other than `spec.suspend`/`spec.timeToLiveSeconds` as a full invalidation: it force-writes
+  `Status.AppState.State = Invalidating`, deletes the driver pod, driver PDB, and web-UI Service/Ingress, then does a
+  **brand-new `spark-submit`** with a new `SubmissionID` — not a live patch. A `PartialRestart` feature gate exists
+  at v2.5.1 that carves out `spec.executor.priorityClassName`/`nodeSelector`/`tolerations`/`affinity`/`schedulerName`
+  edits from forcing invalidation (those fields only apply to newly-created pods via the mutating webhook anyway),
+  but it's Alpha and defaults to **off** — don't assume it's active unless the user confirms the feature gate was
+  explicitly enabled. Driver field changes always force full invalidation regardless of this gate.
+- Don't recommend "delete the driver pod to force a rerun" as a generic fix. It only triggers an automatic resubmit
+  if `spec.restartPolicy.type` allows retries (`OnFailure`/`Always`) with attempts remaining. With the default
+  `Never`, deleting the driver pod just permanently fails the application (`Failing` → `Failed`, no resubmission).
+- `SparkApplication` has no finalizer — `kubectl delete sparkapplication` removes the CR from etcd immediately.
+  Cleanup of the driver pod/PDB/UI Service/Ingress is best-effort plus owner-reference garbage collection, not a
+  guaranteed-synchronous teardown. Don't assume the driver pod is already gone the instant the CR delete returns.
+- Webhook leader-election timing (`leaseDuration`/`renewDeadline`/`retryPeriod`) is only configurable for
+  `spark-operator.controller.leaderElection` — `spark-operator.webhook.leaderElection` only exposes `enable` in the
+  Helm schema. Don't suggest tuning webhook leader-election timing via a Helm value; that knob doesn't exist.
+- Don't suggest disabling `controller.leaderElection.enable` (or `webhook.leaderElection.enable`) unless the
+  matching `controller.replicas`/`webhook.replicas` is also `1`. With more than one replica and leader election off,
+  multiple controllers reconcile the same `SparkApplication`s concurrently — duplicate `spark-submit` calls and
+  driver-pod naming races.
+- `signal: killed` in a `SparkApplication`'s own error message (as opposed to an operator pod `OOMKilled` event) is
+  the fingerprint of the controller's `spark-submit` subprocess — a JVM, default `-Xmx128m` — being OOM-killed; up
+  to `controller.workers` (default 10) can run concurrently. Point at `spark-operator.controller.resources`
+  (`requests: 100m/300Mi`, `limits: 200m/600Mi` in this chart's defaults) and/or `controller.workers` /
+  `workqueueRateLimiter`, not generic node capacity.
+- An admission-webhook outage is narrower than "blocks all pod/CR creation cluster-wide." With the default
+  `failurePolicy: Fail`, every mutating/validating webhook rule (pods, `SparkApplication`, `ScheduledSparkApplication`,
+  `SparkConnect`) carries a `namespaceSelector` gated on `spark-operator.spark.jobNamespaces` (`spark-apps` in this
+  chart's defaults) — an outage only blocks pod/CR creation in those namespaces, not cluster-wide. The pod webhook
+  additionally has an `objectSelector` matching `sparkoperator.k8s.io/launched-by-spark-operator: "true"`, so within
+  those namespaces it only touches spark-operator-launched pods, not unrelated ones; the CR webhooks have no such
+  `objectSelector` narrowing, since a `SparkApplication`/`ScheduledSparkApplication`/`SparkConnect` create/update in
+  a job namespace is unambiguously spark-operator's concern already.
+- For "driver/executor pods never appear" with Volcano, check `kubectl describe sparkapplication <name>` and
+  `kubectl get events` first, not just operator pod logs. A Volcano failure (missing PodGroup CRD, RBAC denial)
+  surfaces as `FailedSubmission` with a populated `ErrorMessage` *before* `spark-submit` is ever invoked — it isn't
+  silent. If the driver pod does get created but stays `Pending`, that's a different failure (Volcano queue/
+  scheduler capacity or a wrong `spec.batchSchedulerOptions.queue`), not the same root cause — ask which one applies.
+- Webhook TLS certs aren't regenerated on every restart or `helm upgrade`: the webhook reuses a stored cert as long
+  as it's still valid, and a pair of always-running reconcilers keep the CA bundle patched into the webhook configs.
+  Don't default to "certificate errors on upgrade mean a clean install is required" — at the v2.5.1 this chart
+  vendors, that machinery already exists. If certificate errors do show up on an upgrade, check these two causes
+  first, in this order (both are more common in practice than a `certManagerIntegration.enabled` toggle, which is
+  almost always left disabled once set):
+  - **Webhook Service/Secret name changed, even if the release name looks the same.** The webhook Service and
+    Secret are named `<fullname>-webhook-svc` / `<fullname>-webhook-certs`, and `spark-operator.fullname` resolves
+    `$name := default .Chart.Name .Values.nameOverride`, then uses `.Release.Name` directly if
+    `contains $name .Release.Name`, else `<release>-<name>`. `.Chart.Name` for the spark-operator templates is
+    always `spark-operator` — Helm resolves `.Chart.Name` from the currently-rendering chart's own `Chart.yaml`
+    whether it's root or a subchart, so nesting depth alone doesn't change it. What actually flips the `contains`
+    check, and therefore the computed name, is the **release-name convention** in use:
+    1. Redeploying through ArgoCD with an Application/release name that differs from the original Helm release name
+       (a common setup: Helm install directly, then adopted into ArgoCD under a different app name).
+    2. This chart being installed as an upgrade on top of an environment where spark-operator was previously
+       installed as its own root chart rather than as a subchart — this includes the plain upstream
+       `kubeflow/spark-operator` chart installed directly (its own docs default to
+       `helm install spark-operator spark-operator/spark-operator`, i.e. release name `spark-operator` itself). With
+       release name `spark-operator`, `contains("spark-operator", "spark-operator")` is true, so `fullname` collapses
+       to just `spark-operator`. Once the same environment is redeployed through `qubership-spark-on-k8s` (release
+       name following *this* chart's convention instead, e.g. `spark-on-k8s`), that `contains` check goes false and
+       `fullname` becomes `<release>-spark-operator` — a different webhook Service/Secret name, even though
+       spark-operator's own chart identity and version didn't change.
+    Meanwhile the `MutatingWebhookConfiguration`/`ValidatingWebhookConfiguration` objects themselves are fixed,
+    cluster-scoped singletons (e.g. `webhook.sparkoperator.k8s.io`) whose `clientConfig.service.name` just gets
+    re-pointed to whichever Service name was last rendered — so after either change, the cert's commonName and the
+    webhook config's service reference can end up disagreeing during/after the transition. Check the actual
+    rendered Service/Secret name (`helm template ... | grep webhook-svc`) against what the webhook config and cert
+    commonName currently reference before assuming a code bug.
+  - **Stale secret from a much older release.** The internal self-signed path stores keys under
+    `CAKeyPem`/`CACertPem`/`ServerCertPem`/`ServerKeyPem`; the cert-manager path uses `ca.crt`/`tls.crt`/`tls.key`
+    instead — different schemas entirely. Upgrading on top of a webhook secret created by a very old spark-operator
+    release (predating the current internal cert-controller, or from a stale `certManagerIntegration` toggle) can
+    leave a secret whose keys don't match what the current binary expects. The fix is to delete the stale
+    `<fullname>-webhook-certs` secret so it regenerates cleanly on next reconcile — not necessarily a full clean
+    reinstall of the release.

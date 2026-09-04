@@ -131,4 +131,4 @@ Kubernetes service and ingress are created automatically for each application su
 
   *Solution*
 
-  Do a clean install of spark operator with cleaning all objects form spark-operator namespace.
+  Do a clean install of spark operator with cleaning all objects form spark-operator namespace. If clean install is not possible, it is also possible to try deleting *-webhook-certs secret.
