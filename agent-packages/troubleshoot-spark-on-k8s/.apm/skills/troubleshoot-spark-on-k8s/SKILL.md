@@ -1,6 +1,6 @@
 ---
 name: troubleshoot-spark-on-k8s
-description: Diagnose and resolve failures in a Qubership Spark on Kubernetes deployment — java.nio.file.AccessDeniedException in driver/executor pod logs, Spark application pods not getting patched by the admission webhook, CRD validation errors when applying the SparkApplication/ScheduledSparkApplication CRDs, MD5 checksum errors connecting to MinIO S3, Spark Operator pod restarts from leader election issues, Spark Operator controller restarts (OOM / failed probes / no visible error), Spark applications submitted but no driver/executor pods appear with a Volcano integration, or certificate errors when installing/upgrading the Spark Operator. Falls back to a general checklist, framed for the user to check, when nothing matches.
+description: Diagnose and resolve failures in a Qubership Spark on Kubernetes deployment — java.nio.file.AccessDeniedException in driver/executor pod logs, Spark application pods not getting patched by the admission webhook, CRD validation errors when applying the SparkApplication/ScheduledSparkApplication CRDs, MD5 checksum errors connecting to MinIO S3, Spark Operator pod restarts from leader election issues, Spark Operator controller restarts (OOM / failed probes / no visible error), Spark applications submitted but no driver/executor pods appear with a Volcano integration, certificate errors when installing/upgrading the Spark Operator, Spark History Server reachable on its Kubernetes Service but not through its oauth2-proxy ingress/HTTPRoute, or an `XAmzContentSHA256Mismatch`/hash error connecting to S3 from Spark History Server or applications. Falls back to a general checklist, framed for the user to check, when nothing matches.
 ---
 
 ## Reading the reference file
@@ -37,12 +37,18 @@ the leading `*`) with issue bullets (`* ` — asterisk plus space).
 | Spark Operator controller restarts with no visible error, an OOM kill, or failed liveness/readiness probes | Spark operator controller restarts with no visible errors or with OOM error or with probe issues |
 | Spark applications submit successfully but driver/executor pods never appear at all, and `spark-operator` pods don't restart (Volcano-scheduled clusters) — see Guardrails below if the driver pod *does* appear but stays `Pending` | Spark applications are being submitted, but application pods are not appearing and there are no errors/restarts in spark-operator pods |
 | Certificate errors during `helm upgrade` of the Spark Operator | Certificate errors when installing spark-operator in update mode |
+| Spark History Server's Kubernetes Service responds fine in-cluster, but its oauth2-proxy ingress/HTTPRoute doesn't work | Spark history server correctly serves requests inside k8s on it's service, but oauth2-proxy ingress or HTTPRoute do not work |
+| `XAmzContentSHA256Mismatch` / "provided 'x-amz-content-sha256' header does not match" connecting to S3 from Spark History Server or a Spark application | Hash errors in logs when connecting to s3 in spark-history-server or in applications |
 
 Start every diagnosis by getting the exact error text or log line and which component it came from (Spark Operator
-controller/webhook, driver pod, or executor pod) — several rows above match on a specific log string, not a general
-description.
+controller/webhook, driver pod, executor pod, or Spark History Server/its oauth2-proxy sidecar) — several rows above
+match on a specific log string, not a general description.
 
-If the symptom plausibly matches more than one row, ask which one applies rather than guessing.
+If the symptom plausibly matches more than one row, ask which one applies rather than guessing — the two MinIO rows
+in particular share the same root cause family (an old MinIO version enforcing stricter checksum validation than the
+AWS SDK client expects) but are distinguished by the exact checksum algorithm named in the error (`MD5` vs.
+`XAmzContentSHA256Mismatch`/`x-amz-content-sha256`) and by which component hit it (Spark Operator's own S3 access vs.
+Spark History Server or a Spark application's S3 access) — get the exact error text before picking one.
 
 If the symptom doesn't match any row, fall back to a general checklist: check Spark Operator controller/webhook pod
 logs and resource usage, check the SparkApplication CR's status/events (`kubectl describe sparkapplication ...`),

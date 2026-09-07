@@ -132,3 +132,27 @@ Kubernetes service and ingress are created automatically for each application su
   *Solution*
 
   Do a clean install of spark operator with cleaning all objects form spark-operator namespace. If clean install is not possible, it is also possible to try deleting *-webhook-certs secret.
+
+* Spark history server correctly serves requests inside k8s on it's service, but oauth2-proxy ingress or HTTPRoute do not work.
+
+  *Cause* 
+  
+  Misconfigured identity provider integration for oauth2-proxy in Spark History Server deployment.
+
+  *Soution* Check identity provider (keycloak) integration configuration. Check if any of the endpoints(spark-history, oauth2-proxy, IDP, ingresses/HTTPRoute) have tls enabled and adjust configuration accordingly.
+
+* Hash errors in logs when connecting to s3 in spark-history-server or in applications.
+
+  *Example of error:*
+
+  ```
+  Error example: botocore.exceptions.ClientError: An error occurred (XAmzContentSHA256Mismatch) when calling the PutObject operation: The provided 'x-amz-content-sha256' header does not match what was computed.
+  ```
+  
+  *Cause*
+
+  Connecting to deprecated Minio version
+
+  *Solution*
+
+  Upgrade Minio version.
