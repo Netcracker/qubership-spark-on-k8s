@@ -33,11 +33,11 @@ the leading `*`) with issue bullets (`* ` — asterisk plus space).
 | Spark application pods aren't mutated by the webhook; `webhook.go:247] Serving admission request` is missing from the operator log | Spark application pods are not getting patched by admission webhook |
 | Applying the `sparkapplications.sparkoperator.k8s.io` / `scheduledsparkapplications` CRD fails with `metadata.annotations: Too long` or a `spec.preserveUnknownFields` error | CRD Validation Error When Applying SparkApplication CRD |
 | MD5 checksum error connecting to MinIO S3 | MD 5 error when connecting to minio s3 |
-| Spark Operator pod restarts; log shows `"error": "leader election lost"` | Spark operator pod restarts with leader election issues |
-| Spark Operator controller restarts with no visible error, an OOM kill, or failed liveness/readiness probes | Spark operator controller restarts with no visible errors or with OOM error or with probe issues |
-| Spark applications submit successfully but driver/executor pods never appear at all, and `spark-operator` pods don't restart (Volcano-scheduled clusters) — see Guardrails below if the driver pod *does* appear but stays `Pending` | Spark applications are being submitted, but application pods are not appearing and there are no errors/restarts in spark-operator pods |
+| Spark Operator pod restarts; log shows `"error": "leader election lost"` | Spark operator pod restarts due to leader election issues |
+| Spark Operator controller restarts with no visible error, an OOM kill, or failed liveness/readiness probes | Spark operator controller restarts with no visible errors, with OOM errors, or with probe issues |
+| Spark applications submit successfully but driver/executor pods never appear at all, and `spark-operator` pods don't restart (Volcano-scheduled clusters) — see Guardrails below if the driver pod *does* appear but stays `Pending` | Spark applications are being submitted, but application pods do not appear and there are no errors or restarts in Spark Operator pods |
 | Certificate errors during `helm upgrade` of the Spark Operator | Certificate errors when installing spark-operator in update mode |
-| Spark History Server's Kubernetes Service responds fine in-cluster, but its oauth2-proxy ingress/HTTPRoute doesn't work | Spark history server correctly serves requests inside k8s on it's service, but oauth2-proxy ingress or HTTPRoute do not work |
+| Spark History Server's Kubernetes Service responds fine in-cluster, but its oauth2-proxy ingress/HTTPRoute doesn't work | Spark History Server correctly serves requests inside Kubernetes on its service, but the oauth2‑proxy ingress or HTTPRoute does not work |
 | `XAmzContentSHA256Mismatch` / "provided 'x-amz-content-sha256' header does not match" connecting to S3 from Spark History Server or a Spark application | Hash errors in logs when connecting to s3 in spark-history-server or in applications |
 
 Start every diagnosis by getting the exact error text or log line and which component it came from (Spark Operator

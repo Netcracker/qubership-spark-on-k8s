@@ -89,7 +89,7 @@ Kubernetes service and ingress are created automatically for each application su
 
   Update minio version. It also might be necessary to set AWS java SDK v2 properties `RequestChecksumCalculation` and `ResponseChecksumValidation` to `WHEN_REQUIRED`.
 
-* Spark operator pod restarts with leader election issues
+* Spark operator pod restarts due to leader election issues
   *Error example*:
 ```
 2025-10-28T11:51:05.128Z ERROR controller/start.go:328 Failed to start manager {"error": "leader election lost"
@@ -97,49 +97,49 @@ Kubernetes service and ingress are created automatically for each application su
 
   *Cause*
 
-  Usually is caused by slow Kubernetes API.
+  Usually caused by a slow Kubernetes API.
 
   *Solution*
 
-  Increase K8S API responsiveness (requires changes in K8S). Alternatively, it's possible to disable leader election using `webhook.leaderElection.enable` and `controller.leaderElection.enable` (For controller it is not recommended when running multiple controller instances, so in this case `controller.replicas` should be set to `1`). Another option is to configure controller leader election timing using `controller.leaderElection.leaseDuration`, `controller.leaderElection.renewDeadline`, `controller.leaderElection.retryPeriod` parameters (note that in current spark operator version the same is not possible for webhook). 
+  Increase Kubernetes API responsiveness (requires changes to the cluster). Alternatively, you can disable leader election using `webhook.leaderElection.enable` and `controller.leaderElection.enable` (disabling it for the controller is not recommended when running multiple controller instances; in that case set `controller.replicas` to `1`). Another option is to configure the controller leader election timing using `controller.leaderElection.leaseDuration`, `controller.leaderElection.renewDeadline`, and `controller.leaderElection.retryPeriod` parameters (note that these settings are not currently available for the webhook).
 
-* Spark operator controller restarts with no visible errors or with OOM error or with probe issues.
+* Spark operator controller restarts with no visible errors, with OOM errors, or with probe issues.
 
   *Cause*
 
-  Usually it is a resources issue. Despite being written in Go, spark-operator launches spark-submit (Java process) for each submitted application. It can consume a lot of resources, especially when there are multiple spark applications are being submitted.
+  Usually this is a resource issue. Although the Spark Operator is written in Go, it launches `spark-submit` (a Java process) for each submitted application. This can consume a lot of resources, especially when multiple Spark applications are being submitted.
 
   *Solution*
 
-  Increase spark operator controller resources and/or reduce spark application submit rate.
+  Increase Spark Operator controller resources and/or reduce the Spark application submit rate.
 
-* Spark applications are being submitted, but application pods are not appearing and there are no errors/restarts in spark-operator pods.
+* Spark applications are being submitted, but application pods do not appear and there are no errors or restarts in Spark Operator pods.
 
   *Cause*
 
-  Spark operator is often used with volcano integration when volcano itself and the integration are not always configured correctly.
+  The Spark Operator is often used with Volcano integration, and the Volcano components or the integration may be misconfigured.
 
   *Solution*
 
-  Check Volcano configuration, Volcano logs, Volcano Queue configuration, Volcano pod groups in spark applications namespace, resources in the queue, resources in the cluster. Consider configuring volcano to run spark applications on a separate set of volcano nodes if there are "not schedulable" errors on volcano side.
+  Check Volcano configuration, Volcano logs, Volcano queue configuration, and Volcano pod groups in the Spark applications namespace. Verify resources in the queue and in the cluster. Consider configuring Volcano to run Spark applications on a separate set of nodes if you encounter "not schedulable" errors.
   
 * Certificate errors when installing spark-operator in update mode
 
   *Cause*
 
-  Some of the older spark operator releases did not support helm upgrade.
+  Some older Spark Operator releases did not support Helm upgrades.
 
   *Solution*
 
-  Do a clean install of spark operator with cleaning all objects form spark-operator namespace. If clean install is not possible, it is also possible to try deleting *-webhook-certs secret.
+  Perform a clean install of the Spark Operator, removing all objects from the `spark-operator` namespace. If a clean install is not possible, you can try deleting the `*-webhook-certs` secret.
 
-* Spark history server correctly serves requests inside k8s on it's service, but oauth2-proxy ingress or HTTPRoute do not work.
+* Spark History Server correctly serves requests inside Kubernetes on its service, but the oauth2‑proxy ingress or HTTPRoute does not work.
 
-  *Cause* 
+  *Cause*
   
-  Misconfigured identity provider integration for oauth2-proxy in Spark History Server deployment.
+  Misconfigured identity‑provider integration for oauth2‑proxy in the Spark History Server deployment.
 
-  *Soution* Check identity provider (keycloak) integration configuration. Check if any of the endpoints(spark-history, oauth2-proxy, IDP, ingresses/HTTPRoute) have tls enabled and adjust configuration accordingly.
+  *Solution* Check the identity provider (Keycloak) integration configuration. Verify whether any of the endpoints (spark‑history, oauth2‑proxy, IDP, ingresses/HTTPRoute) have TLS enabled and adjust the configuration accordingly.
 
 * Hash errors in logs when connecting to s3 in spark-history-server or in applications.
 
