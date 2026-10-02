@@ -61,7 +61,24 @@ spec:
             
             echo "s3_url: $s3_url"
             echo "s3_uri: $s3_uri"
-            
+
+            # seaweedfs://<filer-host>:<filer-port>/<path>: create the directory through the filer HTTP API.
+            # The filer creates missing parent directories, so no bucket or S3 credentials are needed.
+            if [[ "$s3_uri" == seaweedfs://* ]]; then
+              filer_url="http://$(echo "$s3_uri" | cut -d/ -f3)"
+              filer_dir="/$(echo "$s3_uri" | cut -d/ -f4- | sed 's/\/*$//')/"
+              echo -e "\n\n\n\n------Create filer directory '${filer_dir}' at ${filer_url}-------"
+              # POST fails on an existing directory, so create it only if listing it fails.
+              if curl -s -f ${curlOpts} -H "Accept: application/json" -o /dev/null "${filer_url}${filer_dir}" \
+                  || curl -s -f ${curlOpts} -X POST "${filer_url}${filer_dir}"; then
+                echo "Filer directory '${filer_dir}' has been successfully created or already exists."
+                exit 0
+              else
+                echo "Could not create filer directory '${filer_dir}' at ${filer_url}."
+                exit 1
+              fi
+            fi
+
             {{- if .Values.s3.sslInsecure }}
             curlOpts="${curlOpts} --insecure"
             echo "TLS certificate validation is disabled."
