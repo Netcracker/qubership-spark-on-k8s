@@ -10,15 +10,20 @@ def main():
     bucket_name = delete_s3.get_secret("BUCKET_NAME")
     table_name = delete_s3.get_secret("TABLE_NAME")
     database_name = delete_s3.get_secret("DB_NAME")
+    # Optional warehouse URI, for example seaweedfs://<filer-host>:8888/hive/warehouse.
+    # When set, the test uses this storage instead of S3 and ignores the S3 secrets.
+    warehouse_uri = delete_s3.get_secret("WAREHOUSE_URI")
     # Initialize Spark Session
-    spark = (
-        SparkSession.builder.appName("Spark-hive-test")
-        .config("spark.hadoop.fs.s3a.access.key", aws_access_key)
-        .config("spark.hadoop.fs.s3a.secret.key", aws_secret_key)
-        .config("spark.hadoop.fs.s3a.endpoint", s3_endpoint_url)
-        .enableHiveSupport()
-        .getOrCreate()
-    )
+    builder = SparkSession.builder.appName("Spark-hive-test")
+    if warehouse_uri:
+        builder = builder.config("spark.sql.warehouse.dir", warehouse_uri)
+    else:
+        builder = (
+            builder.config("spark.hadoop.fs.s3a.access.key", aws_access_key)
+            .config("spark.hadoop.fs.s3a.secret.key", aws_secret_key)
+            .config("spark.hadoop.fs.s3a.endpoint", s3_endpoint_url)
+        )
+    spark = builder.enableHiveSupport().getOrCreate()
     spark.sparkContext.setLogLevel("ERROR")
 
     log4jLogger = spark._jvm.org.apache.log4j
@@ -30,7 +35,10 @@ def main():
     )
     log4jLogger.LogManager.getLogger("hive").setLevel(log4jLogger.Level.ERROR)
 
-    table_location = f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
+    if warehouse_uri:
+        table_location = f"{warehouse_uri.rstrip('/')}/{database_name}.db/{table_name}"
+    else:
+        table_location = f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
 
     print(f"\n[STARTING JOB]: {database_name}.{table_name}")
 
@@ -41,8 +49,9 @@ def main():
         Path = sc._gateway.jvm.org.apache.hadoop.fs.Path
         FileSystem = sc._gateway.jvm.org.apache.hadoop.fs.FileSystem
         hadoop_conf = sc._jsc.hadoopConfiguration()
-        hadoop_conf.set("fs.s3a.endpoint", s3_endpoint_url)
-        hadoop_conf.set("fs.s3a.path.style.access", "true")
+        if not warehouse_uri:
+            hadoop_conf.set("fs.s3a.endpoint", s3_endpoint_url)
+            hadoop_conf.set("fs.s3a.path.style.access", "true")
         fs = FileSystem.get(Path(table_location).toUri(), hadoop_conf)
 
         if not fs.exists(Path(table_location)):
