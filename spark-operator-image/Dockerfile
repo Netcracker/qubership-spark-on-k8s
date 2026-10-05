@@ -3,11 +3,13 @@ ENV HADOOP_VERSION=3.4.1
 ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV netty_version=4.1.136.Final
 ENV jackson_version=2.18.8
+ENV seaweedfs_version=4.38
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
 RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/software/amazon/awssdk/bundle/2.44.14/bundle-2.44.14.jar --output $SPARK_JARS_DIR/bundle-2.44.14.jar && \
     curl -k -L $MAVEN_REPO/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar --output $SPARK_JARS_DIR/hadoop-aws-$HADOOP_VERSION.jar && \
+    curl -k -L $MAVEN_REPO/com/seaweedfs/seaweedfs-hadoop3-client/$seaweedfs_version/seaweedfs-hadoop3-client-$seaweedfs_version.jar --output $SPARK_JARS_DIR/seaweedfs-hadoop3-client-$seaweedfs_version.jar && \
     curl -k -L $MAVEN_REPO/com/fasterxml/jackson/core/jackson-annotations/$jackson_version/jackson-annotations-$jackson_version.jar --output $SPARK_JARS_DIR/jackson-annotations-$jackson_version.jar && \
     curl -k -L $MAVEN_REPO/com/fasterxml/jackson/core/jackson-core/$jackson_version/jackson-core-$jackson_version.jar --output $SPARK_JARS_DIR/jackson-core-$jackson_version.jar && \
     curl -k -L $MAVEN_REPO/com/fasterxml/jackson/core/jackson-databind/$jackson_version/jackson-databind-$jackson_version.jar --output $SPARK_JARS_DIR/jackson-databind-$jackson_version.jar && \
