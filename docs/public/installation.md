@@ -25,6 +25,7 @@ The following topics are covered in the guide:
     * [Non-HA Scheme](#non-ha-scheme-not-recommended)
     * [OpenShift Support](#openshift-support)
     * [Spark Operator S3 Connectivity Support](#spark-operator-s3-connectivity-support)
+        * [SeaweedFS](#seaweedfs)
     * [Spark History Server Deployment](#spark-history-server-deployment) 
         * [Using Secure S3 Endpoint for Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) 
         * [Enabling HTTPS for Spark History Server Ingresses](#enabling-https-for-spark-history-server-ingresses)
@@ -1328,6 +1329,21 @@ Writable and temporary directories are provisioned through emptyDir mounts, whic
 With this configuration in place, the Spark Operator is able to securely authenticate and communicate with S3.  
 
 **Note**: Defining custom volumes in the Spark Operator pod configuration overrides the default volumes provided by the chart.
+
+### SeaweedFS
+
+The configuration above is not needed to use SeaweedFS (`seaweedfs://`) for application dependencies (`deps.jars`, `deps.files`, `deps.pyFiles`, `deps.archives`) or for `spark.kubernetes.file.upload.path`, as long as the SeaweedFS filer has no authentication. The Spark Operator image includes the `seaweedfs-hadoop3-client` jar. The client takes the filer host and port from the URI, so the operator pod needs no credentials, certificates, or `core-site.xml`.
+
+Set the filesystem classes in the `hadoopConf` section of the application instead:
+
+```yaml
+spec:
+  hadoopConf:
+    "fs.seaweedfs.impl": seaweed.hdfs.SeaweedFileSystem
+    "fs.AbstractFileSystem.seaweedfs.impl": seaweed.hdfs.SeaweedAbstractFileSystem
+```
+
+If the filer requires authentication, mount a `security.toml` and the certificates it references into the Spark Operator pod. For details, see [SeaweedFS Storage](applications-management.md#seaweedfs-storage).
 
 ## Spark History Server Deployment
 
