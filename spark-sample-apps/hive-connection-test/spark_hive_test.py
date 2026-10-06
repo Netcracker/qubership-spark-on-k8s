@@ -38,7 +38,9 @@ def main():
     if warehouse_uri:
         table_location = f"{warehouse_uri.rstrip('/')}/{database_name}.db/{table_name}"
     else:
-        table_location = f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
+        table_location = (
+            f"s3a://{bucket_name}/warehouse/{database_name}.db/{table_name}"
+        )
 
     print(f"\n[STARTING JOB]: {database_name}.{table_name}")
 
