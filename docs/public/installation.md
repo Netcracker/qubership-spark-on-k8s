@@ -27,6 +27,7 @@ The following topics are covered in the guide:
     * [Spark Operator S3 Connectivity Support](#spark-operator-s3-connectivity-support)
         * [SeaweedFS](#seaweedfs)
     * [Spark History Server Deployment](#spark-history-server-deployment) 
+        * [Using SeaweedFS for Spark History Server](#using-seaweedfs-for-spark-history-server)
         * [Using Secure S3 Endpoint for Spark History Server](#using-secure-s3-endpoint-for-spark-history-server) 
         * [Enabling HTTPS for Spark History Server Ingresses](#enabling-https-for-spark-history-server-ingresses)
         * [Enabling HTTPS for Spark History Server Service](#enabling-https-for-spark-history-server-service)
@@ -1366,6 +1367,35 @@ spark-history-server:
     accesskey: 'bWluaW9hY2Nlc3NrZXk='
     secretkey: 'bWluaW9zZWNyZXRrZXk='
 ```
+
+### Using SeaweedFS for Spark History Server
+
+Spark History Server can read event logs from SeaweedFS through the native `seaweedfs://` filesystem instead of S3. The platform Spark image includes the `seaweedfs-hadoop3-client` jar, and the filesystem classes are configured through the `hdfs` parameters of the subchart.
+
+For example:
+
+```yaml
+spark-history-server:
+  enabled: true
+  logDirectory: 'seaweedfs://seaweedfs-filer.seaweedfs:8888/spark/logs'
+  s3:
+    enabled: false
+  s3InitJob:
+    enabled: true
+  hdfs:
+    enabled: true
+    core_site: |
+      <property><name>fs.seaweedfs.impl</name><value>seaweed.hdfs.SeaweedFileSystem</value></property>
+      <property><name>fs.AbstractFileSystem.seaweedfs.impl</name><value>seaweed.hdfs.SeaweedAbstractFileSystem</value></property>
+```
+
+- `logDirectory` is a `seaweedfs://<filer-host>:<filer-port>/<path>` URI. The filer host and port are taken from this URI. The gRPC port defaults to the filer port plus 10000.
+- `s3.enabled: false` disables the S3 and JCEKS credentials configuration, which SeaweedFS does not use.
+- `hdfs.enabled: true` mounts the Hadoop configuration, and `hdfs.core_site` adds the properties that register the `seaweedfs` scheme. The jar does not register it by itself.
+- `s3InitJob` creates the `logDirectory` path through the filer HTTP API (`http://<filer-host>:<filer-port>`) if it does not exist. In this mode the job ignores `s3.endpoint` and the S3 keys. Spark does not create a missing event log directory, so the path must exist before the Spark History Server and the applications start. Set `s3InitJob.enabled: false` if you create the path yourself.
+- Spark applications must write event logs to the same `seaweedfs://` path. See [SeaweedFS Storage](applications-management.md#seaweedfs-storage).
+
+The Spark History Server pod must reach the SeaweedFS filer over HTTP (port `8888` by default) and gRPC (port `18888` by default). This configuration works with a filer without authentication. For an authenticated filer, the SeaweedFS client reads its settings from a `security.toml` file, which must be mounted into the Spark History Server pod.
 
 ### Using Secure S3 Endpoint for Spark History Server
 
