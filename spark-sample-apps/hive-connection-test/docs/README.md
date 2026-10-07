@@ -125,6 +125,54 @@ env:
 ```
 
 
+## SeaweedFS Storage
+
+The test can store the Hive warehouse in SeaweedFS through the native `seaweedfs://` filesystem instead of S3. Use these files:
+
+- `cr/spark-hive-connection-seaweedfs.yaml`: the `spark-hive-test-seaweedfs` application.
+- `cr/seaweedfs_secrets.yaml`: a template for the `seaweedfs-secrets` Secret.
+
+### Requirements
+
+- The Hive Metastore must have the SeaweedFS Hadoop client (`seaweedfs-hadoop3-client`) on its classpath and must not ship Hive's `grpc-*.jar` files. They clash with the gRPC classes bundled in the client and cause a `NoSuchMethodError` when the metastore opens a `seaweedfs://` path. The Qubership Hive Metastore image handles both.
+- The test image must be built on a Qubership Spark Python image that includes the SeaweedFS client jar.
+- The SeaweedFS filer must be reachable from the driver and executor pods over HTTP (port `8888`) and gRPC (port `18888`). The example works with a filer without authentication. For an authenticated filer, see the SeaweedFS section in [applications-management.md](../../../docs/public/applications-management.md).
+
+### Kubernetes Secret for SeaweedFS
+
+The application reads its parameters from the Secret files mounted at `/etc/s3-secrets`, the same path as in the S3 variant:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: seaweedfs-secrets
+  namespace: spark-apps
+type: Opaque
+stringData:
+  WAREHOUSE_URI: seaweedfs://{filer host}:8888/hive/warehouse
+  DB_NAME: {database name}
+  TABLE_NAME: {table name}
+```
+
+When `WAREHOUSE_URI` is set, `spark_hive_test.py` ignores the S3 parameters, sets `spark.sql.warehouse.dir` to `WAREHOUSE_URI`, and creates the table at `<WAREHOUSE_URI>/<DB_NAME>.db/<TABLE_NAME>`.
+
+### Differences from the S3 Variant
+
+- The `spark.hadoop.fs.seaweedfs.impl`, `fs.AbstractFileSystem.seaweedfs.impl`, and `fs.seaweed.filer.*` properties replace the S3A, committer, and TLS properties. Set `fs.seaweed.filer.host` to the filer host from `WAREHOUSE_URI`.
+- There is no `delete-s3` init container, so data from earlier runs stays in place and a rerun appends rows to the same table. To start clean, drop the table and delete its directory in SeaweedFS.
+- The metastore address in `spark.hadoop.hive.metastore.uris` is `thrift://hive-metastore.hive-metastore:9083`. Change it to match your installation.
+
+### Running
+
+```sh
+kubectl apply -f cr/seaweedfs_secrets.yaml
+kubectl apply -f cr/spark-hive-connection-seaweedfs.yaml
+kubectl get sparkapplications -n spark-apps spark-hive-test-seaweedfs
+```
+
+A successful run prints `table created`, `data inserted`, and the final rows in the driver log. The warehouse directory in SeaweedFS then contains `<DB_NAME>.db/<TABLE_NAME>` with a `_SUCCESS` marker and Parquet files.
+
 ## Environment Variables in Spark Application
 The following environment variables are set within the Spark application to import certificates:
 

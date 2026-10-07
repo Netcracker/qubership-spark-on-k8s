@@ -1,0 +1,81 @@
+#
+# Copyright 2017 Google LLC
+# Modified in 2026 by NetCracker Technology Corp.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Writes Spark event logs to SeaweedFS through the filer, using the SeaweedFS Hadoop client.
+# Replace "seaweedfs-filer" with the filer service name and namespace of your SeaweedFS installation.
+# The target directory must exist or be creatable by the filer.
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: spark-pi-event-logs-seaweedfs
+  namespace: spark-apps
+spec:
+  type: Scala
+  mode: cluster
+  image: "ghcr.io/netcracker/qubership-spark-customized:main"
+  imagePullPolicy: Always
+  mainClass: org.apache.spark.examples.SparkPi
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-examples_2.13-4.2.0.jar"
+  sparkVersion: "4.2.0"
+  restartPolicy:
+    type: Never
+  sparkConf:
+    "spark.jars.ivy": "/tmp/.ivy"
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": "seaweedfs://seaweedfs-filer:8888/spark/logs"
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    "spark.kubernetes.driver.connectionTimeout": "60000000"
+    "spark.kubernetes.driver.requestTimeout": "60000000"
+  hadoopConf:
+    "fs.seaweedfs.impl": seaweed.hdfs.SeaweedFileSystem
+    "fs.AbstractFileSystem.seaweedfs.impl": seaweed.hdfs.SeaweedAbstractFileSystem
+    "fs.seaweed.filer.host": seaweedfs-filer
+    "fs.seaweed.filer.port": "8888"
+    "fs.seaweed.filer.port.grpc": "18888"
+
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+    labels:
+      version: 4.2.0
+    serviceAccount: sparkapps-sa
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+
+  executor:
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: 4.2.0
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL

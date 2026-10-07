@@ -1,0 +1,109 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: spark-hive-test-seaweedfs
+  namespace: spark-apps
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
+  imagePullPolicy: Always
+  mainApplicationFile: local:///opt/spark/examples/spark_hive_test.py
+  sparkVersion: "4.2.0"
+  sparkConf:
+    "spark.jars.ivy": "/tmp/.ivy"
+    # --- Hive Metastore Config ---
+    "spark.sql.hive.metastore.version": "4.0.1"
+    "spark.sql.hive.metastore.jars": "path"
+    "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
+    "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.hive-metastore:9083"
+    "spark.hadoop.hive.metastore.schema.verification": "false"
+    "spark.hadoop.hive.metastore.schema.verification.record.version": "false"
+    "spark.hadoop.hive.metastore.use.SSL": "false"
+    "spark.sql.catalogImplementation": "hive"
+    "spark.sql.legacy.createHiveTableByDefault": "false"
+
+    # --- SeaweedFS Config ---
+    # Use the same filer host as in WAREHOUSE_URI.
+    "spark.hadoop.fs.seaweedfs.impl": "seaweed.hdfs.SeaweedFileSystem"
+    "spark.hadoop.fs.AbstractFileSystem.seaweedfs.impl": "seaweed.hdfs.SeaweedAbstractFileSystem"
+    "spark.hadoop.fs.seaweed.filer.host": "seaweedfs-filer-external.seaweedfs"
+    "spark.hadoop.fs.seaweed.filer.port": "8888"
+    "spark.hadoop.fs.seaweed.filer.port.grpc": "18888"
+
+    # --- Logs and Timeouts ---
+    "spark.kubernetes.submission.connectionTimeout": "60000000"
+    "spark.kubernetes.submission.requestTimeout": "60000000"
+    # Added --add-modules to silence the jdk.incubator.vector warning
+    "spark.driver.extraJavaOptions": "--add-modules jdk.incubator.vector"
+    "spark.executor.extraJavaOptions": "--add-modules jdk.incubator.vector"
+
+  restartPolicy:
+    type: Never
+    onFailureRetries: 3
+    onFailureRetryInterval: 10
+    onSubmissionFailureRetries: 5
+    onSubmissionFailureRetryInterval: 20
+
+  volumes:
+    - name: java-cacerts-dir
+      emptyDir: {}
+    - name: test-secrets
+      secret:
+        secretName: seaweedfs-secrets
+    - name: common-volume
+      emptyDir: {}
+
+  driver:
+    cores: 1
+    coreLimit: "1200m"
+    memory: "512m"
+    labels:
+      version: 4.2.0
+    serviceAccount: sparkapps-sa
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+    volumeMounts:
+      - name: java-cacerts-dir
+        mountPath: /java-security
+      # The test reads its parameters from /etc/s3-secrets, the same path the S3 variant uses.
+      - name: test-secrets
+        mountPath: "/etc/s3-secrets"
+        readOnly: true
+      - name: common-volume
+        mountPath: /tmp
+        subPath: tmp
+  executor:
+    cores: 1
+    instances: 1
+    memory: "512m"
+    labels:
+      version: 4.2.0
+    securityContext:
+      seccompProfile:
+        type: RuntimeDefault
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 185
+      capabilities:
+        drop:
+          - ALL
+    volumeMounts:
+      - name: java-cacerts-dir
+        mountPath: /java-security
+      - name: test-secrets
+        mountPath: "/etc/s3-secrets"
+        readOnly: true
+      - name: common-volume
+        mountPath: /tmp
+        subPath: tmp
