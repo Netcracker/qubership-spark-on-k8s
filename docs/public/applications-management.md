@@ -290,14 +290,14 @@ An example of S3 configured CR can be viewed in [spark-streaming-checkpoint-s3.y
 
 # SeaweedFS Storage
 
-Spark applications can use SeaweedFS through the native `seaweedfs://` filesystem instead of the S3 API, for example to store event logs or application dependencies.
+Spark applications can use SeaweedFS via the native `seaweedfs://` filesystem instead of the S3 API, for example to store event logs or application dependencies.
 
-The `seaweedfs-hadoop3-client` jar is already included in the Qubership Spark images and in the Qubership Spark Operator image:
+The `seaweedfs-hadoop3-client` JAR is already included in both the Qubership Spark images and the Qubership Spark Operator image:
 
 * The Spark images (driver and executors) use it to read and write `seaweedfs://` paths.
 * The Spark Operator image uses it to upload local application dependencies to `spark.kubernetes.file.upload.path` when that path is a `seaweedfs://` URI.
 
-To connect to SeaweedFS, specify the following properties in the application CR. The filer host and ports below are examples; use the values of your SeaweedFS installation:
+To connect to SeaweedFS, add the following properties to the SparkApplication CR. The filer host and ports shown are examples; replace them with the values for your SeaweedFS deployment:
 
 ```yaml
 spec:
@@ -306,20 +306,26 @@ spec:
     "spark.eventLog.dir": "seaweedfs://seaweedfs-filer.seaweedfs:8888/spark/logs"
     "spark.kubernetes.file.upload.path": "seaweedfs://seaweedfs-filer.seaweedfs:8888/spark/upload"
   hadoopConf:
-    "fs.seaweedfs.impl": seaweed.hdfs.SeaweedFileSystem # mandatory
+    "fs.seaweedfs.impl": seaweed.hdfs.SeaweedFileSystem                     # mandatory
     "fs.AbstractFileSystem.seaweedfs.impl": seaweed.hdfs.SeaweedAbstractFileSystem # mandatory
-    "fs.seaweed.filer.host": seaweedfs-filer.seaweedfs # mandatory
+    "fs.seaweed.filer.host": seaweedfs-filer.seaweedfs                       # mandatory
     "fs.seaweed.filer.port": "8888"
     "fs.seaweed.filer.port.grpc": "18888"
 ```
 
-The client connects to the filer over gRPC (port `18888` by default, filer port plus 10000). The filer must be reachable from the driver and executor pods, and from the Spark Operator pod when it uploads dependencies.
+The client connects to the filer via gRPC (default port `18888`, which is the filer port + 10 000). The filer must be reachable from the driver and executor pods, as well as from the Spark Operator pod when it uploads dependencies.
 
-Spark does not create a missing event log directory, and the application fails at startup with `FileNotFoundException: File does not exist`. Create the directory before you submit the application.
+Spark does **not** automatically create a missing event‑log directory. If the directory does not exist, the application fails at startup with `FileNotFoundException: File does not exist`. Create the directory before submitting the application.
 
-This configuration works with a filer without authentication. If the filer requires authentication, the client reads its settings (gRPC mutual TLS, HTTPS, or Basic Auth for a filer behind a reverse proxy) from a `security.toml` file at `/etc/seaweedfs/security.toml`, `~/.seaweedfs/security.toml`, or `./security.toml`. Mount the file and the certificates it references into the driver and executor pods, and into the Spark Operator pod if it uploads dependencies. For details, see the [SeaweedFS Hadoop client source](https://github.com/seaweedfs/seaweedfs/tree/master/other/java/client/src/main/java/seaweedfs/client).
+This configuration works with a filer that does **not** require authentication. If your filer requires authentication, the client reads its settings (gRPC mutual TLS, HTTPS, or Basic Auth for a filer behind a reverse proxy) from a `security.toml` file located at one of the following paths:
 
-An example of a SeaweedFS configured CR can be viewed in [spark-pi-event-logs-seaweedfs.yaml](examples/app-crs/spark-pi-event-logs-seaweedfs.yaml).
+* `/etc/seaweedfs/security.toml`
+* `~/.seaweedfs/security.toml`
+* `./security.toml`
+
+Mount the `security.toml` file and any referenced certificates into the driver and executor pods, and also into the Spark Operator pod if it uploads dependencies. For implementation details, see the [SeaweedFS Hadoop client source](https://github.com/seaweedfs/seaweedfs/tree/master/other/java/client/src/main/java/seaweedfs/client).
+
+An example of a SeaweedFS‑configured CR can be found in [spark-pi-event-logs-seaweedfs.yaml](examples/app-crs/spark-pi-event-logs-seaweedfs.yaml).
 
 # Enabling Authentication Using OAuth2 Proxy
 
