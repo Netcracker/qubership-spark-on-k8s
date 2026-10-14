@@ -7,10 +7,10 @@ from requests.auth import HTTPBasicAuth
 from pyspark.sql import SparkSession
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger("TrinoSparkDynamicCatalogTest")
+
 
 class TrinoClient:
     """Executes SQL via Trino HTTP REST API directly inside Spark driver."""
@@ -33,10 +33,7 @@ class TrinoClient:
     def execute(self, sql: str):
         url = f"{self.coordinator_url}/v1/statement"
         resp = self.session.post(
-            url,
-            data=sql.strip().encode("utf-8"),
-            headers=self.headers,
-            verify=False
+            url, data=sql.strip().encode("utf-8"), headers=self.headers, verify=False
         )
         if resp.status_code == 401:
             logger.error(f"Trino Auth Failed: {resp.text}")
@@ -44,24 +41,21 @@ class TrinoClient:
         data = resp.json()
 
         result_rows = []
-        columns = []
 
         # Poll nextUri until complete
         while "nextUri" in data:
             if "data" in data and data["data"]:
                 result_rows.extend(data["data"])
-            if "columns" in data and data["columns"]:
-                columns = data["columns"]
 
-            poll_resp = self.session.get(data["nextUri"], headers=self.headers, verify=False)
+            poll_resp = self.session.get(
+                data["nextUri"], headers=self.headers, verify=False
+            )
             poll_resp.raise_for_status()
             data = poll_resp.json()
             time.sleep(0.2)
 
         if "data" in data and data["data"]:
             result_rows.extend(data["data"])
-        if "columns" in data and data["columns"]:
-            columns = data["columns"]
 
         if "error" in data:
             err_msg = data["error"].get("message", "Unknown Trino query error")
@@ -72,12 +66,20 @@ class TrinoClient:
 
 def main():
     # Initialize basic SparkSession
-    spark = SparkSession.builder.appName("spark-trino-dynamic-catalog-e2e").getOrCreate()
+    spark = SparkSession.builder.appName(
+        "spark-trino-dynamic-catalog-e2e"
+    ).getOrCreate()
 
     # Target service FQDNs across namespaces
-    trino_url = os.getenv("TRINO_COORDINATOR_URL", "http://trino-coordinator.trino.svc.cluster.local:8080")
-    hive_thrift_url = os.getenv("HIVE_METASTORE_URI", "thrift://hive-metastore.hive.svc.cluster.local:9083")
-    seaweedfs_s3_url = os.getenv("SEAWEEDFS_S3_ENDPOINT", "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333")
+    trino_url = os.getenv(
+        "TRINO_COORDINATOR_URL", "http://trino-coordinator.trino.svc.cluster.local:8080"
+    )
+    hive_thrift_url = os.getenv(
+        "HIVE_METASTORE_URI", "thrift://hive-metastore.hive.svc.cluster.local:9083"
+    )
+    seaweedfs_s3_url = os.getenv(
+        "SEAWEEDFS_S3_ENDPOINT", "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
+    )
     seaweed_key = os.getenv("SEAWEED_ACCESS_KEY", "admin")
     seaweed_secret = os.getenv("SEAWEED_SECRET_KEY", "admin123")
 
@@ -92,7 +94,9 @@ def main():
         logger.info(f"1. Dropping existing catalog '{catalog_name}' if present...")
         client.execute(f"DROP CATALOG IF EXISTS {catalog_name}")
 
-        logger.info(f"2. Dynamically creating catalog '{catalog_name}' for SeaweedFS...")
+        logger.info(
+            f"2. Dynamically creating catalog '{catalog_name}' for SeaweedFS..."
+        )
         create_catalog_sql = f"""
         CREATE CATALOG {catalog_name} USING hive
         WITH (
@@ -109,7 +113,9 @@ def main():
         logger.info("3. Verifying catalog creation...")
         catalogs = [row[0] for row in client.execute("SHOW CATALOGS")]
         if catalog_name not in catalogs:
-            raise AssertionError(f"Catalog '{catalog_name}' not found in SHOW CATALOGS output: {catalogs}")
+            raise AssertionError(
+                f"Catalog '{catalog_name}' not found in SHOW CATALOGS output: {catalogs}"
+            )
         logger.info(f"Catalog '{catalog_name}' successfully verified in Trino.")
 
         logger.info(f"4. Creating schema '{schema_name}'...")
@@ -119,22 +125,26 @@ def main():
         client.execute(f"DROP TABLE IF EXISTS {full_table}")
 
         logger.info(f"6. Creating table '{full_table}'...")
-        client.execute(f"""
+        client.execute(
+            f"""
             CREATE TABLE {full_table} (
                 id BIGINT,
                 event_name VARCHAR,
                 created_at TIMESTAMP(6)
             )
-        """)
+        """
+        )
 
         logger.info("7. Inserting test records...")
-        client.execute(f"""
+        client.execute(
+            f"""
             INSERT INTO {full_table} (id, event_name, created_at)
             VALUES
                 (1, 'pipeline_started', current_timestamp),
                 (2, 'data_ingested', current_timestamp),
                 (3, 'pipeline_completed', current_timestamp)
-        """)
+        """
+        )
 
         logger.info("8. Verifying row count == 3...")
         count_rows = client.execute(f"SELECT COUNT(*) FROM {full_table}")
@@ -143,14 +153,18 @@ def main():
             raise AssertionError(f"Expected count 3, got: {actual_count}")
 
         logger.info("9. Verifying row content...")
-        data_rows = client.execute(f"SELECT id, event_name FROM {full_table} ORDER BY id")
+        data_rows = client.execute(
+            f"SELECT id, event_name FROM {full_table} ORDER BY id"
+        )
         expected_rows = [
             [1, "pipeline_started"],
             [2, "data_ingested"],
-            [3, "pipeline_completed"]
+            [3, "pipeline_completed"],
         ]
         if data_rows != expected_rows:
-            raise AssertionError(f"Data verification failed! Expected: {expected_rows}, Got: {data_rows}")
+            raise AssertionError(
+                f"Data verification failed! Expected: {expected_rows}, Got: {data_rows}"
+            )
 
         logger.info("All dynamic catalog assertions passed successfully!")
 
