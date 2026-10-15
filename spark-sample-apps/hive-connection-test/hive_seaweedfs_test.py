@@ -102,7 +102,9 @@ def main():
     client = TrinoClient(coordinator_url=trino_url)
 
     try:
-        logger.info("0. Trino nodes answering this test (node_id, uri, version, coordinator):")
+        logger.info(
+            "0. Trino nodes answering this test (node_id, uri, version, coordinator):"
+        )
         for node in client.execute(
             "SELECT node_id, http_uri, node_version, coordinator FROM system.runtime.nodes"
         ):
