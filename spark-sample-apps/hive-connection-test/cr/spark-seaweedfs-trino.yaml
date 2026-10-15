@@ -2,7 +2,7 @@ apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
   name: spark-trino-dynamic-catalog-test
-  namespace: spark
+  namespace: spark-apps
 spec:
   type: Python
   pythonVersion: "3"
@@ -17,13 +17,23 @@ spec:
     onFailureRetryInterval: 10
     onSubmissionFailureRetries: 5
     onSubmissionFailureRetryInterval: 20
+  volumes:
+    - name: java-cacerts-dir
+      emptyDir: {}
+    - name: common-volume
+      emptyDir: {}
+    - name: seaweed-secrets
+      secret:
+        secretName: hive-seaweedfs-test-secret
+
   sparkConf:
     "spark.jars.ivy": "/tmp/.ivy"
+    
     # --- Hive Metastore Config ---
     "spark.sql.hive.metastore.version": "4.0.1"
     "spark.sql.hive.metastore.jars": "path"
     "spark.sql.hive.metastore.jars.path": "/opt/spark/hivejars/*"
-    "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.hive-metastore:9083"
+    "spark.hadoop.hive.metastore.uris": "thrift://hive-metastore.hive-seaweedfs:9083"
     "spark.hadoop.hive.metastore.schema.verification": "false"
     "spark.hadoop.hive.metastore.schema.verification.record.version": "false"
     "spark.hadoop.hive.metastore.use.SSL": "false"
@@ -31,7 +41,6 @@ spec:
     "spark.sql.legacy.createHiveTableByDefault": "false"
 
     # --- SeaweedFS Config ---
-    # Use the same filer host as in WAREHOUSE_URI.
     "spark.hadoop.fs.seaweedfs.impl": "seaweed.hdfs.SeaweedFileSystem"
     "spark.hadoop.fs.AbstractFileSystem.seaweedfs.impl": "seaweed.hdfs.SeaweedAbstractFileSystem"
     "spark.hadoop.fs.seaweed.filer.host": "seaweedfs-filer-external.seaweedfs"
@@ -41,9 +50,9 @@ spec:
     # --- Logs and Timeouts ---
     "spark.kubernetes.submission.connectionTimeout": "60000000"
     "spark.kubernetes.submission.requestTimeout": "60000000"
-    # Added --add-modules to silence the jdk.incubator.vector warning
-    "spark.driver.extraJavaOptions": "--add-modules jdk.incubator.vector"
-    "spark.executor.extraJavaOptions": "--add-modules jdk.incubator.vector"  
+    "spark.driver.extraJavaOptions": "-Djava.io.tmpdir=/tmp --add-modules jdk.incubator.vector"
+    "spark.executor.extraJavaOptions": "-Djava.io.tmpdir=/tmp --add-modules jdk.incubator.vector"
+
   driver:
     env:
       - name: TRINO_COORDINATOR_URL
@@ -51,11 +60,11 @@ spec:
       - name: HIVE_METASTORE_URI
         value: "thrift://hive-metastore.hive-seaweedfs.svc.cluster.local:9083"
       - name: SEAWEEDFS_S3_ENDPOINT
-        value: "https://adminseaweedfs.saas-rnd-bdt-01.managed.netcracker.cloud"
-      - name: SEAWEED_ACCESS_KEY
-        value: "admin"
-      - name: SEAWEED_SECRET_KEY
-        value: "admin"
+        value: "https://s3seaweedfs.saas-rnd-bdt-01.managed.netcracker.cloud"
+      - name: TRINO_S3_ENDPOINT
+        value: "http://seaweedfs-filer-external.seaweedfs.svc.cluster.local:9000"
+      - name: SEAWEED_WAREHOUSE_URI
+        value: "s3a://warehouse"
     cores: 1
     coreLimit: "1200m"
     memory: "512m"
@@ -69,31 +78,21 @@ spec:
       readOnlyRootFilesystem: true
       runAsNonRoot: true
       runAsUser: 185
+      fsGroup: 185
       capabilities:
         drop:
           - ALL
     volumeMounts:
       - name: java-cacerts-dir
         mountPath: /java-security
-      # The test reads its parameters from /etc/s3-secrets, the same path the S3 variant uses.
-      - name: test-secrets
-        mountPath: "/etc/s3-secrets"
+      - name: seaweed-secrets
+        mountPath: /etc/s3-secrets
         readOnly: true
       - name: common-volume
         mountPath: /tmp
         subPath: tmp
+
   executor:
-    env:
-      - name: TRINO_COORDINATOR_URL
-        value: "http://trino-coordinator.trino.svc.cluster.local:8080"
-      - name: HIVE_METASTORE_URI
-        value: "thrift://hive-metastore.hive.svc.cluster.local:9083"
-      - name: SEAWEEDFS_S3_ENDPOINT
-        value: "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
-      - name: SEAWEED_ACCESS_KEY
-        value: "<SEAWEED_ACCESS_KEY>"
-      - name: SEAWEED_SECRET_KEY
-        value: "<SEAWEED_SECRET_KEY>"
     cores: 1
     instances: 1
     memory: "512m"
@@ -106,16 +105,13 @@ spec:
       readOnlyRootFilesystem: true
       runAsNonRoot: true
       runAsUser: 185
+      fsGroup: 185
       capabilities:
         drop:
           - ALL
     volumeMounts:
       - name: java-cacerts-dir
         mountPath: /java-security
-      - name: test-secrets
-        mountPath: "/etc/s3-secrets"
-        readOnly: true
       - name: common-volume
         mountPath: /tmp
         subPath: tmp
-  

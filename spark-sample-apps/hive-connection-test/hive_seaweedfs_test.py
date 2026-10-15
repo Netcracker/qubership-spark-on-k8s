@@ -3,8 +3,12 @@ import sys
 import time
 import logging
 import requests
+import urllib3
 from requests.auth import HTTPBasicAuth
 from pyspark.sql import SparkSession
+
+# TLS verification is intentionally disabled for the internal endpoints
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
@@ -64,13 +68,20 @@ class TrinoClient:
         return result_rows
 
 
+def get_secret(key_name):
+    """Reads a value from the Secret files mounted at /etc/s3-secrets."""
+    path = f"/etc/s3-secrets/{key_name}"
+    try:
+        with open(path, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        raise RuntimeError(f"Secret file {path} not found; is the Secret mounted?")
+
+
 def main():
-    # Initialize basic SparkSession
     spark = SparkSession.builder.appName(
         "spark-trino-dynamic-catalog-e2e"
     ).getOrCreate()
-
-    # Target service FQDNs across namespaces
     trino_url = os.getenv(
         "TRINO_COORDINATOR_URL", "http://trino-coordinator.trino.svc.cluster.local:8080"
     )
@@ -80,13 +91,20 @@ def main():
     seaweedfs_s3_url = os.getenv(
         "SEAWEEDFS_S3_ENDPOINT", "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
     )
-    seaweed_key = os.getenv("SEAWEED_ACCESS_KEY", "admin")
-    seaweed_secret = os.getenv("SEAWEED_SECRET_KEY", "admin123")
+    trino_s3_url = os.getenv("TRINO_S3_ENDPOINT", seaweedfs_s3_url)
+    seaweed_key = get_secret("SEAWEED_ACCESS_KEY")
+    seaweed_secret = get_secret("SEAWEED_SECRET_KEY")
+    seaweed_region = os.getenv("SEAWEED_REGION", "us-east-1")
+    warehouse_uri = os.getenv(
+        "SEAWEED_WAREHOUSE_URI",
+        "seaweedfs://seaweedfs-filer-external.seaweedfs:8888/warehouse",
+    ).rstrip("/")
 
     catalog_name = "seaweed_hive"
-    schema_name = "test_schema"
+    schema_name = "test_schema_s3"
     table_name = "pipeline_events"
     full_table = f"{catalog_name}.{schema_name}.{table_name}"
+    schema_location = f"{warehouse_uri}/{schema_name}"
 
     client = TrinoClient(coordinator_url=trino_url)
 
@@ -101,11 +119,13 @@ def main():
         CREATE CATALOG {catalog_name} USING hive
         WITH (
             "hive.metastore.uri" = '{hive_thrift_url}',
-            "hive.s3.endpoint" = '{seaweedfs_s3_url}',
-            "hive.s3.aws-access-key" = '{seaweed_key}',
-            "hive.s3.aws-secret-key" = '{seaweed_secret}',
-            "hive.s3.path-style-access" = 'true',
-            "hive.s3.ssl.enabled" = 'false'
+            "hive.non-managed-table-writes-enabled" = 'true',
+            "fs.native-s3.enabled" = 'true',
+            "s3.endpoint" = '{trino_s3_url}',
+            "s3.region" = '{seaweed_region}',
+            "s3.aws-access-key" = '{seaweed_key}',
+            "s3.aws-secret-key" = '{seaweed_secret}',
+            "s3.path-style-access" = 'true'
         )
         """
         client.execute(create_catalog_sql)
@@ -118,8 +138,11 @@ def main():
             )
         logger.info(f"Catalog '{catalog_name}' successfully verified in Trino.")
 
-        logger.info(f"4. Creating schema '{schema_name}'...")
-        client.execute(f"CREATE SCHEMA IF NOT EXISTS {catalog_name}.{schema_name}")
+        logger.info(f"4. Creating schema '{schema_name}' at '{schema_location}'...")
+        client.execute(
+            f"CREATE SCHEMA IF NOT EXISTS {catalog_name}.{schema_name} "
+            f"WITH (location = '{schema_location}')"
+        )
 
         logger.info(f"5. Dropping old table '{full_table}' if exists...")
         client.execute(f"DROP TABLE IF EXISTS {full_table}")
@@ -130,7 +153,7 @@ def main():
             CREATE TABLE {full_table} (
                 id BIGINT,
                 event_name VARCHAR,
-                created_at TIMESTAMP(6)
+                created_at TIMESTAMP(3)
             )
         """
         )
@@ -153,9 +176,14 @@ def main():
             raise AssertionError(f"Expected count 3, got: {actual_count}")
 
         logger.info("9. Verifying row content...")
-        data_rows = client.execute(
-            f"SELECT id, event_name FROM {full_table} ORDER BY id"
+        table_rows = client.execute(
+            f"SELECT id, event_name, created_at FROM {full_table} ORDER BY id"
         )
+        logger.info(f"Data in {full_table}:")
+        logger.info(f"  {'id':<4} | {'event_name':<20} | created_at")
+        for row_id, event_name, created_at in table_rows:
+            logger.info(f"  {row_id:<4} | {event_name:<20} | {created_at}")
+        data_rows = [row[:2] for row in table_rows]
         expected_rows = [
             [1, "pipeline_started"],
             [2, "data_ingested"],
