@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
+  image: "artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:seaweedfs_test"
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/spark/examples/hive_seaweedfs_test.py
   sparkVersion: "4.2.0"
@@ -22,9 +22,6 @@ spec:
       emptyDir: {}
     - name: common-volume
       emptyDir: {}
-    - name: seaweed-secrets
-      secret:
-        secretName: hive-seaweedfs-test-secret
 
   sparkConf:
     "spark.jars.ivy": "/tmp/.ivy"
@@ -59,12 +56,8 @@ spec:
         value: "https://trino.saas-rnd-bdt-01.managed.netcracker.cloud"
       - name: HIVE_METASTORE_URI
         value: "thrift://hive-metastore.hive-seaweedfs.svc.cluster.local:9083"
-      - name: SEAWEEDFS_S3_ENDPOINT
-        value: "https://s3seaweedfs.saas-rnd-bdt-01.managed.netcracker.cloud"
-      - name: TRINO_S3_ENDPOINT
-        value: "http://seaweedfs-filer-external.seaweedfs.svc.cluster.local:9000"
       - name: SEAWEED_WAREHOUSE_URI
-        value: "s3a://warehouse"
+        value: "seaweedfs://seaweedfs-filer-external.seaweedfs:8888/warehouse"
     cores: 1
     coreLimit: "1200m"
     memory: "512m"
@@ -85,9 +78,6 @@ spec:
     volumeMounts:
       - name: java-cacerts-dir
         mountPath: /java-security
-      - name: seaweed-secrets
-        mountPath: /etc/s3-secrets
-        readOnly: true
       - name: common-volume
         mountPath: /tmp
         subPath: tmp

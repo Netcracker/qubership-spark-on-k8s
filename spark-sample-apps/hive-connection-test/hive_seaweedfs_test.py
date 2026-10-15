@@ -63,19 +63,17 @@ class TrinoClient:
 
         if "error" in data:
             err_msg = data["error"].get("message", "Unknown Trino query error")
+            # Trino often wraps the real error (e.g. "Invalid location URI"); include the causes
+            causes = []
+            info = data["error"].get("failureInfo")
+            while info:
+                causes.append(f"{info.get('type')}: {info.get('message')}")
+                info = info.get("cause")
+            if causes:
+                err_msg += "\n  Caused by chain:\n    " + "\n    ".join(causes)
             raise RuntimeError(f"Trino execution failed for SQL [{sql}]: {err_msg}")
 
         return result_rows
-
-
-def get_secret(key_name):
-    """Reads a value from the Secret files mounted at /etc/s3-secrets."""
-    path = f"/etc/s3-secrets/{key_name}"
-    try:
-        with open(path, "r") as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        raise RuntimeError(f"Secret file {path} not found; is the Secret mounted?")
 
 
 def main():
@@ -88,13 +86,8 @@ def main():
     hive_thrift_url = os.getenv(
         "HIVE_METASTORE_URI", "thrift://hive-metastore.hive.svc.cluster.local:9083"
     )
-    seaweedfs_s3_url = os.getenv(
-        "SEAWEEDFS_S3_ENDPOINT", "http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333"
-    )
-    trino_s3_url = os.getenv("TRINO_S3_ENDPOINT", seaweedfs_s3_url)
-    seaweed_key = get_secret("SEAWEED_ACCESS_KEY")
-    seaweed_secret = get_secret("SEAWEED_SECRET_KEY")
-    seaweed_region = os.getenv("SEAWEED_REGION", "us-east-1")
+    # Path of the Hadoop config (defining fs.seaweedfs.impl) inside the Trino pods
+    trino_core_site = os.getenv("TRINO_CORE_SITE_PATH", "/etc/trino/core-site.xml")
     warehouse_uri = os.getenv(
         "SEAWEED_WAREHOUSE_URI",
         "seaweedfs://seaweedfs-filer-external.seaweedfs:8888/warehouse",
@@ -109,23 +102,27 @@ def main():
     client = TrinoClient(coordinator_url=trino_url)
 
     try:
+        logger.info("0. Trino nodes answering this test (node_id, uri, version, coordinator):")
+        for node in client.execute(
+            "SELECT node_id, http_uri, node_version, coordinator FROM system.runtime.nodes"
+        ):
+            logger.info(f"  {node}")
+
         logger.info(f"1. Dropping existing catalog '{catalog_name}' if present...")
         client.execute(f"DROP CATALOG IF EXISTS {catalog_name}")
 
         logger.info(
             f"2. Dynamically creating catalog '{catalog_name}' for SeaweedFS..."
         )
+        # seaweedfs:// locations are opened through Trino's Hadoop filesystem support with the
+        # SeaweedFS client, which needs the Hadoop config that registers the scheme.
         create_catalog_sql = f"""
         CREATE CATALOG {catalog_name} USING hive
         WITH (
             "hive.metastore.uri" = '{hive_thrift_url}',
             "hive.non-managed-table-writes-enabled" = 'true',
-            "fs.native-s3.enabled" = 'true',
-            "s3.endpoint" = '{trino_s3_url}',
-            "s3.region" = '{seaweed_region}',
-            "s3.aws-access-key" = '{seaweed_key}',
-            "s3.aws-secret-key" = '{seaweed_secret}',
-            "s3.path-style-access" = 'true'
+            "fs.hadoop.enabled" = 'true',
+            "hive.config.resources" = '{trino_core_site}'
         )
         """
         client.execute(create_catalog_sql)
