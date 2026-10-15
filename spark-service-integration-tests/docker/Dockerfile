@@ -14,6 +14,7 @@ COPY docs/public/examples/app-crs/spark-pi.yaml  ${ROBOT_HOME}/tests/test-app
 COPY docs/public/examples/app-crs/spark-pi-long-run.yaml  ${ROBOT_HOME}/tests/test-app
 COPY docs/public/examples/app-crs/spark-pi-event-logs-s3.yaml  ${ROBOT_HOME}/tests/test-app
 COPY spark-sample-apps/hive-connection-test/cr/spark-hive-connection-app.yaml ${ROBOT_HOME}/tests/test-app/
+COPY spark-sample-apps/hive-connection-test/cr/spark-seaweedfs-trino.yaml ${ROBOT_HOME}/tests/test-app/
 # ToDo add examples copy
 
 RUN set -x \
