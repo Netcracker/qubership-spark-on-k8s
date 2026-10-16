@@ -100,6 +100,23 @@ The `spark-integration-tests.sparkHiveIntegrationTests.enabled` - parameter spec
 
 The `spark-integration-tests.sparkHiveIntegrationTests.sparkHiveImage` - paramter specifies the Docker image for Spark-Hive connection integration test.
 
+The `spark-integration-tests.trinoSeaweedfsIntegrationTests.enabled` - parameter specifies if the Spark-Trino-Hive-SeaweedFS integration test needs to run. The default value is `false`. The test starts a Spark application that, through Trino, creates a dynamic catalog on the Hive Metastore, creates a schema and a table located in SeaweedFS (`seaweedfs://`), inserts rows, reads them back, and cleans up. It uses the image from `sparkHiveIntegrationTests.sparkHiveImage`.
+
+When the test is enabled, set these parameters:
+
+| Parameter | Description | Example |
+|---|---|---|
+| `trinoSeaweedfsIntegrationTests.trinoCoordinatorUrl` | Trino coordinator URL reachable from the Spark driver | `http://trino.trino.svc.cluster.local:8080` |
+| `trinoSeaweedfsIntegrationTests.hiveMetastoreUri` | Hive Metastore thrift URI used by the Trino catalog | `thrift://hive-metastore.hive-seaweedfs.svc.cluster.local:9083` |
+| `trinoSeaweedfsIntegrationTests.warehouseUri` | SeaweedFS location under which the test schema is created | `seaweedfs://seaweedfs-filer-external.seaweedfs:8888/warehouse` |
+
+**Note** Before enabling `trinoSeaweedfsIntegrationTests.enabled`, ensure that:
+
+* Trino uses the Qubership Trino image with the SeaweedFS client and has `/etc/trino/core-site.xml` registering the `seaweedfs` scheme on the coordinator and on every worker. See "Using SeaweedFS with the Hive Connection" in the Trino installation guide.
+* Trino can run as a user that has an `/etc/passwd` entry, and it can reach the SeaweedFS filer over HTTP (`8888`) and gRPC (`18888`).
+* Trino has dynamic catalog management enabled (`catalog.management=dynamic`).
+* The Hive Metastore supports `seaweedfs://` and is accessible from Trino.
+
 
 
 ## Manual Deployment

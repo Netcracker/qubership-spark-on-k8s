@@ -27,10 +27,10 @@ RUN rm -f /opt/spark/hivejars/log4j-slf4j-impl-*.jar \
            /opt/spark/hivejars/log4j-1.2-api-*.jar \
            /opt/spark/hivejars/bundle-*.jar
 
-COPY --chown=spark:spark spark_hive_test.py delete_s3.py ./
+COPY --chown=spark:spark spark_hive_test.py delete_s3.py hive_seaweedfs_test.py ./
 
 RUN chmod 755 *.py
 
-RUN python3 -m pip install --no-cache-dir boto3==1.39.3
+RUN python3 -m pip install --no-cache-dir boto3==1.39.3 requests
 
 USER spark

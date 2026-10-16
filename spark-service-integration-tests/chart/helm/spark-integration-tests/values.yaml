@@ -52,3 +52,12 @@ volcanoIntegrationTests:
 sparkHiveIntegrationTests:
   enabled: false
   sparkHiveImage: ghcr.io/netcracker/qubership-tests-spark-hive-connection:main
+# Spark -> Trino -> Hive Metastore -> SeaweedFS test. Uses sparkHiveIntegrationTests.sparkHiveImage.
+trinoSeaweedfsIntegrationTests:
+  enabled: false
+  # Trino coordinator URL reachable from the Spark driver, e.g. http://trino.trino.svc.cluster.local:8080
+  trinoCoordinatorUrl: ""
+  # Hive Metastore thrift URI, e.g. thrift://hive-metastore.hive-seaweedfs.svc.cluster.local:9083
+  hiveMetastoreUri: ""
+  # SeaweedFS warehouse location for the test schema, e.g. seaweedfs://seaweedfs-filer.seaweedfs:8888/warehouse
+  warehouseUri: ""
