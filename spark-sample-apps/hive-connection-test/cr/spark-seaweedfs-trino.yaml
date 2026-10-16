@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: "artifactorycn.netcracker.com:17152/netcracker/qubership-tests-spark-hive-connection:seaweedfs_test"
+  image: "ghcr.io/netcracker/qubership-tests-spark-hive-connection:main"
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/spark/examples/hive_seaweedfs_test.py
   sparkVersion: "4.2.0"
@@ -51,13 +51,6 @@ spec:
     "spark.executor.extraJavaOptions": "-Djava.io.tmpdir=/tmp --add-modules jdk.incubator.vector"
 
   driver:
-    env:
-      - name: TRINO_COORDINATOR_URL
-        value: "https://trino.saas-rnd-bdt-01.managed.netcracker.cloud"
-      - name: HIVE_METASTORE_URI
-        value: "thrift://hive-metastore.hive-seaweedfs.svc.cluster.local:9083"
-      - name: SEAWEED_WAREHOUSE_URI
-        value: "seaweedfs://seaweedfs-filer-external.seaweedfs:8888/warehouse"
     cores: 1
     coreLimit: "1200m"
     memory: "512m"

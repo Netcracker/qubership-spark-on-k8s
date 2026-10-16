@@ -80,18 +80,11 @@ def main():
     spark = SparkSession.builder.appName(
         "spark-trino-dynamic-catalog-e2e"
     ).getOrCreate()
-    trino_url = os.getenv(
-        "TRINO_COORDINATOR_URL", "http://trino-coordinator.trino.svc.cluster.local:8080"
-    )
-    hive_thrift_url = os.getenv(
-        "HIVE_METASTORE_URI", "thrift://hive-metastore.hive.svc.cluster.local:9083"
-    )
+    trino_url = os.getenv("TRINO_COORDINATOR_URL")
+    hive_thrift_url = os.getenv("HIVE_METASTORE_URI")
     # Path of the Hadoop config (defining fs.seaweedfs.impl) inside the Trino pods
-    trino_core_site = os.getenv("TRINO_CORE_SITE_PATH", "/etc/trino/core-site.xml")
-    warehouse_uri = os.getenv(
-        "SEAWEED_WAREHOUSE_URI",
-        "seaweedfs://seaweedfs-filer-external.seaweedfs:8888/warehouse",
-    ).rstrip("/")
+    trino_core_site = "/etc/trino/core-site.xml"
+    warehouse_uri = os.getenv("SEAWEED_WAREHOUSE_URI").rstrip("/")
 
     catalog_name = "seaweed_hive"
     schema_name = "test_schema_s3"
