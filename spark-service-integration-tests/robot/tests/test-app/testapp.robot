@@ -5,10 +5,7 @@ ${BASE_APP_IMAGE}             %{BASE_APP_IMAGE}
 ${BASE_PY_APP_IMAGE}          %{BASE_PY_APP_IMAGE}
 ${SPARK_HIVE_IMAGE}           %{SPARK_HIVE_IMAGE}
 ${SPARK_HIVE_INTEGRATION_TESTS_ENABLED}  %{SPARK_HIVE_INTEGRATION_TESTS_ENABLED}
-${TRINO_SEAWEEDFS_INTEGRATION_TESTS_ENABLED}  %{TRINO_SEAWEEDFS_INTEGRATION_TESTS_ENABLED=false}
-${TRINO_SEAWEEDFS_TEST_TRINO_URL}       %{TRINO_SEAWEEDFS_TEST_TRINO_URL=}
-${TRINO_SEAWEEDFS_TEST_METASTORE_URI}   %{TRINO_SEAWEEDFS_TEST_METASTORE_URI=}
-${TRINO_SEAWEEDFS_TEST_WAREHOUSE_URI}   %{TRINO_SEAWEEDFS_TEST_WAREHOUSE_URI=}
+${SPARK_HIVE_SEAWEEDFS_INTEGRATION_TESTS_ENABLED}  %{SPARK_HIVE_SEAWEEDFS_INTEGRATION_TESTS_ENABLED=false}
 ${VOLCANO_INTEGRATION_TESTS_ENABLED}     %{VOLCANO_INTEGRATION_TESTS_ENABLED}
 ${MANAGED_BY_OPERATOR}        true
 ${PLURAL}                     sparkapplications
@@ -30,16 +27,13 @@ Library  ../lib/jsonObject.py
 
 *** Keywords ***
 Create CR For Spark Application
-    [Arguments]  ${APP_IMAGE}  ${PATH_TO_APP}  ${VOLCANO}=False  ${DRIVER_ENV}=${None}
+    [Arguments]  ${APP_IMAGE}  ${PATH_TO_APP}  ${VOLCANO}=False
 
     ${body}=    Update App Yaml
     ...    app_image=${APP_IMAGE}
     ...    path_to_app=${PATH_TO_APP}
     ...    sa_name=${SPARK_APPS_SERVICEACCOUNT}
     ...    use_volcano=${VOLCANO}
-    IF    $DRIVER_ENV is not None
-        ${body}=    Set Driver Env    ${body}    ${DRIVER_ENV}
-    END
 
     Create Namespaced Custom Object  ${GROUP}  ${VERSION}  ${SPARK_APPS_NAMESPACE}  ${PLURAL}  ${body}
     Log To Console  \nSpark App is created!
@@ -124,26 +118,20 @@ Run Spark to Hive Connection Application
 
     Log To Console  Spark to Hive connection application is completed
 
-Run Spark to Trino Hive SeaweedFS Application
-    [Tags]  hive-trino-seaweedfs  test_app
-    [Teardown]  Delete CR If Exists  spark-trino-dynamic-catalog-test-integration-tests
-    Skip If    '${TRINO_SEAWEEDFS_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Spark-Trino-Hive-SeaweedFS integration test since it is disabled.
-    Should Not Be Empty    ${TRINO_SEAWEEDFS_TEST_TRINO_URL}    trinoCoordinatorUrl is not set for trinoSeaweedfsIntegrationTests
-    Should Not Be Empty    ${TRINO_SEAWEEDFS_TEST_METASTORE_URI}    hiveMetastoreUri is not set for trinoSeaweedfsIntegrationTests
-    Should Not Be Empty    ${TRINO_SEAWEEDFS_TEST_WAREHOUSE_URI}    warehouseUri is not set for trinoSeaweedfsIntegrationTests
+Run Spark to Hive SeaweedFS Connection Application
+    [Tags]  hive-seaweedfs  test_app
+    Skip If    '${SPARK_HIVE_SEAWEEDFS_INTEGRATION_TESTS_ENABLED}' == 'false'    Skipping Spark-Hive-SeaweedFS integration test since it is disabled.
+    [Teardown]  Run Keywords   Delete CR If Exists  spark-hive-test-seaweedfs-integration-tests
+    ...    AND    Delete Kubernetes Secret    seaweedfs-secrets
 
-    ${driver_env}=    Create Dictionary
-    ...    TRINO_COORDINATOR_URL=${TRINO_SEAWEEDFS_TEST_TRINO_URL}
-    ...    HIVE_METASTORE_URI=${TRINO_SEAWEEDFS_TEST_METASTORE_URI}
-    ...    SEAWEED_WAREHOUSE_URI=${TRINO_SEAWEEDFS_TEST_WAREHOUSE_URI}
-    Create CR For Spark Application  ${SPARK_HIVE_IMAGE}  tests/test-app/spark-seaweedfs-trino.yaml  DRIVER_ENV=${driver_env}
+    Create CR For Spark Application  ${SPARK_HIVE_IMAGE}  tests/test-app/spark-hive-connection-seaweedfs.yaml
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
-    ...  Check Status CR  spark-trino-dynamic-catalog-test-integration-tests  RUNNING
-    Log To Console  Spark to Trino Hive SeaweedFS application is running
+    ...  Check Status CR  spark-hive-test-seaweedfs-integration-tests  RUNNING
+    Log To Console  Spark to Hive SeaweedFS connection application is running
     Wait Until Keyword Succeeds  ${COUNT_OF_RETRY}  ${RETRY_INTERVAL}
-    ...  Check Status CR  spark-trino-dynamic-catalog-test-integration-tests  COMPLETED
+    ...  Check Status CR  spark-hive-test-seaweedfs-integration-tests  COMPLETED
 
-    Log To Console  Spark to Trino Hive SeaweedFS application is completed
+    Log To Console  Spark to Hive SeaweedFS connection application is completed
 
 Run Dual Volcano Scheduled Applications
     [Tags]    volcano    dual_test

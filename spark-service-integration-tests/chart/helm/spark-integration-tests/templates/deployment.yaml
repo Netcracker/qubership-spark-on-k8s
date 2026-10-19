@@ -79,14 +79,8 @@ spec:
             {{- end }}
             - name: SPARK_HIVE_INTEGRATION_TESTS_ENABLED
               value: {{ .Values.sparkHiveIntegrationTests.enabled | default "false" | quote }}
-            - name: TRINO_SEAWEEDFS_INTEGRATION_TESTS_ENABLED
-              value: {{ .Values.trinoSeaweedfsIntegrationTests.enabled | default "false" | quote }}
-            - name: TRINO_SEAWEEDFS_TEST_TRINO_URL
-              value: {{ .Values.trinoSeaweedfsIntegrationTests.trinoCoordinatorUrl | default "" | quote }}
-            - name: TRINO_SEAWEEDFS_TEST_METASTORE_URI
-              value: {{ .Values.trinoSeaweedfsIntegrationTests.hiveMetastoreUri | default "" | quote }}
-            - name: TRINO_SEAWEEDFS_TEST_WAREHOUSE_URI
-              value: {{ .Values.trinoSeaweedfsIntegrationTests.warehouseUri | default "" | quote }}
+            - name: SPARK_HIVE_SEAWEEDFS_INTEGRATION_TESTS_ENABLED
+              value: {{ .Values.sparkHiveSeaweedfsIntegrationTests.enabled | default "false" | quote }}
             - name: VOLCANO_INTEGRATION_TESTS_ENABLED
               value: {{ .Values.volcanoIntegrationTests.enabled | default "false" | quote }}
           resources:

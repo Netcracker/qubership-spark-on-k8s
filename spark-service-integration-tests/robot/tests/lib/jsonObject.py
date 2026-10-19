@@ -47,19 +47,6 @@ def update_app_yaml(
     return data
 
 
-def set_driver_env(data, env):
-    """Sets (or adds) environment variables in the driver of a SparkApplication body."""
-    driver_env = data["spec"]["driver"].setdefault("env", [])
-    for name, value in env.items():
-        for item in driver_env:
-            if item["name"] == name:
-                item["value"] = value
-                break
-        else:
-            driver_env.append({"name": name, "value": value})
-    return data
-
-
 reduced_resources = dict(
     requests=dict(cpu="1m", memory="1Mi"), limits=dict(cpu="1m", memory="1Mi")
 )

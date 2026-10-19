@@ -19,6 +19,17 @@ rules:
       - get
       - delete
 {{- end }}      
+{{- if .Values.sparkHiveSeaweedfsIntegrationTests.enabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    resourceNames:
+      - "seaweedfs-secrets"
+    verbs:
+      - get
+      - delete
+{{- end }}
 {{- if .Values.volcanoIntegrationTests.enabled }}
   - apiGroups: 
       - scheduling.volcano.sh
