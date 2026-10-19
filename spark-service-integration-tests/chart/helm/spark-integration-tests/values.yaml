@@ -52,3 +52,10 @@ volcanoIntegrationTests:
 sparkHiveIntegrationTests:
   enabled: false
   sparkHiveImage: ghcr.io/netcracker/qubership-tests-spark-hive-connection:main
+# Spark -> Hive Metastore -> SeaweedFS test. Uses sparkHiveIntegrationTests.sparkHiveImage.
+sparkHiveSeaweedfsIntegrationTests:
+  enabled: false
+  # SeaweedFS warehouse location, e.g. seaweedfs://seaweedfs-filer-external.seaweedfs:8888/hive/warehouse
+  warehouseUri: ""
+  dbName: test-db
+  tableName: test-table

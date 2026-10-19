@@ -79,6 +79,8 @@ spec:
             {{- end }}
             - name: SPARK_HIVE_INTEGRATION_TESTS_ENABLED
               value: {{ .Values.sparkHiveIntegrationTests.enabled | default "false" | quote }}
+            - name: SPARK_HIVE_SEAWEEDFS_INTEGRATION_TESTS_ENABLED
+              value: {{ .Values.sparkHiveSeaweedfsIntegrationTests.enabled | default "false" | quote }}
             - name: VOLCANO_INTEGRATION_TESTS_ENABLED
               value: {{ .Values.volcanoIntegrationTests.enabled | default "false" | quote }}
           resources:

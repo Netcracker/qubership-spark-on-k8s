@@ -195,6 +195,31 @@
         }
       }
     },
+    "sparkHiveSeaweedfsIntegrationTests": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to enable the Spark-Hive-SeaweedFS integration test. If true, a Spark application connects to the Hive Metastore and writes and reads a table stored in SeaweedFS. If false, the test is skipped. Uses sparkHiveIntegrationTests.sparkHiveImage."
+        },
+        "warehouseUri": {
+          "type": "string",
+          "default": "",
+          "description": "SeaweedFS (seaweedfs://) warehouse location used by the test."
+        },
+        "dbName": {
+          "type": "string",
+          "default": "test-db",
+          "description": "Database name used by the test."
+        },
+        "tableName": {
+          "type": "string",
+          "default": "test-table",
+          "description": "Table name used by the test."
+        }
+      }
+    },
     "PAAS_PLATFORM": {
       "type": "string",
       "description": "The PaaS platform where spark is being deployed to."
