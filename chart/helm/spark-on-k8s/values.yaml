@@ -59,6 +59,15 @@ appServiceMonitor:
   enable: false
 spark-history-server:
   enabled: false
+  # Platform-wide Gateway API switch. Passed to the subchart so it can decide between Ingress and HTTPRoute.
+  GATEWAY_SYSTEM_TYPE: "legacy-ingress"
+  GATEWAY_SYSTEM_NAME: "default-external-gateway"
+  GATEWAY_SYSTEM_NAMESPACE: "gateway-system"
+  # Let GATEWAY_SYSTEM_TYPE decide between Ingress and HTTPRoute.
+  ingress:
+    enabled: null
+  gateway:
+    enabled: null
   openShift:
     omit: true
   securityContext:
@@ -70,6 +79,11 @@ spark-history-server:
     seccompProfile:
       type: RuntimeDefault
   oauth2Proxy:
+    # Let GATEWAY_SYSTEM_TYPE decide between Ingress and HTTPRoute for the OAuth2 Proxy.
+    ingress:
+      enabled: null
+    gateway:
+      enabled: null
     securityContext:
       enabled: true
       allowPrivilegeEscalation: false

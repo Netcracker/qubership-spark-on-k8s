@@ -57,6 +57,82 @@ History server replicas
 {{- end -}}
 
 {{/*
+Whether to render the legacy Ingress resource. Uses .Values.ingress.enabled when explicitly set
+(true/false); otherwise falls back to whether GATEWAY_SYSTEM_TYPE contains "legacy-ingress",
+or, when GATEWAY_SYSTEM_TYPE is not set, to whether Gateway API CRDs are NOT available in
+ the cluster.
+*/}}
+{{- define "spark-history-server.ingressEnabled" -}}
+{{- if eq .Values.ingress.enabled nil -}}
+{{- $gatewayType := .Values.GATEWAY_SYSTEM_TYPE | default "" | toString -}}
+{{- if $gatewayType -}}
+{{- contains "legacy-ingress" $gatewayType -}}
+{{- else -}}
+{{- not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1") -}}
+{{- end -}}
+{{- else -}}
+{{- .Values.ingress.enabled -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether to render the Gateway API HTTPRoute resources. Uses .Values.gateway.enabled when
+explicitly set (true/false); otherwise falls back to whether GATEWAY_SYSTEM_TYPE contains
+"gateway-api-default", or, when GATEWAY_SYSTEM_TYPE is not set, to whether Gateway API CRDs
+are available in the cluster.
+*/}}
+{{- define "spark-history-server.gatewayEnabled" -}}
+{{- if eq .Values.gateway.enabled nil -}}
+{{- $gatewayType := .Values.GATEWAY_SYSTEM_TYPE | default "" | toString -}}
+{{- if $gatewayType -}}
+{{- contains "gateway-api-default" $gatewayType -}}
+{{- else -}}
+{{- .Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1" -}}
+{{- end -}}
+{{- else -}}
+{{- .Values.gateway.enabled -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether to render the OAuth2 Proxy legacy Ingress resource. Uses .Values.oauth2Proxy.ingress.enabled
+when explicitly set (true/false); otherwise falls back to whether GATEWAY_SYSTEM_TYPE contains
+"legacy-ingress", or, when GATEWAY_SYSTEM_TYPE is not set, to whether Gateway API CRDs are NOT
+available in the cluster.
+*/}}
+{{- define "spark-history-server.oauth2Proxy.ingressEnabled" -}}
+{{- if eq .Values.oauth2Proxy.ingress.enabled nil -}}
+{{- $gatewayType := .Values.GATEWAY_SYSTEM_TYPE | default "" | toString -}}
+{{- if $gatewayType -}}
+{{- contains "legacy-ingress" $gatewayType -}}
+{{- else -}}
+{{- not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1") -}}
+{{- end -}}
+{{- else -}}
+{{- .Values.oauth2Proxy.ingress.enabled -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Whether to render the OAuth2 Proxy Gateway API HTTPRoute resources. Uses .Values.oauth2Proxy.gateway.enabled
+when explicitly set (true/false); otherwise falls back to whether GATEWAY_SYSTEM_TYPE contains
+"gateway-api-default", or, when GATEWAY_SYSTEM_TYPE is not set, to whether Gateway API CRDs are available
+in the cluster.
+*/}}
+{{- define "spark-history-server.oauth2Proxy.gatewayEnabled" -}}
+{{- if eq .Values.oauth2Proxy.gateway.enabled nil -}}
+{{- $gatewayType := .Values.GATEWAY_SYSTEM_TYPE | default "" | toString -}}
+{{- if $gatewayType -}}
+{{- contains "gateway-api-default" $gatewayType -}}
+{{- else -}}
+{{- .Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1" -}}
+{{- end -}}
+{{- else -}}
+{{- .Values.oauth2Proxy.gateway.enabled -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Selector labels
 */}}
 {{- define "selector_labels_shs" -}}

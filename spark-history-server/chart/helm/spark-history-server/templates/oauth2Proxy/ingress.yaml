@@ -1,5 +1,6 @@
 {{- if .Values.oauth2Proxy.enabled }}
-{{- if .Values.oauth2Proxy.ingress.enabled -}}
+{{- /* Qubership custom change: when oauth2Proxy.ingress.enabled is null, GATEWAY_SYSTEM_TYPE decides whether the Ingress is created */}}
+{{- if eq (include "spark-history-server.oauth2Proxy.ingressEnabled" .) "true" -}}
 {{- $serviceName := include "oauth2-proxy.fullname" . -}}
 {{- $servicePort := .Values.oauth2Proxy.service.portNumber -}}
 {{- $ingressPath := .Values.oauth2Proxy.ingress.path -}}
