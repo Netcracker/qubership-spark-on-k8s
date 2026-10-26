@@ -52,7 +52,7 @@ service:
 
 ingress:
   # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "legacy-ingress").
-  enabled: false
+  enabled: ~
   host: spark-history-server.your.cloud.qubership.org
   path: /
     # kubernetes.io/ingress.class: nginx
@@ -160,7 +160,7 @@ oauth2Proxy:
   enabled: false
   gateway:
     # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "gateway-api-default").
-    enabled: false
+    enabled: ~
     hostnames: []
     parentRefs:
       - group: gateway.networking.k8s.io
@@ -497,7 +497,7 @@ oauth2Proxy:
 
   ingress:
     # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "legacy-ingress").
-    enabled: false
+    enabled: ~
     # className: nginx
     path: /
     # Only used if API capabilities (networking.k8s.io/v1) allow it
@@ -922,7 +922,7 @@ oauth2Proxy:
     #       type: Opaque
 gateway:
   # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "gateway-api-default").
-  enabled: false
+  enabled: ~
   annotations: {}
   parentRefs:
     - group: gateway.networking.k8s.io

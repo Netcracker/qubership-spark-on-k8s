@@ -46,6 +46,21 @@
       "default": "spark-history-server",
       "description": "The string to override a release name."
     },
+    "GATEWAY_SYSTEM_TYPE": {
+      "type": "string",
+      "default": "legacy-ingress",
+      "description": "Platform switch driving the automatic selection between Ingress (legacy-ingress) and Gateway API HTTPRoute (gateway-api-default)."
+    },
+    "GATEWAY_SYSTEM_NAME": {
+      "type": "string",
+      "default": "default-external-gateway",
+      "description": "The name of the Gateway resource used by HTTPRoute parentRefs when Gateway API is selected."
+    },
+    "GATEWAY_SYSTEM_NAMESPACE": {
+      "type": "string",
+      "default": "gateway-system",
+      "description": "The namespace of the Gateway resource used by HTTPRoute parentRefs when Gateway API is selected."
+    },
     "priorityClassName": {
       "type": [
         "string",
@@ -141,7 +156,7 @@
       "properties": {
         "enabled": {
           "type": ["boolean", "null"],
-          "default": true,
+          "default": null,
           "description": "It enables the Spark History Server ingress creation. Set to null to derive from GATEWAY_SYSTEM_TYPE."
         },
         "host": {
@@ -491,7 +506,7 @@
           "properties": {
             "enabled": {
               "type": ["boolean", "null"],
-              "default": false,
+              "default": null,
               "description": "Specifies if HTTPRoute for oauth2-proxy is deployed. Set to null to derive from GATEWAY_SYSTEM_TYPE."
             },
             "hostnames": {
@@ -936,7 +951,7 @@
           "properties": {
             "enabled": {
               "type": ["boolean", "null"],
-              "default": true,
+              "default": null,
               "description": "It enables the OAuth2 Proxy ingress. Set to null to derive from GATEWAY_SYSTEM_TYPE."
             },
             "path": {
@@ -1563,7 +1578,7 @@
       "properties": {
         "enabled": {
           "type": ["boolean", "null"],
-          "default": false,
+          "default": null,
           "description": "Specifies if HTTPRoute for History-server is deployed. Set to null to derive from GATEWAY_SYSTEM_TYPE."
         },
         "hostnames": {
