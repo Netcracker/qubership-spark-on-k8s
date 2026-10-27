@@ -5,13 +5,6 @@
 {{- if .Values.oauth2Proxy.enabled -}}
 {{- /* Qubership custom change: when oauth2Proxy.gateway.enabled is null, GATEWAY_SYSTEM_TYPE decides whether the HTTPRoute is created */}}
 {{- if eq (include "spark-history-server.oauth2Proxy.gatewayEnabled" .) "true" -}}
-{{- /* Qubership custom change: fail only when both OAuth2 Proxy toggles are explicitly true. When derived from GATEWAY_SYSTEM_TYPE, both resources can coexist. */}}
-{{- if and (eq (toString .Values.oauth2Proxy.ingress.enabled) "true") (eq (toString .Values.oauth2Proxy.gateway.enabled) "true") }}
-{{- fail "`oauth2Proxy.ingress.enabled` and `oauth2Proxy.gateway.enabled` are both set to `true`. HTTPRoute (Gateway API) is an alternative to the Ingress; enable only one of them." }}
-{{- end }}
-{{- if not (.Capabilities.APIVersions.Has "gateway.networking.k8s.io/v1") }}
-{{- fail "Gateway API CRDs (gateway.networking.k8s.io/v1) are required for HTTPRoute but are not available in the cluster." }}
-{{- end }}
 {{- $fullname := (include "oauth2-proxy.fullname" .) }}
 {{- $Global := . }}
 
