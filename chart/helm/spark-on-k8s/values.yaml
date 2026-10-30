@@ -59,7 +59,7 @@ appServiceMonitor:
   enable: false
 spark-history-server:
   enabled: false
-  GATEWAY_SYSTEM_TYPE: "legacy-ingress"
+  GATEWAY_SYSTEM_TYPE: ""
   GATEWAY_SYSTEM_NAME: "default-external-gateway"
   GATEWAY_SYSTEM_NAMESPACE: "gateway-system"
   openShift:
