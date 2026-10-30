@@ -3,7 +3,8 @@
 #################################################
 
 {{- if .Values.oauth2Proxy.enabled -}}
-{{- if .Values.oauth2Proxy.gateway.enabled -}}
+{{- /* Qubership custom change: when oauth2Proxy.gateway.enabled is null, GATEWAY_SYSTEM_TYPE decides whether the HTTPRoute is created */}}
+{{- if eq (include "spark-history-server.oauth2Proxy.gatewayEnabled" .) "true" -}}
 {{- $fullname := (include "oauth2-proxy.fullname" .) }}
 {{- $Global := . }}
 

@@ -1,7 +1,8 @@
 #################################################
 ## Qubership custom template. HTTPRoute for spark-history-server when using a Kubernetes Gateway instead of an Ingress.
 #################################################
-{{- if  .Values.gateway.enabled -}}
+{{- /* Qubership custom change: when gateway.enabled is null, GATEWAY_SYSTEM_TYPE decides whether the HTTPRoute is created */}}
+{{- if eq (include "spark-history-server.gatewayEnabled" .) "true" -}}
 {{- $fullname := (include "spark-history-server.fullname" .) }}
 {{- $Global := . }}
 apiVersion: gateway.networking.k8s.io/v1
