@@ -58,7 +58,7 @@ prometheusRules:
 appServiceMonitor:
   enable: false
 spark-history-server:
-  enabled: true
+  enabled: false
   GATEWAY_SYSTEM_NAME: "default-external-gateway"
   GATEWAY_SYSTEM_NAMESPACE: "gateway-system"
   openShift:
