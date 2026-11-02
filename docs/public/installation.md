@@ -793,12 +793,12 @@ prometheusRules:
 
 ## Spark History Server
 
-The following table lists the Spark History Server configuration parameters.  
-As qubership-spark-on-k8s chart is a parent chart, it can override the Spark History Server deployment parameters.
+The following table lists the Spark History Server configuration parameters.
+Because the **qubership-spark-on-k8s** chart is a parent chart, it can override the Spark History Server deployment parameters.
 
 | Parameter                                              | Mandatory                                    | Type              | Default                                                                                                                   | Description                                                                                                                                                                                                                                                                              |
 |--------------------------------------------------------|----------------------------------------------|-------------------|---------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `spark-history-server.enabled`                         | false                                        | string            | false                                                                                                                     | It enables the Spark History Server deployment.                                                                                                                                                                                                                                          |
+| `spark-history-server.enabled`                         | false                                        | string            | false                                                                                                                     | Enables the Spark History Server deployment.                                                                                                                                                                                                                                          |
 | `spark-history-server.GATEWAY_SYSTEM_NAME`               | false                                        | string            | `"default-external-gateway"`                                                                                              | The name of the Gateway resource used by HTTPRoute parentRefs when Gateway API is selected.                                                                                                                                                                                               |
 | `spark-history-server.GATEWAY_SYSTEM_NAMESPACE`          | false                                        | string            | `"gateway-system"`                                                                                                        | The namespace of the Gateway resource used by HTTPRoute parentRefs when Gateway API is selected.                                                                                                                                                                                          |
 | `spark-history-server.ingress.enabled`                   | false                                        | bool, null        | `false`                                                                                                                   | It enables the Spark History Server ingress creation. Set to `null` (`~`) to derive from the absence of Gateway API CRDs (`gateway.networking.k8s.io/v1`) in the cluster.                                                                                                                   |
@@ -1350,7 +1350,7 @@ If the filer requires authentication, mount a `security.toml` file and any refer
 
 ## Spark History Server Deployment
 
-Spark History Server deployment can be enabled by the qubership-spark-on-k8s `spark-history-server.enabled` deployment parameter.
+Spark History Server deployment can be enabled using the `spark-history-server.enabled` parameter of the **qubership-spark-on-k8s** chart.
 All possible parameters are listed in a table in the [Spark History Server Subchart Deployment Parameters](#spark-history-server) section.
 
 Following is the example set of parameters that can be used to enable spark-history-server:
