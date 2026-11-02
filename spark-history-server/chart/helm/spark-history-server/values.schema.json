@@ -46,11 +46,6 @@
       "default": "spark-history-server",
       "description": "The string to override a release name."
     },
-    "GATEWAY_SYSTEM_TYPE": {
-      "type": "string",
-      "default": "legacy-ingress",
-      "description": "Platform switch driving the automatic selection between Ingress (legacy-ingress) and Gateway API HTTPRoute (gateway-api-default)."
-    },
     "GATEWAY_SYSTEM_NAME": {
       "type": "string",
       "default": "default-external-gateway",
@@ -157,7 +152,7 @@
         "enabled": {
           "type": ["boolean", "null"],
           "default": null,
-          "description": "It enables the Spark History Server ingress creation. Set to null to derive from GATEWAY_SYSTEM_TYPE."
+          "description": "It enables the Spark History Server ingress creation. Set to null to derive from the absence of Gateway API CRDs (gateway.networking.k8s.io/v1)."
         },
         "host": {
           "type": "string",
@@ -507,7 +502,7 @@
             "enabled": {
               "type": ["boolean", "null"],
               "default": null,
-              "description": "Specifies if HTTPRoute for oauth2-proxy is deployed. Set to null to derive from GATEWAY_SYSTEM_TYPE."
+              "description": "Specifies if HTTPRoute for oauth2-proxy is deployed. Set to null to derive from the presence of Gateway API CRDs (gateway.networking.k8s.io/v1)."
             },
             "hostnames": {
               "type": "array",
@@ -952,7 +947,7 @@
             "enabled": {
               "type": ["boolean", "null"],
               "default": null,
-              "description": "It enables the OAuth2 Proxy ingress. Set to null to derive from GATEWAY_SYSTEM_TYPE."
+              "description": "It enables the OAuth2 Proxy ingress. Set to null to derive from the absence of Gateway API CRDs (gateway.networking.k8s.io/v1)."
             },
             "path": {
               "type": "string",
@@ -1579,7 +1574,7 @@
         "enabled": {
           "type": ["boolean", "null"],
           "default": null,
-          "description": "Specifies if HTTPRoute for History-server is deployed. Set to null to derive from GATEWAY_SYSTEM_TYPE."
+          "description": "Specifies if HTTPRoute for History-server is deployed. Set to null to derive from the presence of Gateway API CRDs (gateway.networking.k8s.io/v1)."
         },
         "hostnames": {
           "type": "array",

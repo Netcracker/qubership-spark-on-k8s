@@ -51,7 +51,7 @@ service:
   type: ClusterIP
 
 ingress:
-  # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "legacy-ingress").
+  # Set to true/false to override, or null to derive from the presence of Gateway API CRDs (disabled when gateway.networking.k8s.io/v1 is available).
   enabled: ~
   host: spark-history-server.your.cloud.qubership.org
   path: /
@@ -159,7 +159,7 @@ hdfs:
 oauth2Proxy:
   enabled: false
   gateway:
-    # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "gateway-api-default").
+    # Set to true/false to override, or null to derive from the presence of Gateway API CRDs (enabled when gateway.networking.k8s.io/v1 is available).
     enabled: ~
     hostnames: []
     parentRefs:
@@ -496,7 +496,7 @@ oauth2Proxy:
   fullnameOverride: oauth2-proxy-history
 
   ingress:
-    # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "legacy-ingress").
+    # Set to true/false to override, or null to derive from the presence of Gateway API CRDs (disabled when gateway.networking.k8s.io/v1 is available).
     enabled: ~
     # className: nginx
     path: /
@@ -921,7 +921,7 @@ oauth2Proxy:
     #       secretName: oauth2-proxy-secrets-store
     #       type: Opaque
 gateway:
-  # Set to true/false to override, or null to derive from GATEWAY_SYSTEM_TYPE (enabled when it contains "gateway-api-default").
+  # Set to true/false to override, or null to derive from the presence of Gateway API CRDs (enabled when gateway.networking.k8s.io/v1 is available).
   enabled: ~
   annotations: {}
   parentRefs:
