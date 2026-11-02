@@ -1,4 +1,4 @@
-{{- /* Qubership custom change: when ingress.enabled is null, the presence of Gateway API CRDs decides whether the Ingress is created */}}
+{{- /* When ingress.enabled is null, the presence of Gateway API CRDs decides whether the Ingress is created */}}
 {{- if eq (include "spark-history-server.ingressEnabled" .) "true" -}}
 {{- $serviceName := include "spark-history-server.fullname" . -}}
 {{- $servicePort := .Values.service.externalPort -}}
