@@ -69,8 +69,8 @@
         },
         "status_custom_resource_path": {
           "type": "string",
-          "default": "apps/v1/spark/deployments/spark-integration-tests-runner",
-          "description": "The parameter (optional) specifies the path to Custom Resource that should be used for the write status of auto-tests execution."
+          "default": "apps/v1/{{ .Release.Namespace }}/deployments/spark-integration-tests-runner",
+          "description": "The parameter (optional) specifies the path to Custom Resource that should be used for the write status of auto-tests execution. The value is processed as a Helm template, so expressions such as '{{ .Release.Namespace }}' are evaluated at render time."
         }
       }
     },

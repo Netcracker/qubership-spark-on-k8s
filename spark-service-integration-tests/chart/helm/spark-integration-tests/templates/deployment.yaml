@@ -73,7 +73,7 @@ spec:
             - name: IS_SHORT_STATUS_MESSAGE
               value: {{ .Values.cr_status_writing.is_short_status_message | quote }}
             - name: STATUS_CUSTOM_RESOURCE_PATH
-              value: {{ toYaml .Values.cr_status_writing.status_custom_resource_path }}
+              value: {{ tpl .Values.cr_status_writing.status_custom_resource_path . }}
             - name: PROMETHEUS_URL
               value: {{ .Values.prometheusUrl }}
             {{- end }}
