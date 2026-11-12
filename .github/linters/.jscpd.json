@@ -7,6 +7,7 @@
         "**/spark-sample-apps/**",
         "**/.github/**",
         "**/spark-customized/entrypoint.sh",
-        "**/spark-customized/thrift-server-entrypoint.sh"
+        "**/spark-customized/thrift-server-entrypoint.sh",
+        "**/agent-packages/**/references/troubleshooting-guide.md"
     ]
 }
