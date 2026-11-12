@@ -1,7 +1,13 @@
 FROM alpine:latest AS unpacker
 ENV HADOOP_VERSION=3.5.0
-ENV netty_version=4.2.16.Final
-ENV jackson_version=2.21.4
+ENV netty_version=4.2.18.Final
+ENV jackson_version=2.21.8
+ENV tcnative_version=2.0.84.Final
+ENV zstd_version=1.5.7-25
+ENV snappy_version=1.1.10.10
+ENV lz4_version=1.11.4
+ENV vertx_version=4.5.36
+ENV xmlschema_version=2.3.3
 ENV seaweedfs_version=4.38
 ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
@@ -38,10 +44,24 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-epoll/$netty_version/netty-transport-native-epoll-$netty_version-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-epoll-$netty_version-linux-x86_64.jar && \    
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/$netty_version/netty-transport-native-kqueue-$netty_version-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-$netty_version-osx-aarch_64.jar && \    
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-kqueue/$netty_version/netty-transport-native-kqueue-$netty_version-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-transport-native-kqueue-$netty_version-osx-x86_64.jar && \    
-    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/$netty_version/netty-transport-native-unix-common-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-$netty_version.jar     
-    
+    curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/$netty_version/netty-transport-native-unix-common-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-$netty_version.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-tcnative-boringssl-static/$tcnative_version/netty-tcnative-boringssl-static-$tcnative_version-linux-aarch_64.jar --output $SPARK_JARS_DIR/netty-tcnative-boringssl-static-$tcnative_version-linux-aarch_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-tcnative-boringssl-static/$tcnative_version/netty-tcnative-boringssl-static-$tcnative_version-linux-x86_64.jar --output $SPARK_JARS_DIR/netty-tcnative-boringssl-static-$tcnative_version-linux-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-tcnative-boringssl-static/$tcnative_version/netty-tcnative-boringssl-static-$tcnative_version-osx-aarch_64.jar --output $SPARK_JARS_DIR/netty-tcnative-boringssl-static-$tcnative_version-osx-aarch_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-tcnative-boringssl-static/$tcnative_version/netty-tcnative-boringssl-static-$tcnative_version-osx-x86_64.jar --output $SPARK_JARS_DIR/netty-tcnative-boringssl-static-$tcnative_version-osx-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-tcnative-boringssl-static/$tcnative_version/netty-tcnative-boringssl-static-$tcnative_version-windows-x86_64.jar --output $SPARK_JARS_DIR/netty-tcnative-boringssl-static-$tcnative_version-windows-x86_64.jar && \
+    curl -k -L $MAVEN_REPO/io/netty/netty-tcnative-classes/$tcnative_version/netty-tcnative-classes-$tcnative_version.jar --output $SPARK_JARS_DIR/netty-tcnative-classes-$tcnative_version.jar && \
+    curl -k -L $MAVEN_REPO/com/github/luben/zstd-jni/$zstd_version/zstd-jni-$zstd_version.jar --output $SPARK_JARS_DIR/zstd-jni-$zstd_version.jar && \
+    curl -k -L $MAVEN_REPO/org/xerial/snappy/snappy-java/$snappy_version/snappy-java-$snappy_version.jar --output $SPARK_JARS_DIR/snappy-java-$snappy_version.jar && \
+    curl -k -L $MAVEN_REPO/at/yawk/lz4/lz4-java/$lz4_version/lz4-java-$lz4_version.jar --output $SPARK_JARS_DIR/lz4-java-$lz4_version.jar && \
+    curl -k -L $MAVEN_REPO/io/vertx/vertx-core/$vertx_version/vertx-core-$vertx_version.jar --output $SPARK_JARS_DIR/vertx-core-$vertx_version.jar && \
+    curl -k -L $MAVEN_REPO/io/vertx/vertx-web-client/$vertx_version/vertx-web-client-$vertx_version.jar --output $SPARK_JARS_DIR/vertx-web-client-$vertx_version.jar && \
+    curl -k -L $MAVEN_REPO/io/vertx/vertx-web-common/$vertx_version/vertx-web-common-$vertx_version.jar --output $SPARK_JARS_DIR/vertx-web-common-$vertx_version.jar && \
+    curl -k -L $MAVEN_REPO/io/vertx/vertx-auth-common/$vertx_version/vertx-auth-common-$vertx_version.jar --output $SPARK_JARS_DIR/vertx-auth-common-$vertx_version.jar && \
+    curl -k -L $MAVEN_REPO/io/vertx/vertx-uri-template/$vertx_version/vertx-uri-template-$vertx_version.jar --output $SPARK_JARS_DIR/vertx-uri-template-$vertx_version.jar && \
+    curl -k -L $MAVEN_REPO/org/apache/ws/xmlschema/xmlschema-core/$xmlschema_version/xmlschema-core-$xmlschema_version.jar --output $SPARK_JARS_DIR/xmlschema-core-$xmlschema_version.jar
 
-FROM apache/spark:4.2.0
+FROM apache/spark:4.3.0
 
 ENV SPARK_JARS_DIR=/opt/spark/jars
 
@@ -103,7 +123,22 @@ RUN rm $SPARK_JARS_DIR/netty-all-4.2.13.Final.jar \
     $SPARK_JARS_DIR/jackson-databind-2.21.2.jar \
     $SPARK_JARS_DIR/jackson-dataformat-yaml-2.21.2.jar \
     $SPARK_JARS_DIR/jackson-datatype-jsr310-2.21.2.jar \
-    $SPARK_JARS_DIR/jackson-module-scala_2.13-2.21.2.jar
+    $SPARK_JARS_DIR/jackson-module-scala_2.13-2.21.2.jar \
+    $SPARK_JARS_DIR/netty-tcnative-boringssl-static-2.0.76.Final-linux-aarch_64.jar \
+    $SPARK_JARS_DIR/netty-tcnative-boringssl-static-2.0.76.Final-linux-x86_64.jar \
+    $SPARK_JARS_DIR/netty-tcnative-boringssl-static-2.0.76.Final-osx-aarch_64.jar \
+    $SPARK_JARS_DIR/netty-tcnative-boringssl-static-2.0.76.Final-osx-x86_64.jar \
+    $SPARK_JARS_DIR/netty-tcnative-boringssl-static-2.0.76.Final-windows-x86_64.jar \
+    $SPARK_JARS_DIR/netty-tcnative-classes-2.0.76.Final.jar \
+    $SPARK_JARS_DIR/zstd-jni-1.5.7-7.jar \
+    $SPARK_JARS_DIR/snappy-java-1.1.10.8.jar \
+    $SPARK_JARS_DIR/lz4-java-1.11.0.jar \
+    $SPARK_JARS_DIR/vertx-core-4.5.26.jar \
+    $SPARK_JARS_DIR/vertx-web-client-4.5.26.jar \
+    $SPARK_JARS_DIR/vertx-web-common-4.5.26.jar \
+    $SPARK_JARS_DIR/vertx-auth-common-4.5.26.jar \
+    $SPARK_JARS_DIR/vertx-uri-template-4.5.26.jar \
+    $SPARK_JARS_DIR/xmlschema-core-2.3.1.jar
 
 COPY --from=unpacker --chmod=0777 $SPARK_JARS_DIR/ $SPARK_JARS_DIR/
 
