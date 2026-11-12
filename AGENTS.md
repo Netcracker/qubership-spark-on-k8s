@@ -23,9 +23,9 @@ This copies `chart/helm/*`, downloads the upstream spark-operator v2.1.0 chart, 
 
 Images are built via GitHub Actions using `.github/docker-build-config.json`. For local builds, use the Dockerfiles directly:
 
-- Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.2.0`, adds AWS SDK, Hadoop AWS, Netty, Jackson JARs)
-- Python variant: `spark-customized/py/Dockerfile` (extends the main image, adds Python 3.11)
-- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.5.1`, adds AWS SDK, Hadoop AWS, Netty, Jackson JARs, upgrades jersey-client, adds gosu and gnupg)
+- Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.3.0`, adds AWS SDK, Hadoop AWS, Netty, Jackson JARs)
+- Python variant: `spark-customized/py/Dockerfile` (extends the main image, adds Python 3.14)
+- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.6.0`, adds AWS SDK, Hadoop AWS, Netty, Jackson JARs, upgrades jersey-client, adds gosu and gnupg)
 - Test runner image: `spark-service-integration-tests/docker/Dockerfile` (builds on `ghcr.io/netcracker/qubership-docker-integration-tests:0.5.8`, copies Robot Framework suites and requirements)
 
 ### Build sample apps (Maven)
@@ -74,7 +74,7 @@ The main chart `chart/helm/spark-on-k8s/` depends on four sub-charts (assembled 
 
 `spark-customized/Dockerfile` is a two-stage build:
 1. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, and Jackson JARs from Maven Central
-2. **Main stage** (`apache/spark:4.2.0`) — removes bundled Netty 4.2.13 and Jackson 2.21.2 JARs, copies in newer Netty 4.2.16 and Jackson 2.21.4 JARs and S3 JARs, upgrades curl, adds `gosu`, copies `entrypoint.sh`
+2. **Main stage** (`apache/spark:4.3.0`) — removes bundled Netty 4.2.13 and Jackson 2.21.2 JARs, copies in newer Netty 4.2.16 and Jackson 2.21.4 JARs and S3 JARs, upgrades curl, adds `gosu`, copies `entrypoint.sh`
 
 The custom `entrypoint.sh` handles:
 - JCEKS credential file creation for S3 authentication at runtime

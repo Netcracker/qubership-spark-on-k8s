@@ -41,7 +41,7 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/netty/netty-transport-native-unix-common/$netty_version/netty-transport-native-unix-common-$netty_version.jar --output $SPARK_JARS_DIR/netty-transport-native-unix-common-$netty_version.jar     
     
 
-FROM apache/spark:4.2.0
+FROM apache/spark:4.3.0
 
 ENV SPARK_JARS_DIR=/opt/spark/jars
 
