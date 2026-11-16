@@ -532,7 +532,6 @@ oauth2Proxy:
       gateway-api-converter.netcracker.com/ignore: "true"
 
     labels: 
-      app.kubernetes.io/component: ingress
       deployment.netcracker.com/ingress-type: public-network
       deployment.netcracker.com/ingress-audience-type: conf-user 
     # annotations:

@@ -11,7 +11,7 @@ kind: Ingress
 metadata:
   labels:
     app: {{ template "oauth2-proxy.name" . }}
-    {{- include "oauth2-proxy.labels" . | indent 4 }}
+    {{- include "oauth2-proxy.labels" (merge (dict "component" "ingress") .) | indent 4 }}
 {{- if .Values.oauth2Proxy.ingress.labels }}
 {{ toYaml .Values.oauth2Proxy.ingress.labels | indent 4 }}
 {{- end }}

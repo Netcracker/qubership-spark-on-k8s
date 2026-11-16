@@ -19,7 +19,9 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-    {{- include "oauth2-proxy.labels" $Global | nindent 4 }}
+    deployment.netcracker.com/ingress-type: {{ .Values.oauth2Proxy.gateway.ingressType | default "public-network" }}
+    deployment.netcracker.com/ingress-audience-type: {{ .Values.oauth2Proxy.gateway.ingressAudienceType | default "conf-user" }}
+    {{- include "oauth2-proxy.labels" (merge (dict "component" "ingress") $Global) | nindent 4 }}
     {{- if .Values.oauth2Proxy.gateway.labels }}
     {{- tpl (toYaml .Values.oauth2Proxy.gateway.labels) . | nindent 4 }}
     {{- end }}
@@ -123,7 +125,9 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-    {{- include "oauth2-proxy.labels" $Global | nindent 4 }}
+    deployment.netcracker.com/ingress-type: {{ .Values.oauth2Proxy.gateway.ingressType | default "public-network" }}
+    deployment.netcracker.com/ingress-audience-type: {{ .Values.oauth2Proxy.gateway.ingressAudienceType | default "conf-user" }}
+    {{- include "oauth2-proxy.labels" (merge (dict "component" "ingress") $Global) | nindent 4 }}
     {{- if .Values.oauth2Proxy.gateway.labels }}
     {{- tpl (toYaml .Values.oauth2Proxy.gateway.labels) . | nindent 4 }}
     {{- end }}
