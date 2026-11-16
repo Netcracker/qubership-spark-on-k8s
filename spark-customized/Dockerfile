@@ -13,7 +13,7 @@ ENV SPARK_JARS_DIR=/opt/spark/jars
 ENV MAVEN_REPO=https://repo1.maven.org/maven2
 RUN apk add curl
 RUN mkdir -p /opt/spark/jars/ && \
-    curl -k -L $MAVEN_REPO/software/amazon/awssdk/bundle/2.49.5/bundle-2.49.5.jar --output $SPARK_JARS_DIR/bundle-2.49.5.jar && \
+    curl -k -L $MAVEN_REPO/software/amazon/awssdk/bundle/2.59.1/bundle-2.59.1.jar --output $SPARK_JARS_DIR/bundle-2.59.1.jar && \
     curl -k -L $MAVEN_REPO/org/apache/hadoop/hadoop-aws/$HADOOP_VERSION/hadoop-aws-$HADOOP_VERSION.jar --output $SPARK_JARS_DIR/hadoop-aws-$HADOOP_VERSION.jar && \
     curl -k -L ${MAVEN_REPO}/software/amazon/s3/analyticsaccelerator/analyticsaccelerator-s3/1.3.1/analyticsaccelerator-s3-1.3.1.jar --output $SPARK_JARS_DIR/analyticsaccelerator-s3-1.3.1.jar && \
     curl -k -L $MAVEN_REPO/com/seaweedfs/seaweedfs-hadoop3-client/$seaweedfs_version/seaweedfs-hadoop3-client-$seaweedfs_version.jar --output $SPARK_JARS_DIR/seaweedfs-hadoop3-client-$seaweedfs_version.jar && \

@@ -37,7 +37,10 @@ Generate basic labels
 {{- define "oauth2-proxy.labels" }}
 helm.sh/chart: {{ include "oauth2-proxy.chart" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- /* HTTPRoute labels are fully driven by oauth2Proxy.gateway.labels (see values.yaml) */}}
+{{- if ne .component "ingress" }}
 app.kubernetes.io/component: {{ .component | default "authentication-proxy" }}
+{{- end }}
 app.kubernetes.io/part-of: {{ template "oauth2-proxy.name" . }}
 {{- include "oauth2-proxy.selectorLabels" . }}
 {{- if .Chart.AppVersion }}

@@ -16,9 +16,6 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-    app.kubernetes.io/component: ingress
-    deployment.netcracker.com/ingress-type: {{ .Values.gateway.ingressType | default "public-network" }}
-    deployment.netcracker.com/ingress-audience-type: {{ .Values.gateway.ingressAudienceType | default "conf-user" }}
     {{- include "all_objects_labels_shs" $Global  | nindent 4 }}
     {{- if .Values.gateway.labels }}
     {{- tpl (toYaml .Values.gateway.labels) . | nindent 4 }}
@@ -81,9 +78,6 @@ metadata:
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     heritage: {{ .Release.Service }}
-    app.kubernetes.io/component: ingress
-    deployment.netcracker.com/ingress-type: {{ .Values.gateway.ingressType | default "public-network" }}
-    deployment.netcracker.com/ingress-audience-type: {{ .Values.gateway.ingressAudienceType | default "conf-user" }}
     {{- include "all_objects_labels_shs" $Global  | nindent 4 }}
     {{- if .Values.gateway.labels }}
     {{- tpl (toYaml .Values.gateway.labels) . | nindent 4 }}
