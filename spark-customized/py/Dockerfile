@@ -8,11 +8,10 @@ RUN set -ex; \
     apt-get update; \
     mkdir tempdebs; \
     cd tempdebs; \
-    curl -fsSL -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/libpython3.14_3.14.10-1+jammy1_amd64.deb; \
-    curl -fsSL -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/libpython3.14-stdlib_3.14.10-1+jammy1_amd64.deb; \
-    curl -fsSL -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/python3.14_3.14.10-1+jammy1_amd64.deb; \
-    curl -fsSL -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/python3.14-venv_3.14.10-1+jammy1_amd64.deb; \
-    ls -l; head -c 200 python3.14_3.14.10-1+jammy1_amd64.deb | cat -v; echo; curl --version | head -1; \
+    curl -fsSL --retry 5 --retry-delay 10 -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/libpython3.14_3.14.10-1+jammy1_amd64.deb; \
+    curl -fsSL --retry 5 --retry-delay 10 -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/libpython3.14-stdlib_3.14.10-1+jammy1_amd64.deb; \
+    curl -fsSL --retry 5 --retry-delay 10 -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/python3.14_3.14.10-1+jammy1_amd64.deb; \
+    curl -fsSL --retry 5 --retry-delay 10 -O https://ppa.launchpadcontent.net/deadsnakes/ppa/ubuntu/pool/main/p/python3.14/python3.14-venv_3.14.10-1+jammy1_amd64.deb; \
     cd ..; \
     apt-get install -y mailcap mime-support; \
     dpkg -R --install tempdebs/; \
