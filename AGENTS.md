@@ -23,9 +23,9 @@ This copies `chart/helm/*`, downloads the upstream spark-operator v2.1.0 chart, 
 
 Images are built via GitHub Actions using `.github/docker-build-config.json`. For local builds, use the Dockerfiles directly:
 
-- Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.2.0`, adds AWS SDK, Hadoop AWS, Netty, Jackson JARs)
-- Python variant: `spark-customized/py/Dockerfile` (extends the main image, adds Python 3.11)
-- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.5.1`, adds AWS SDK, Hadoop AWS, Netty, Jackson JARs, upgrades jersey-client, adds gosu and gnupg)
+- Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.3.0`, adds AWS SDK, Hadoop AWS, and overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions)
+- Python variant: `spark-customized/py/Dockerfile` (extends the main image, adds Python 3.14)
+- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.6.0`, adds AWS SDK, Hadoop AWS, overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions, upgrades jersey-client, adds gosu and gnupg)
 - Test runner image: `spark-service-integration-tests/docker/Dockerfile` (builds on `ghcr.io/netcracker/qubership-docker-integration-tests:0.5.8`, copies Robot Framework suites and requirements)
 
 ### Build sample apps (Maven)
@@ -73,8 +73,8 @@ The main chart `chart/helm/spark-on-k8s/` depends on four sub-charts (assembled 
 ### Spark image layering
 
 `spark-customized/Dockerfile` is a two-stage build:
-1. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, and Jackson JARs from Maven Central
-2. **Main stage** (`apache/spark:4.2.0`) — removes bundled Netty 4.2.13 and Jackson 2.21.2 JARs, copies in newer Netty 4.2.16 and Jackson 2.21.4 JARs and S3 JARs, upgrades curl, adds `gosu`, copies `entrypoint.sh`
+1. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs from Maven Central
+2. **Main stage** (`apache/spark:4.3.0`) — removes bundled Netty 4.2.13, Jackson 2.21.2, netty-tcnative 2.0.76.Final, zstd-jni 1.5.7-7, snappy-java 1.1.10.8, lz4-java 1.11.0, Vert.x 4.5.26 and xmlschema-core 2.3.1 JARs and copies in patched versions (Netty 4.2.18, Jackson 2.21.8, netty-tcnative 2.0.84, zstd-jni 1.5.7-25, snappy-java 1.1.10.10, lz4-java 1.11.4, Vert.x 4.5.36, xmlschema-core 2.3.3) and S3 JARs, upgrades curl, adds `gosu`, copies `entrypoint.sh`
 
 The custom `entrypoint.sh` handles:
 - JCEKS credential file creation for S3 authentication at runtime

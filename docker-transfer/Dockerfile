@@ -11,7 +11,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 RUN mkdir -p chart/helm/spark-on-k8s/charts && \
-    curl -s -L https://github.com/kubeflow/spark-operator/releases/download/v2.5.1/spark-operator-2.5.1.tgz | \
+    curl -s -L https://github.com/kubeflow/spark-operator/releases/download/v2.6.0/spark-operator-2.6.0.tgz | \
     tar xvz -C chart/helm/spark-on-k8s/charts
 
 COPY chart /app/chart

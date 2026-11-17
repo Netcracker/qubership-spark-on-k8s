@@ -57,7 +57,7 @@ and check driver/executor pod events and logs — before concluding the issue is
 ## Guardrails
 
 Facts below are grounded in the actual Spark Operator source
-([kubeflow/spark-operator](https://github.com/kubeflow/spark-operator), tag `v2.5.1` — the version
+([kubeflow/spark-operator](https://github.com/kubeflow/spark-operator), tag `v2.6.0` — the version
 `docker-transfer/Dockerfile` vendors for both the chart and the controller/webhook image) and this chart's
 `chart/helm/spark-on-k8s/values.yaml`, not assumptions:
 
@@ -65,7 +65,7 @@ Facts below are grounded in the actual Spark Operator source
   treats any spec change other than `spec.suspend`/`spec.timeToLiveSeconds` as a full invalidation: it force-writes
   `Status.AppState.State = Invalidating`, deletes the driver pod, driver PDB, and web-UI Service/Ingress, then does a
   **brand-new `spark-submit`** with a new `SubmissionID` — not a live patch. A `PartialRestart` feature gate exists
-  at v2.5.1 that carves out `spec.executor.priorityClassName`/`nodeSelector`/`tolerations`/`affinity`/`schedulerName`
+  at v2.6.0 that carves out `spec.executor.priorityClassName`/`nodeSelector`/`tolerations`/`affinity`/`schedulerName`
   edits from forcing invalidation (those fields only apply to newly-created pods via the mutating webhook anyway),
   but it's Alpha and defaults to **off** — don't assume it's active unless the user confirms the feature gate was
   explicitly enabled. Driver field changes always force full invalidation regardless of this gate.
@@ -102,7 +102,7 @@ Facts below are grounded in the actual Spark Operator source
   scheduler capacity or a wrong `spec.batchSchedulerOptions.queue`), not the same root cause — ask which one applies.
 - Webhook TLS certs aren't regenerated on every restart or `helm upgrade`: the webhook reuses a stored cert as long
   as it's still valid, and a pair of always-running reconcilers keep the CA bundle patched into the webhook configs.
-  Don't default to "certificate errors on upgrade mean a clean install is required" — at the v2.5.1 this chart
+  Don't default to "certificate errors on upgrade mean a clean install is required" — at the v2.6.0 this chart
   vendors, that machinery already exists. If certificate errors do show up on an upgrade, check these two causes
   first, in this order (both are more common in practice than a `certManagerIntegration.enabled` toggle, which is
   almost always left disabled once set):

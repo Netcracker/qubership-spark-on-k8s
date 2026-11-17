@@ -173,7 +173,10 @@ oauth2Proxy:
           value: /
         backendRefs:
           - port: 4180
-    labels: {}
+    labels:
+      deployment.netcracker.com/ingress-type: public-network
+      deployment.netcracker.com/ingress-audience-type: conf-user
+      app.kubernetes.io/component: ingress      
     backendTLSPolicy:
       enabled: false
       caCertificateRefs: []
@@ -188,7 +191,7 @@ oauth2Proxy:
 
   image:
     repository: "quay.io/oauth2-proxy/oauth2-proxy"
-    tag: "v7.15.3"
+    tag: "v7.15.6"
     pullPolicy: "IfNotPresent"
     command: []
     namespaceOverride: ""
@@ -936,7 +939,10 @@ gateway:
         value: /
       backendRefs:
         - port: 80
-  labels: {}
+  labels:
+    deployment.netcracker.com/ingress-type: public-network
+    deployment.netcracker.com/ingress-audience-type: conf-user
+    app.kubernetes.io/component: ingress      
   redirectRoute:
     enabled: false
     parentRefs: []
