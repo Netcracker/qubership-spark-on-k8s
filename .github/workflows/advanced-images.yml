@@ -13,8 +13,12 @@ on:
         required: false
 
 env:
-  TAG_NAME: ${{ github.event.release.tag_name || github.ref }}
-  PUSH: ${{ (github.event_name == 'workflow_dispatch' && inputs.publish_docker) || !startsWith(github.ref, 'refs/heads/dependabot') }}
+  # workflow_run always runs the workflow file from the default branch, so github.ref is
+  # refs/heads/main there. Use the triggering run's branch/commit instead.
+  HEAD_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+  HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+  TAG_NAME: ${{ github.event.release.tag_name || github.event.workflow_run.head_branch || github.ref }}
+  PUSH: ${{ (github.event_name == 'workflow_dispatch' && inputs.publish_docker) || !startsWith(github.event.workflow_run.head_branch || github.ref_name, 'dependabot') }}
   GITHUB_GROUP: ${{ github.repository_owner }}
 
 jobs:
@@ -30,6 +34,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.HEAD_SHA }}
+          fetch-depth: 0
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
