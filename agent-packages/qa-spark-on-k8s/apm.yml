@@ -1,0 +1,11 @@
+name: qa-spark-on-k8s
+version: 1.0.0
+description: QA guidance for the Qubership Spark on Kubernetes Helm deployment — Robot test apps, Volcano and Hive integration paths, sample apps and the UID 185 / webhook / CRD constraints.
+targets:
+- claude
+- copilot
+- cursor
+dependencies:
+  apm: []
+  mcp: []
+includes: auto
