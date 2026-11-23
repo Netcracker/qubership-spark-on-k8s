@@ -67,6 +67,9 @@ ENV SPARK_JARS_DIR=/opt/spark/jars
 
 USER root
 
+# Replace the bundled JDK (Temurin 21.0.13+9) with 21.0.13.1 to fix CVE-2026-114938 (Java4Shell).
+# Remove this line once the apache/spark base image ships Temurin 21.0.13.1 or later.
+COPY --from=eclipse-temurin:21.0.13.1_2-jdk-jammy /opt/java/openjdk /opt/java/openjdk
 
     # Change permissions to run examples
     # Still need to add property     "spark.jars.ivy": "/tmp/.ivy" when running in openshift
