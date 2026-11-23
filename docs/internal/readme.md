@@ -93,6 +93,7 @@ Spark images are pretty large and include pretty big JARs. To avoid unnecessary 
 13) Update [base tests image](/spark-service-integration-tests/docker/Dockerfile) based on the [latest Qubership release](https://github.com/Netcracker/qubership-docker-integration-tests).
 14) Update status provisioner in [values](/chart/helm/spark-on-k8s/values.yaml) based on the [latest Qubership release](https://github.com/Netcracker/qubership-deployment-status-provisioner/releases).
 15) Check that tests still run with status provisioner.
+16) Update the pinned versions in the QA and troubleshooting skills: [qa-spark-on-k8s SKILL.md](/agent-packages/qa-spark-on-k8s/.apm/skills/qa-spark-on-k8s/SKILL.md) (spark-operator version, `apache/spark` base image, the chart tarball version pinned in [create_chart.sh](/create_chart.sh)) and [troubleshoot-spark-on-k8s SKILL.md](/agent-packages/troubleshoot-spark-on-k8s/.apm/skills/troubleshoot-spark-on-k8s/SKILL.md) (the spark-operator version the guardrails are grounded in, and the webhook log line if it moved).
 
 ## Useful links
 
