@@ -1,3 +1,8 @@
+# Remove these stages once the controller base image ships Temurin 21.0.13.1 or later.
+FROM eclipse-temurin:21.0.13.1_2-jdk-jammy AS jdk-amd64
+FROM ghcr.io/kubeflow/spark-operator/controller:2.6.0 AS jdk-arm64
+FROM jdk-${TARGETARCH} AS jdk
+
 FROM alpine:latest AS unpacker
 ENV HADOOP_VERSION=3.4.1
 ENV netty_version=4.2.18.Final
@@ -63,6 +68,9 @@ RUN mkdir -p /opt/spark/jars/ && \
 FROM ghcr.io/kubeflow/spark-operator/controller:2.6.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 USER root
+
+# Remove these stage once the controller base image ships Temurin 21.0.13.1 or later.
+COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

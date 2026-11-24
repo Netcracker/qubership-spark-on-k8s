@@ -1,3 +1,8 @@
+# Remove these stages once the apache/spark base image ships Temurin 21.0.13.1 or later.
+FROM eclipse-temurin:21.0.13.1_2-jdk-jammy AS jdk-amd64
+FROM apache/spark:4.3.0 AS jdk-arm64
+FROM jdk-${TARGETARCH} AS jdk
+
 FROM alpine:latest AS unpacker
 ENV HADOOP_VERSION=3.5.0
 ENV netty_version=4.2.18.Final
@@ -67,6 +72,8 @@ ENV SPARK_JARS_DIR=/opt/spark/jars
 
 USER root
 
+# Remove these stage once the apache/spark base image ships Temurin 21.0.13.1 or later.
+COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 
     # Change permissions to run examples
     # Still need to add property     "spark.jars.ivy": "/tmp/.ivy" when running in openshift
