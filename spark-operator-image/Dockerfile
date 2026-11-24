@@ -1,5 +1,3 @@
-# CVE-2026-114938 (Java4Shell) affects only x86-64, and Temurin 21.0.13.1 has no arm64 build.
-# amd64 takes the fixed JDK. arm64 keeps the JDK from the base image.
 # Remove these stages once the controller base image ships Temurin 21.0.13.1 or later.
 FROM eclipse-temurin:21.0.13.1_2-jdk-jammy AS jdk-amd64
 FROM ghcr.io/kubeflow/spark-operator/controller:2.6.0 AS jdk-arm64
@@ -71,7 +69,7 @@ FROM ghcr.io/kubeflow/spark-operator/controller:2.6.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 USER root
 
-# Replace the bundled JDK (Temurin 21.0.13+9) on amd64 to fix CVE-2026-114938. No-op on arm64.
+# Remove these stages once the controller base image ships Temurin 21.0.13.1 or later.
 COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 
 RUN apt-get update && \
