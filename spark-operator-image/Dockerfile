@@ -69,7 +69,7 @@ FROM ghcr.io/kubeflow/spark-operator/controller:2.6.0
 ENV SPARK_JARS_DIR=/opt/spark/jars
 USER root
 
-# Remove these stages once the controller base image ships Temurin 21.0.13.1 or later.
+# Remove these stage once the controller base image ships Temurin 21.0.13.1 or later.
 COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 
 RUN apt-get update && \

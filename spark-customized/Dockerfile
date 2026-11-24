@@ -72,7 +72,7 @@ ENV SPARK_JARS_DIR=/opt/spark/jars
 
 USER root
 
-# Remove these stages once the apache/spark base image ships Temurin 21.0.13.1 or later.
+# Remove these stage once the apache/spark base image ships Temurin 21.0.13.1 or later.
 COPY --from=jdk /opt/java/openjdk /opt/java/openjdk
 
     # Change permissions to run examples
