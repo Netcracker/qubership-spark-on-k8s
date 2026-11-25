@@ -106,7 +106,7 @@ from the files before changing anything; the numbers move, the locations do not.
 | What | Pinned value | Defined in |
 | --- | --- | --- |
 | Spark version | `4.3.0` | sample apps, docs, examples, `sparkVersion` in the CRs |
-| Spark base image | `apache/spark:4.3.0-scala2.13-java21-ubuntu` plus its index digest | `spark-customized/Dockerfile` (both `FROM` lines) |
+| Spark base image | `apache/spark:4.3.0-scala2.13-java21-ubuntu` | `spark-customized/Dockerfile` (both `FROM` lines) |
 | spark-operator controller image | `2.6.0` | `spark-operator-image/Dockerfile` (both `FROM` lines) |
 | spark-operator chart | `2.6.0` | `docker-transfer/Dockerfile`, `create_chart.sh`, `chart/helm/spark-on-k8s/Chart.yaml` |
 | Bundled JDK, amd64 only | Temurin `21.0.13.1_2-jdk-jammy` | both Dockerfiles |
@@ -129,9 +129,8 @@ number follows from them, so choose the pair before editing a file.
    `4.3.0-scala2.13-java21-ubuntu`. The operator image builds on the controller image and inherits that
    image's Spark, so this choice does not apply to it. Name the flavor: the short `apache/spark:<version>`
    alias resolves to the Python flavor, so a bare version silently changes the base image. Confirm both
-   architectures and read the index digest with
-   `docker buildx imagetools inspect apache/spark:<version>-scala2.13-java21-ubuntu`; pin the tag and the
-   digest together.
+   architectures with
+   `docker manifest inspect apache/spark:<version>-scala2.13-java21-ubuntu`.
 2. Pick the operator candidate: the newest release on the
    [kubeflow/spark-operator releases](https://github.com/kubeflow/spark-operator/releases) whose supported
    Spark versions include the Spark candidate; the release notes or the compatibility table in the
@@ -211,8 +210,7 @@ guardrail. In an interactive run, ask instead of stopping.
 ### Update Spark
 
 1. Change both `FROM apache/spark:` lines in `spark-customized/Dockerfile`, the `jdk-arm64` stage and the
-   main stage, to the tag and digest chosen in `Prepare the update.1`. The tag names the flavor; the digest
-   changes with the version, so the two move together.
+   main stage, to the flavor tag chosen in `Prepare the update.1`.
 2. Re-sync `spark-customized/entrypoint.sh`. It is a fork of the `spark-docker` entrypoint for the same
    version, so diff it against
    `https://github.com/apache/spark-docker/blob/master/<version>/scala2.13-java21-ubuntu/entrypoint.sh`,
