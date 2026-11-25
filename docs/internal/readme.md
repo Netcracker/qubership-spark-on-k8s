@@ -108,6 +108,7 @@ from the files before changing anything; the numbers move, the locations do not.
 | Spark version | `4.3.0` | sample apps, docs, examples, `sparkVersion` in the CRs |
 | Spark base image | `apache/spark:4.3.0-scala2.13-java21-ubuntu`, the flavor without the Python interpreter on purpose; the `-py` image adds Python 3.14 | `spark-customized/Dockerfile` (both `FROM` lines) |
 | spark-operator controller image | `2.6.0` | `spark-operator-image/Dockerfile` (both `FROM` lines) |
+| spark-operator bundled Spark | `4.2.1` | `ghcr.io/kubeflow/spark-operator/controller:<version>`, read from `spark-core_2.13-<version>.jar` in `/opt/spark/jars` |
 | spark-operator chart | `2.6.0` | `docker-transfer/Dockerfile`, `create_chart.sh`, `chart/helm/spark-on-k8s/Chart.yaml` |
 | Bundled JDK, amd64 only | Temurin `21.0.13.1_2-jdk-jammy` | both Dockerfiles |
 | Patched JARs | Netty `4.2.18.Final`, Jackson `2.21.8`, tcnative `2.0.84.Final`, zstd-jni `1.5.7-25`, snappy-java `1.1.10.10`, lz4-java `1.11.4`, Vert.x `4.5.36`, xmlschema-core `2.3.3` | both Dockerfiles |
@@ -158,12 +159,15 @@ Spark image built here. Every other number follows from those two, so identify t
 5. Check the Spark settings for renames. `chart/helm/spark-on-k8s/values.yaml`, `spark-history-server/`,
    `spark-thrift-server/` and the sample applications pass `spark.eventLog.*`, `spark.history.*`,
    `spark.kubernetes.*` and S3A keys; compare them with the migration notes of the target release.
-   When the operator submits an application, the driver pod is built by the Spark client in the operator
-   image, and the executor pods are built by the driver, which runs the target Spark. A driver-side
-   `spark.kubernetes.*` option or pod-spec default that is new in the target release therefore has no
-   effect on operator-submitted applications until the operator bundles that release; executor-side
-   options work. Do not adopt such a driver option in this distribution's values or samples on the
-   strength of the release notes alone.
+   When the operator submits a `SparkApplication`, the `spark-submit` in the controller builds the driver pod,
+   so the driver pod spec comes from the Spark bundled in the operator image (see the baseline table).
+   Executor pods are built by the driver, which runs the target Spark. A driver-side `spark.kubernetes.*`
+   option or a driver pod-spec default that is new in the target release therefore cannot take effect until
+   the operator bundles that release. An option that is new in the target release and read by both the client
+   and the driver applies to executor pods only. The thrift server is not affected: it runs `spark-submit` in
+   client mode inside its own pod, built from this distribution's image, so the client and the driver are the
+   same release. Its driver pod comes from the chart, not from `spark.kubernetes.driver.*` options. Do not
+   adopt a new driver option in the values or samples on the strength of the release notes alone.
 6. Create one branch and one pull request, and record the target Spark version, the operator version, the
    Spark that operator bundles and the checks that qualified them in the description. Nothing in the
    repository records which upstream release a local chart render used.
