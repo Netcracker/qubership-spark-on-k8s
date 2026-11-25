@@ -1,6 +1,6 @@
 # Remove these stages once the apache/spark base image ships Temurin 21.0.13.1 or later.
 FROM eclipse-temurin:21.0.13.1_2-jdk-jammy AS jdk-amd64
-FROM apache/spark:4.3.0 AS jdk-arm64
+FROM apache/spark:4.3.0-scala2.13-java21-ubuntu@sha256:f082889c966c834a5e3a2fed075dabd5f1cd9efa242589d75b2785e1fee98c47 AS jdk-arm64
 FROM jdk-${TARGETARCH} AS jdk
 
 FROM alpine:latest AS unpacker
@@ -66,7 +66,7 @@ RUN mkdir -p /opt/spark/jars/ && \
     curl -k -L $MAVEN_REPO/io/vertx/vertx-uri-template/$vertx_version/vertx-uri-template-$vertx_version.jar --output $SPARK_JARS_DIR/vertx-uri-template-$vertx_version.jar && \
     curl -k -L $MAVEN_REPO/org/apache/ws/xmlschema/xmlschema-core/$xmlschema_version/xmlschema-core-$xmlschema_version.jar --output $SPARK_JARS_DIR/xmlschema-core-$xmlschema_version.jar
 
-FROM apache/spark:4.3.0
+FROM apache/spark:4.3.0-scala2.13-java21-ubuntu@sha256:f082889c966c834a5e3a2fed075dabd5f1cd9efa242589d75b2785e1fee98c47
 
 ENV SPARK_JARS_DIR=/opt/spark/jars
 

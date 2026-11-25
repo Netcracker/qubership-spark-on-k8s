@@ -19,6 +19,7 @@ jobs:
           - name: qubership-tests-spark-streaming-checkpoint
           - name: qubership-tests-spark-streaming-word-count
           - name: qubership-tests-spark-word-count-s3
+          - name: qubership-tests-spark-hive-connection
     if: github.event.ref_type == 'branch' || github.event.ref_type == 'tag'
     runs-on: ubuntu-latest
     steps:

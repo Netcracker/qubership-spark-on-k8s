@@ -56,8 +56,6 @@ History server replicas
     {{ printf "%s:%s" (.Values.image.repository) (.Values.image.tag) }}
 {{- end -}}
 
-{{- /* Qubership custom change: ingressEnabled and gatewayEnabled helpers. When ingress.enabled or gateway.enabled is null, the helpers derive the choice from the presence of the Gateway API CRDs; upstream has no equivalent helper. */ -}}
-
 {{/*
 Whether to render the legacy Ingress resource. Uses .Values.ingress.enabled when explicitly set
 (true/false); otherwise falls back to whether Gateway API CRDs are NOT available in the cluster.

@@ -95,6 +95,8 @@ failure. Mark every new local edit, and carry the markers through a re-sync:
 
 A marker records what the local edit is and why. It does not record where upstream stopped, so the diff
 against the upstream file remains the inventory, and the markers only protect edits made from now on.
+Markers apply to files that come from upstream; files this repository owns, such as the history server
+chart templates, need none.
 
 The baseline table records the state this runbook was last verified against. Read the current values
 from the files before changing anything; the numbers move, the locations do not.
@@ -103,7 +105,8 @@ from the files before changing anything; the numbers move, the locations do not.
 
 | What | Pinned value | Defined in |
 | --- | --- | --- |
-| Spark | `4.3.0` | `spark-customized/Dockerfile` (both `FROM` lines), sample apps, docs, examples |
+| Spark version | `4.3.0` | sample apps, docs, examples, `sparkVersion` in the CRs |
+| Spark base image | `apache/spark:4.3.0-scala2.13-java21-ubuntu` plus its index digest | `spark-customized/Dockerfile` (both `FROM` lines) |
 | spark-operator controller image | `2.6.0` | `spark-operator-image/Dockerfile` (both `FROM` lines) |
 | spark-operator chart | `2.6.0` | `docker-transfer/Dockerfile`, `create_chart.sh`, `chart/helm/spark-on-k8s/Chart.yaml` |
 | Bundled JDK, amd64 only | Temurin `21.0.13.1_2-jdk-jammy` | both Dockerfiles |
@@ -122,9 +125,12 @@ number follows from them, so choose the pair before editing a file.
 
 1. Pick the Spark candidate: the newest GA release on the
    [apache/spark releases](https://github.com/apache/spark/releases) page that has an `apache/spark` image
-   tag for the Scala 2.13, Java 21, Ubuntu flavor both Dockerfiles use. Confirm the architectures with
-   `docker manifest inspect apache/spark:<version>`; the images are published for amd64 and arm64, and a
-   tag that covers only one of them is not usable.
+   for the Scala 2.13, Java 21, Ubuntu flavor both Dockerfiles use, for example
+   `4.3.0-scala2.13-java21-ubuntu`. Name the flavor: the short `apache/spark:<version>` alias resolves to
+   the Python flavor, so a bare version silently changes the base image. Confirm both architectures and
+   read the index digest with
+   `docker buildx imagetools inspect apache/spark:<version>-scala2.13-java21-ubuntu`; pin the tag and the
+   digest together.
 2. Pick the operator candidate: the newest release on the
    [kubeflow/spark-operator releases](https://github.com/kubeflow/spark-operator/releases) whose supported
    Spark versions include the Spark candidate; the release notes or the compatibility table in the
@@ -203,8 +209,9 @@ guardrail. In an interactive run, ask instead of stopping.
 
 ### Update Spark
 
-1. Change `FROM apache/spark:<version>` in `spark-customized/Dockerfile`, in the main stage and in the
-   `jdk-arm64` stage.
+1. Change both `FROM apache/spark:` lines in `spark-customized/Dockerfile`, the `jdk-arm64` stage and the
+   main stage, to the tag and digest chosen in `Prepare the update.1`. The tag names the flavor; the digest
+   changes with the version, so the two move together.
 2. Re-sync `spark-customized/entrypoint.sh`. It is a fork of the `spark-docker` entrypoint for the same
    version, so diff it against
    `https://github.com/apache/spark-docker/blob/master/<version>/scala2.13-java21-ubuntu/entrypoint.sh`,
@@ -225,12 +232,12 @@ guardrail. In an interactive run, ask instead of stopping.
    PPA, so a change of the base OS or of the Python version breaks the URLs. The image is built for amd64
    only, as configured in `.github/docker-build-config.json`.
 6. Re-check the JDK override. Both images replace the bundled JDK with Temurin on amd64 and copy
-   `/opt/java/openjdk` over the base image. Delete the three `jdk-*` stages and the `COPY --from=jdk` line
-   once the base images ship Temurin 21.0.13.1 or later. While the override stays, bump its tag for CVE
-   fixes in both Dockerfiles and keep the `jdk-arm64` stage on the same base image as the main stage. arm64
-   keeps the JDK from the base image, so the two architectures differ on purpose. Record the new version in
-   the `Bundled JDK` row of the baseline table and in `AGENTS.md`, which names Temurin in the operator
-   bullet and in the Spark image layering section.
+   `/opt/java/openjdk` over the base image. Delete the `jdk-amd64`, `jdk-arm64` and `jdk` stages and the
+   `COPY --from=jdk` line once the base images ship Temurin 21.0.13.1 or later. While the override stays,
+   bump its tag for CVE fixes in both Dockerfiles and keep the `jdk-arm64` stage on the same base image as
+   the main stage. arm64 keeps the JDK from the base image, so the two architectures differ on purpose.
+   Record the new version in the `Bundled JDK` row of the baseline table and in `AGENTS.md`, which names
+   Temurin in the operator bullet and in the Spark image layering section.
 7. Run a CVE pass on the built image. Close patch-level findings with another override JAR in both
    Dockerfiles; the patched JAR set in the baseline table is the current example. When the set changes,
    update both JAR rows of the baseline table and `AGENTS.md`, which lists the JAR families in both image
@@ -300,18 +307,45 @@ guardrail. In an interactive run, ask instead of stopping.
    (operator version, `apache/spark` base image, the `create_chart.sh` tarball) and
    [troubleshoot-spark-on-k8s SKILL.md](/agent-packages/troubleshoot-spark-on-k8s/.apm/skills/troubleshoot-spark-on-k8s/SKILL.md)
    (the operator version the guardrails are grounded in, and the webhook log line if it moved). Edit
-   `docs/public/troubleshooting-guide.md` rather than the copy under `references/`: the sync workflow
-   overwrites the copy on every push to `main`.
+   `docs/public/troubleshooting-guide.md` rather than the copy under `references/`:
+   `sync-troubleshooting-skill.yml` runs on every push to `main`, opens a pull request that rewrites the
+   copy, and enables auto-merge.
 4. When you add an agent package, register it in `apm.yml`. If the package copies files out of `docs/` the
    way the troubleshooting references do, add the copies to the jscpd ignore list
    (`.github/linters/.jscpd.json`).
+5. Know where each image is registered before adding, renaming or removing one. A built image appears in:
+   * `.github/docker-build-config.json`: the build components and their platforms, read by the release
+     workflow;
+   * `.github/workflows/basic-images.yml` and `advanced-images.yml`: the matrices that build and publish
+     the stage 1 and stage 2 images;
+   * `.github/workflows/test-images.yml`: the sample application images, tagged by branch or release name
+     rather than through `release-images.yaml`;
+   * `.github/workflows/clean.yml`: the cleanup matrix that deletes package versions when a branch or tag
+     goes away;
+   * `chart/helm/spark-on-k8s/release-images.yaml`: the image reference with its `:main` tag, rewritten at
+     release time;
+   * `.github/helm-charts-release-config.yaml`: the images the release action rewrites.
+
+   A missing entry breaks nothing, which is why it drifts: the image still builds, but its tag is never
+   rewritten or its package versions are never cleaned up. `clean.yml` was missing the entry for
+   `qubership-tests-spark-hive-connection`, so that image's versions outlived deleted branches.
 
 ### Verify the update
 
 1. Build the images: stage 1 for amd64 and arm64, stage 2 (Python) for amd64, as configured in
    `.github/docker-build-config.json`, then the five sample application images in
    `.github/workflows/test-images.yml`, which take the new Spark images as their base.
-2. Assemble and render the chart: run `./create_chart.sh`, then `helm template ./target/chart/spark-on-k8s`.
+2. Render the chart from the transfer image, not from `./create_chart.sh`. The build applies patches the
+   local script does not: `update_charts.py` rewrites the controller and webhook security context, and the
+   schemas and image tags are synced. Rendering the local output shows unpatched upstream templates, so the
+   OpenShift check below cannot pass there.
+
+   ```sh
+   docker create --name transfer qubership-spark-on-k8s-transfer:<tag>
+   docker cp transfer:/chart ./target/chart-transfer && docker rm transfer
+   helm template qubership-spark-on-k8s ./target/chart-transfer/spark-on-k8s
+   ```
+
    Render the guarded branches too, because the defaults leave most of them out:
    `--api-versions gateway.networking.k8s.io/v1` exercises the HTTPRoute paths, and
    `--api-versions security.openshift.io/v1` exercises the OpenShift security-context branch, which
@@ -319,12 +353,20 @@ guardrail. In an interactive run, ask instead of stopping.
    history server with `oauth2Proxy`, the thrift server, the integration tests and the status
    provisioner in the values used for the render.
 3. Run the Robot suites with the tags `test_app` (plus `java`, `py`, `long-pi`), `history-server`,
-   `volcano`, `hive-connection`, `hive-seaweedfs` and `alerts`. CI does not run these suites, so this check
-   is manual.
+   `volcano`, `hive-connection`, `hive-seaweedfs` and `alerts`, plus `spark_images` from
+   `image_tests.robot` and `spark_container_hardening` from `testapp.robot`, which matter most after an
+   image bump. CI does not run these suites, so this check is manual.
 4. Check the functional paths by hand: submit a `SparkApplication`, open the history server, run a query
    on the thrift server, log in through oauth2-proxy and Keycloak, and confirm that the status provisioner
    reports the deployment as complete.
-5. Refresh the baseline table at the top of this section. It records what was verified, and a stale row
+5. All pipeline checks pass: super-linter on the pull request, the basic image build (stage 1, amd64 and
+   arm64), the advanced build (the Python image) and the manually dispatched test image build. Nothing
+   else runs the Robot suites.
+6. Sweep the old values one last time and decide on every hit:
+   `git grep -n "<old spark version>"` and `git grep -n "<old operator version>"`, plus the JAR versions
+   swept in `Update Spark.7`. The only acceptable leftovers are historical notes, such as the drift
+   example in `Update spark-operator.3`.
+7. Refresh the baseline table at the top of this section. It records what was verified, and a stale row
    turns the next run into guesswork.
 
 ## Useful links

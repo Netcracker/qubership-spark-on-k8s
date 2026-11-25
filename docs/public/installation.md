@@ -1055,7 +1055,7 @@ Status Provisioner is a component for providing the overall service status.
 ```yaml
 statusProvisioner:
   enabled: true
-  dockerImage: ghcr.io/netcracker/qubership-deployment-status-provisioner:0.2.11
+  image: ghcr.io/netcracker/qubership-deployment-status-provisioner:0.2.11
   lifetimeAfterCompletion: 600
   podReadinessTimeout: 300
   integrationTestsTimeout: 300

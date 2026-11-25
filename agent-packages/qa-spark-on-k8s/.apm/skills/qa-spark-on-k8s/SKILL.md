@@ -7,7 +7,7 @@ description: Plan and verify testing of a Qubership Spark on Kubernetes change â
 
 `chart/helm/spark-on-k8s` deploys the Kubeflow **spark-operator** (declared `2.6.0`) plus
 optional history server, thrift server and test runner. Spark images are built from
-`apache/spark:4.3.0` (`spark-customized`) and `spark-customized-py`.
+`apache/spark:4.3.0-scala2.13-java21-ubuntu` (`spark-customized`) and `spark-customized-py`.
 
 **Chart assembly matters.** `./create_chart.sh` builds `./target/chart/spark-on-k8s/` and
 downloads the upstream operator chart tarball â€” pinned at `v2.6.0` in the script and declared
