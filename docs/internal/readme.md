@@ -86,6 +86,16 @@ One update is one pull request, with a commit per concern: operator chart, opera
 supporting images and release plumbing, documentation. Cite a step as `<section>.<step>`, for example
 `Update Spark.2`, when reporting progress or resuming after an interruption.
 
+Local edits inside files that come from upstream are mostly unmarked, so a re-sync can drop them without a
+failure. Mark every new local edit, and carry the markers through a re-sync:
+
+* `# QB change: <description>` in a shell script;
+* `## Qubership custom template. <description>` at the top of a template that does not exist upstream;
+* `{{- /* Qubership custom change: <description> */ -}}` inside a Helm template that is otherwise upstream.
+
+A marker records what the local edit is and why. It does not record where upstream stopped, so the diff
+against the upstream file remains the inventory, and the markers only protect edits made from now on.
+
 The baseline table records the state this runbook was last verified against. Read the current values
 from the files before changing anything; the numbers move, the locations do not.
 
@@ -105,12 +115,58 @@ from the files before changing anything; the numbers move, the locations do not.
 | Status provisioner | `0.2.11` | `chart/helm/spark-on-k8s/values.yaml` and `values.schema.json` |
 | Chart version | `1.0.0` | `chart/helm/spark-on-k8s/Chart.yaml`, `chart-version` in the release workflow |
 
+### Prepare the update
+
+The procedure has two inputs, the target Spark version and the target Spark Operator version. Every other
+number follows from them, so choose the pair before editing a file.
+
+1. Pick the Spark candidate: the newest GA release on the
+   [apache/spark releases](https://github.com/apache/spark/releases) page that has an `apache/spark` image
+   tag for the Scala 2.13, Java 21, Ubuntu flavor both Dockerfiles use. Confirm the architectures with
+   `docker manifest inspect apache/spark:<version>`; the images are published for amd64 and arm64, and a
+   tag that covers only one of them is not usable.
+2. Pick the operator candidate: the newest release on the
+   [kubeflow/spark-operator releases](https://github.com/kubeflow/spark-operator/releases) whose supported
+   Spark versions include the Spark candidate; the release notes or the compatibility table in the
+   repository state the range. The bundled client is evidence of what the operator was built against, not
+   a requirement to match: operator `2.6.0` is built on Spark `4.2.1` while the images here ship `4.3.0`.
+   Read the bundled version from `/opt/spark/jars` in
+   `ghcr.io/kubeflow/spark-operator/controller:<version>`, where the `spark-core_2.13-<version>.jar` names
+   it. The controller image and the chart tarball come from the same tag.
+3. Treat the two as a pair. A Spark release that the chosen operator does not support is not a target, and
+   building the operator image on a Spark base that no operator release supports is a separate change with
+   its own testing, not part of this procedure.
+4. Check the operator chart surface this distribution depends on: the values under `controller.*`,
+   `webhook.*`, `spark.*`, `prometheus.*` and `certManager.*` in
+   `chart/helm/spark-on-k8s/values.yaml`, and the controller and webhook deployment layout that
+   `docker-transfer/update_charts.py` patches. Check the CRD as well: when the release serves a different
+   `SparkApplication` version, the sample CRs and
+   `spark-service-integration-tests/robot/tests/test-app/testapp.robot`, which hardcodes `v1beta2`, move
+   with it.
+5. Check the Spark settings for renames. `chart/helm/spark-on-k8s/values.yaml`, `spark-history-server/`,
+   `spark-thrift-server/` and the sample applications pass `spark.eventLog.*`, `spark.history.*`,
+   `spark.kubernetes.*` and S3A keys; compare them with the migration notes of the target release.
+6. Create one branch and one pull request, and record the pair and the checks that qualified it in the
+   description. Nothing in the repository records which upstream release a local chart render used.
+
+**Blocker rule for unattended runs.** Stop, leave the work on the branch without a pull request, and report
+the check that failed together with the versions considered, when any of these is true:
+
+* the Spark candidate has no multi-arch `apache/spark` image tag;
+* no operator release covers the Spark candidate, or its controller image or chart tarball is missing;
+* the operator chart no longer exposes the values or the deployment layout this distribution depends on,
+  and closing the gap needs a design decision rather than a port;
+* an upstream value that this distribution documents or overrides was removed with no replacement;
+* a build fails in a way that needs a decision about a new JAR family rather than a version bump.
+
+Do not work around a blocker to make a check pass: do not rebase the operator image on an unsupported Spark
+base, do not relax `docker-transfer/update_charts.py`, do not pin an unreleased tag, and do not delete a
+guardrail. In an interactive run, ask instead of stopping.
+
 ### Update spark-operator
 
-1. Check the [community releases](https://github.com/kubeflow/spark-operator/releases). The controller
-   image tag and the chart tarball come from the same release, so bump them together. If the new Spark
-   has no matching operator release, you may have to build the operator image from scratch on the new
-   Spark base instead of skipping the bump.
+1. Bump the controller image and the chart tarball together, from the release chosen in
+   `Prepare the update.2`. They come from the same tag, so they share one version number.
 2. In `spark-operator-image/Dockerfile`, change both `FROM ghcr.io/kubeflow/spark-operator/controller:<version>`
    lines: the `jdk-arm64` stage at the top and the main build stage. Changing only the main stage leaves
    arm64 builds with the old JDK. Review that image's own `rm` list and patched-JAR set the same way as
@@ -172,9 +228,14 @@ from the files before changing anything; the numbers move, the locations do not.
    `/opt/java/openjdk` over the base image. Delete the three `jdk-*` stages and the `COPY --from=jdk` line
    once the base images ship Temurin 21.0.13.1 or later. While the override stays, bump its tag for CVE
    fixes in both Dockerfiles and keep the `jdk-arm64` stage on the same base image as the main stage. arm64
-   keeps the JDK from the base image, so the two architectures differ on purpose.
+   keeps the JDK from the base image, so the two architectures differ on purpose. Record the new version in
+   the `Bundled JDK` row of the baseline table and in `AGENTS.md`, which names Temurin in the operator
+   bullet and in the Spark image layering section.
 7. Run a CVE pass on the built image. Close patch-level findings with another override JAR in both
-   Dockerfiles; the patched JAR set in the baseline table is the current example.
+   Dockerfiles; the patched JAR set in the baseline table is the current example. When the set changes,
+   update both JAR rows of the baseline table and `AGENTS.md`, which lists the JAR families in both image
+   bullets and the removed and patched versions in the Spark image layering section.
+   `git grep -n "<old jar version>"` finds every copy.
 8. Sweep the Spark version through the fixtures and docs. The test image copies the example CRs, so a stale
    `sparkVersion` there means the tests exercise the old Spark:
 
@@ -201,7 +262,8 @@ from the files before changing anything; the numbers move, the locations do not.
    oauth2-proxy container in `templates/deployment.yaml` and the `oauth2Proxy` block of `values.yaml`. Keep
    the local additions: the Gateway API `httproute.yaml` and `oauth2Proxy.gateway` values, the
    `ingressEnabled` and `gatewayEnabled` helpers in `_helpers.tpl` with their `null` semantics, and the
-   `requiredSecretKeys` and `client_id` handling.
+   `requiredSecretKeys` and `client_id` handling. Mark every local edit you carry over with the marker rule
+   above, and drop a marker only when upstream ships the same change.
 3. Integration test base image: bump `ghcr.io/netcracker/qubership-docker-integration-tests` in
    `spark-service-integration-tests/docker/Dockerfile` to the [latest Qubership release](https://github.com/Netcracker/qubership-docker-integration-tests).
 4. Status provisioner: bump `statusProvisioner.image` in `chart/helm/spark-on-k8s/values.yaml` and the
@@ -250,6 +312,8 @@ from the files before changing anything; the numbers move, the locations do not.
 4. Check the functional paths by hand: submit a `SparkApplication`, open the history server, run a query
    on the thrift server, log in through oauth2-proxy and Keycloak, and confirm that the status provisioner
    reports the deployment as complete.
+5. Refresh the baseline table at the top of this section. It records what was verified, and a stale row
+   turns the next run into guesswork.
 
 ## Useful links
 
