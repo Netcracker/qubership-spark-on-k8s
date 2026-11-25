@@ -17,7 +17,7 @@ The deployable artifact is a Helm chart assembled from multiple sub-charts. It i
 # Output: ./target/chart/spark-on-k8s/
 ```
 
-This copies `chart/helm/*`, downloads the upstream spark-operator v2.1.0 chart, and merges in the sub-charts from `spark-history-server/`, `spark-service-integration-tests/`, and `spark-thrift-server/`.
+This copies `chart/helm/*`, downloads the upstream spark-operator v2.6.0 chart, and merges in the sub-charts from `spark-history-server/`, `spark-service-integration-tests/`, and `spark-thrift-server/`.
 
 ### Build Docker images
 
@@ -25,7 +25,7 @@ Images are built via GitHub Actions using `.github/docker-build-config.json`. Fo
 
 - Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.3.0`, adds AWS SDK, Hadoop AWS, and overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions)
 - Python variant: `spark-customized/py/Dockerfile` (extends the main image, adds Python 3.14)
-- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.6.0`, adds AWS SDK, Hadoop AWS, overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions, upgrades jersey-client, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 for CVE fixes, adds gosu and gnupg)
+- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.6.0`, adds AWS SDK, Hadoop AWS, overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 for CVE fixes, adds gosu and gnupg)
 - Test runner image: `spark-service-integration-tests/docker/Dockerfile` (builds on `ghcr.io/netcracker/qubership-docker-integration-tests:0.5.8`, copies Robot Framework suites and requirements)
 
 ### Build sample apps (Maven)
@@ -65,7 +65,7 @@ The main chart `chart/helm/spark-on-k8s/` depends on four sub-charts (assembled 
 
 | Sub-chart | Source | Condition |
 |---|---|---|
-| `spark-operator` | Downloaded from kubeflow/spark-operator v2.1.0 | always |
+| `spark-operator` | Downloaded from kubeflow/spark-operator v2.6.0 | always |
 | `spark-history-server` | `spark-history-server/chart/helm/` | `spark-history-server.enabled` |
 | `spark-thrift-server` | `spark-thrift-server/chart/helm/` | `spark-thrift-server.enabled` |
 | `spark-integration-tests` | `spark-service-integration-tests/chart/helm/` | `spark-integration-tests.enabled` |

@@ -10,9 +10,9 @@ optional history server, thrift server and test runner. Spark images are built f
 `apache/spark:4.3.0` (`spark-customized`) and `spark-customized-py`.
 
 **Chart assembly matters.** `./create_chart.sh` builds `./target/chart/spark-on-k8s/` and
-downloads the upstream operator chart tarball — currently pinned at `v2.1.0` in the script
-while `Chart.yaml` declares `2.6.0`. After assembly, verify the rendered dependency version
-rather than trusting either number.
+downloads the upstream operator chart tarball — pinned at `v2.6.0` in the script and declared
+as `2.6.0` in `Chart.yaml`. After assembly, verify the rendered dependency version rather than
+trusting either number.
 
 ---
 
