@@ -158,6 +158,12 @@ Spark image built here. Every other number follows from those two, so identify t
 5. Check the Spark settings for renames. `chart/helm/spark-on-k8s/values.yaml`, `spark-history-server/`,
    `spark-thrift-server/` and the sample applications pass `spark.eventLog.*`, `spark.history.*`,
    `spark.kubernetes.*` and S3A keys; compare them with the migration notes of the target release.
+   When the operator submits an application, the driver pod is built by the Spark client in the operator
+   image, and the executor pods are built by the driver, which runs the target Spark. A driver-side
+   `spark.kubernetes.*` option or pod-spec default that is new in the target release therefore has no
+   effect on operator-submitted applications until the operator bundles that release; executor-side
+   options work. Do not adopt such a driver option in this distribution's values or samples on the
+   strength of the release notes alone.
 6. Create one branch and one pull request, and record the target Spark version, the operator version, the
    Spark that operator bundles and the checks that qualified them in the description. Nothing in the
    repository records which upstream release a local chart render used.
