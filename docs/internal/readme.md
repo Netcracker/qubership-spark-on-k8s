@@ -106,7 +106,7 @@ from the files before changing anything; the numbers move, the locations do not.
 | What | Pinned value | Defined in |
 | --- | --- | --- |
 | Spark version | `4.3.0` | sample apps, docs, examples, `sparkVersion` in the CRs |
-| Spark base image | `apache/spark:4.3.0-scala2.13-java21-ubuntu` | `spark-customized/Dockerfile` (both `FROM` lines) |
+| Spark base image | `apache/spark:4.3.0-scala2.13-java21-ubuntu`, the flavor without Python on purpose; Python comes from the `-py` image | `spark-customized/Dockerfile` (both `FROM` lines) |
 | spark-operator controller image | `2.6.0` | `spark-operator-image/Dockerfile` (both `FROM` lines) |
 | spark-operator chart | `2.6.0` | `docker-transfer/Dockerfile`, `create_chart.sh`, `chart/helm/spark-on-k8s/Chart.yaml` |
 | Bundled JDK, amd64 only | Temurin `21.0.13.1_2-jdk-jammy` | both Dockerfiles |
@@ -229,7 +229,10 @@ guardrail. In an interactive run, ask instead of stopping.
    not an oversight.
 5. Review the Python base in `spark-customized/py/Dockerfile`. It installs jammy debs from the deadsnakes
    PPA, so a change of the base OS or of the Python version breaks the URLs. The image is built for amd64
-   only, as configured in `.github/docker-build-config.json`.
+   only, as configured in `.github/docker-build-config.json`. The main image has no system Python, and
+   `dpkg -R --install` does not fetch missing dependencies, so a library the debs need but the base lacks
+   fails the build with an unmet-dependency error. Add the package to the `apt-get install` line in that
+   Dockerfile; do not switch the main image to the Python flavor to make the build pass.
 6. Re-check the JDK override. Both images replace the bundled JDK with Temurin on amd64 and copy
    `/opt/java/openjdk` over the base image. Delete the `jdk-amd64`, `jdk-arm64` and `jdk` stages and the
    `COPY --from=jdk` line once the base images ship Temurin 21.0.13.1 or later. While the override stays,
