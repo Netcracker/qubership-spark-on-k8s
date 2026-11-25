@@ -72,9 +72,10 @@ The main chart `chart/helm/spark-on-k8s/` depends on four sub-charts (assembled 
 
 ### Spark image layering
 
-`spark-customized/Dockerfile` is a two-stage build:
-1. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs from Maven Central
-2. **Main stage** (`apache/spark:4.3.0-scala2.13-java21-ubuntu`) — removes bundled Netty 4.2.13, Jackson 2.21.2, netty-tcnative 2.0.76.Final, zstd-jni 1.5.7-7, snappy-java 1.1.10.8, lz4-java 1.11.0, Vert.x 4.5.26 and xmlschema-core 2.3.1 JARs and copies in patched versions (Netty 4.2.18, Jackson 2.21.8, netty-tcnative 2.0.84, zstd-jni 1.5.7-25, snappy-java 1.1.10.10, lz4-java 1.11.4, Vert.x 4.5.36, xmlschema-core 2.3.3) and S3 JARs, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 (CVE fixes), upgrades curl, adds `gosu`, copies `entrypoint.sh`
+`spark-customized/Dockerfile` is a multi-stage build:
+1. **JDK stages** (`jdk-amd64`, `jdk-arm64`, `jdk`) — select the JDK per architecture: Temurin 21.0.13.1 on amd64, the base image's own JDK on arm64. Remove them once the base image ships Temurin 21.0.13.1 or later
+2. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs from Maven Central
+3. **Main stage** (`apache/spark:4.3.0-scala2.13-java21-ubuntu`) — removes bundled Netty 4.2.13, Jackson 2.21.2, netty-tcnative 2.0.76.Final, zstd-jni 1.5.7-7, snappy-java 1.1.10.8, lz4-java 1.11.0, Vert.x 4.5.26 and xmlschema-core 2.3.1 JARs and copies in patched versions (Netty 4.2.18, Jackson 2.21.8, netty-tcnative 2.0.84, zstd-jni 1.5.7-25, snappy-java 1.1.10.10, lz4-java 1.11.4, Vert.x 4.5.36, xmlschema-core 2.3.3) and S3 JARs, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 (CVE fixes), upgrades curl, adds `gosu`, copies `entrypoint.sh`
 
 The custom `entrypoint.sh` handles:
 - JCEKS credential file creation for S3 authentication at runtime
