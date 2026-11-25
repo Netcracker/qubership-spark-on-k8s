@@ -259,11 +259,23 @@ guardrail. In an interactive run, ask instead of stopping.
    `.github/helm-charts-release-config.yaml` expands.
 2. When the upstream [oauth2-proxy chart](https://github.com/oauth2-proxy/manifests/tree/main/helm/oauth2-proxy)
    changes, re-sync `spark-history-server/chart/helm/spark-history-server/templates/oauth2Proxy/`, the
-   oauth2-proxy container in `templates/deployment.yaml` and the `oauth2Proxy` block of `values.yaml`. Keep
-   the local additions: the Gateway API `httproute.yaml` and `oauth2Proxy.gateway` values, the
-   `ingressEnabled` and `gatewayEnabled` helpers in `_helpers.tpl` with their `null` semantics, and the
-   `requiredSecretKeys` and `client_id` handling. Mark every local edit you carry over with the marker rule
-   above, and drop a marker only when upstream ships the same change.
+   oauth2-proxy container in `templates/deployment.yaml` and the `oauth2Proxy` block of `values.yaml`.
+   Nothing records which release the fork was taken from: `7.12.2` is the closest match, and parts of the
+   deployment template already carry code from the `10.x` line. Diff against that base and against the
+   release you are syncing from before overwriting anything, and keep the local edits:
+
+   * values nested under `oauth2Proxy.`;
+   * the `oauth2Proxy.enabled` guards on the secret and config templates;
+   * `secretsAsFiles`, the `or .Values.secretsAsFiles` condition in `secret.yaml`, and the
+     `--client-secret-file` and `--cookie-secret-file` arguments;
+   * `proxyVarsAsSecrets: false` against an upstream `true`;
+   * the `gateway` values and the `ingressEnabled` and `gatewayEnabled` helpers with their `null`
+     semantics, which replace upstream `gatewayApi`;
+   * the `oauth2-proxy.redis.enabled` check in `configmap-wait-for-redis.yaml`.
+
+   `requiredSecretKeys` and the `client_id` config option are upstream, not local edits. Mark every local
+   edit you carry over with the marker rule above, and drop a marker only when upstream ships the same
+   change.
 3. Integration test base image: bump `ghcr.io/netcracker/qubership-docker-integration-tests` in
    `spark-service-integration-tests/docker/Dockerfile` to the [latest Qubership release](https://github.com/Netcracker/qubership-docker-integration-tests).
 4. Status provisioner: bump `statusProvisioner.image` in `chart/helm/spark-on-k8s/values.yaml` and the
