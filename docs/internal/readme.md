@@ -341,10 +341,17 @@ guardrail. In an interactive run, ask instead of stopping.
    OpenShift check below cannot pass there.
 
    ```sh
-   docker create --name transfer qubership-spark-on-k8s-transfer:<tag>
+   docker rm -f transfer 2>/dev/null || true
+   docker create --name transfer spark-on-k8s-transfer:test /none
    docker cp transfer:/chart ./target/chart-transfer && docker rm transfer
-   helm template qubership-spark-on-k8s ./target/chart-transfer/spark-on-k8s
+   helm template qubership-spark-on-k8s \
+     ./target/chart-transfer/helm/spark-on-k8s
    ```
+
+   The image is the one built in `Update spark-operator.4`; for a released build, substitute
+   `ghcr.io/netcracker/qubership-spark-on-k8s-transfer:<tag>`. The image is `FROM scratch` with no command,
+   so `docker create` needs the `/none` argument even though the container never starts, and the chart
+   lands under `helm/` because the image copies the repository's `chart/` directory to `/chart`.
 
    Render the guarded branches too, because the defaults leave most of them out:
    `--api-versions gateway.networking.k8s.io/v1` exercises the HTTPRoute paths, and
