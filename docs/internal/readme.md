@@ -78,9 +78,9 @@ Spark images are pretty large and include pretty big JARs. To avoid unnecessary 
 
 ## Evergreen strategy
 
-This is the runbook for bringing the distribution up to a new upstream release. It also feeds the
-update skill, so keep it accurate: every step names the files to change and the check that proves the
-change works.
+This is the runbook for bringing the distribution up to a new upstream release. Both people and
+automated runs follow it step by step, so keep it accurate: every step names the files to change and the
+check that proves the change works.
 
 One update is one pull request, with a commit per concern: operator chart, operator image, Spark image,
 supporting images and release plumbing, documentation. Cite a step as `<section>.<step>`, for example
