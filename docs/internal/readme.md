@@ -120,8 +120,10 @@ from the files before changing anything; the numbers move, the locations do not.
 
 ### Prepare the update
 
-The procedure has two inputs, the target Spark version and the target Spark Operator version. Every other
-number follows from them, so choose the pair before editing a file.
+The procedure has two inputs, the target Spark version and the target Spark Operator version. Both are the
+newest available release, and the two are expected to name different Spark versions: the operator submits
+applications with the client bundled in its controller image, while the applications themselves run the
+Spark image built here. Every other number follows from those two, so identify them before editing a file.
 
 1. Pick the Spark candidate: the newest GA release on the
    [apache/spark releases](https://github.com/apache/spark/releases) page that has an `apache/spark` image
@@ -132,16 +134,20 @@ number follows from them, so choose the pair before editing a file.
    architectures with
    `docker manifest inspect apache/spark:<version>-scala2.13-java21-ubuntu`.
 2. Pick the operator candidate: the newest release on the
-   [kubeflow/spark-operator releases](https://github.com/kubeflow/spark-operator/releases) whose supported
-   Spark versions include the Spark candidate; the release notes or the compatibility table in the
-   repository state the range. The bundled client is evidence of what the operator was built against, not
-   a requirement to match: operator `2.6.0` is built on Spark `4.2.1` while the images here ship `4.3.0`.
-   Read the bundled version from `/opt/spark/jars` in
-   `ghcr.io/kubeflow/spark-operator/controller:<version>`, where the `spark-core_2.13-<version>.jar` names
-   it. The controller image and the chart tarball come from the same tag.
-3. Treat the two as a pair. A Spark release that the chosen operator does not support is not a target, and
-   building the operator image on a Spark base that no operator release supports is a separate change with
-   its own testing, not part of this procedure.
+   [kubeflow/spark-operator releases](https://github.com/kubeflow/spark-operator/releases) page. Do not filter
+   it by the Spark version it bundles or tests against, and do not go looking for a supported-version range:
+   upstream publishes none for current releases. The README version matrix stops at `2.3.x`, the release
+   notes only name the Spark the runtime was upgraded to, and the code enforces no upper bound at all, only
+   Spark `< 3.0.0` for pod templates. Operator `2.6.0` is built on Spark `4.2.1` while this distribution
+   ships `4.3.0`, and that is the normal state, not a defect. Read the bundled version from `/opt/spark/jars`
+   in `ghcr.io/kubeflow/spark-operator/controller:<version>`, where the `spark-core_2.13-<version>.jar` names
+   it, so the mismatch can be stated in the pull request. The controller image and the chart tarball come from
+   the same tag.
+3. Keep the two Spark versions apart. The operator image inherits the Spark of its controller image and stays
+   that way; the driver and executor images run the Spark chosen in step 1. Replacing the bundled Spark in the
+   operator image would force a match that nothing requires, so it is a separate change with its own testing,
+   not part of this procedure. What qualifies the pair is the verification section: the newest operator either
+   runs the newest Spark applications here or it does not, and the run records which.
 4. Check the operator chart surface this distribution depends on: the values under `controller.*`,
    `webhook.*`, `spark.*`, `prometheus.*` and `certManager.*` in
    `chart/helm/spark-on-k8s/values.yaml`, and the controller and webhook deployment layout that
@@ -152,22 +158,26 @@ number follows from them, so choose the pair before editing a file.
 5. Check the Spark settings for renames. `chart/helm/spark-on-k8s/values.yaml`, `spark-history-server/`,
    `spark-thrift-server/` and the sample applications pass `spark.eventLog.*`, `spark.history.*`,
    `spark.kubernetes.*` and S3A keys; compare them with the migration notes of the target release.
-6. Create one branch and one pull request, and record the pair and the checks that qualified it in the
-   description. Nothing in the repository records which upstream release a local chart render used.
+6. Create one branch and one pull request, and record the target Spark version, the operator version, the
+   Spark that operator bundles and the checks that qualified them in the description. Nothing in the
+   repository records which upstream release a local chart render used.
 
 **Blocker rule for unattended runs.** Stop, leave the work on the branch without a pull request, and report
 the check that failed together with the versions considered, when any of these is true:
 
 * the Spark candidate has no multi-arch `apache/spark` image tag;
-* no operator release covers the Spark candidate, or its controller image or chart tarball is missing;
+* the operator candidate is newer than the pin but its controller image or chart tarball is missing or not
+  published yet;
+* the newest operator does not run the Spark candidate: an application fails to submit or finishes with
+  errors because of the version difference, and no setting in this distribution closes the gap;
 * the operator chart no longer exposes the values or the deployment layout this distribution depends on,
   and closing the gap needs a design decision rather than a port;
 * an upstream value that this distribution documents or overrides was removed with no replacement;
 * a build fails in a way that needs a decision about a new JAR family rather than a version bump.
 
-Do not work around a blocker to make a check pass: do not rebase the operator image on an unsupported Spark
-base, do not relax `docker-transfer/update_charts.py`, do not pin an unreleased tag, and do not delete a
-guardrail. In an interactive run, ask instead of stopping.
+Do not work around a blocker to make a check pass: do not replace the Spark bundled in the operator image to
+force a match, do not relax `docker-transfer/update_charts.py`, do not pin an unreleased tag, and do not
+delete a guardrail. In an interactive run, ask instead of stopping.
 
 ### Update spark-operator
 
@@ -369,7 +379,10 @@ guardrail. In an interactive run, ask instead of stopping.
 3. Run the Robot suites with the tags `test_app` (plus `java`, `py`, `long-pi`), `history-server`,
    `volcano`, `hive-connection`, `hive-seaweedfs` and `alerts`, plus `spark_images` from
    `image_tests.robot` and `spark_container_hardening` from `testapp.robot`, which matter most after an
-   image bump. CI does not run these suites, so this check is manual.
+   image bump. CI does not run these suites, so this check is manual. This is also the check that qualifies
+   the operator against the Spark version it does not bundle: an application submitted by the operator and
+   running on the new image is the evidence, and a failure here is the blocker listed in the blocker rule
+   under `Prepare the update`.
 4. Check the functional paths by hand: submit a `SparkApplication`, open the history server, run a query
    on the thrift server, log in through oauth2-proxy and Keycloak, and confirm that the status provisioner
    reports the deployment as complete.
