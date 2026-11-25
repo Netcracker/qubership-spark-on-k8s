@@ -125,10 +125,11 @@ number follows from them, so choose the pair before editing a file.
 
 1. Pick the Spark candidate: the newest GA release on the
    [apache/spark releases](https://github.com/apache/spark/releases) page that has an `apache/spark` image
-   for the Scala 2.13, Java 21, Ubuntu flavor both Dockerfiles use, for example
-   `4.3.0-scala2.13-java21-ubuntu`. Name the flavor: the short `apache/spark:<version>` alias resolves to
-   the Python flavor, so a bare version silently changes the base image. Confirm both architectures and
-   read the index digest with
+   for the Scala 2.13, Java 21, Ubuntu flavor `spark-customized/Dockerfile` uses, for example
+   `4.3.0-scala2.13-java21-ubuntu`. The operator image builds on the controller image and inherits that
+   image's Spark, so this choice does not apply to it. Name the flavor: the short `apache/spark:<version>`
+   alias resolves to the Python flavor, so a bare version silently changes the base image. Confirm both
+   architectures and read the index digest with
    `docker buildx imagetools inspect apache/spark:<version>-scala2.13-java21-ubuntu`; pin the tag and the
    digest together.
 2. Pick the operator candidate: the newest release on the
@@ -343,7 +344,9 @@ guardrail. In an interactive run, ask instead of stopping.
    ```sh
    docker rm -f transfer 2>/dev/null || true
    docker create --name transfer spark-on-k8s-transfer:test /none
-   docker cp transfer:/chart ./target/chart-transfer && docker rm transfer
+   rm -rf ./target/chart-transfer
+   mkdir -p ./target/chart-transfer
+   docker cp transfer:/chart/. ./target/chart-transfer && docker rm transfer
    helm template qubership-spark-on-k8s \
      ./target/chart-transfer/helm/spark-on-k8s
    ```
@@ -351,7 +354,10 @@ guardrail. In an interactive run, ask instead of stopping.
    The image is the one built in `Update spark-operator.4`; for a released build, substitute
    `ghcr.io/netcracker/qubership-spark-on-k8s-transfer:<tag>`. The image is `FROM scratch` with no command,
    so `docker create` needs the `/none` argument even though the container never starts, and the chart
-   lands under `helm/` because the image copies the repository's `chart/` directory to `/chart`.
+   lands under `helm/` because the image copies the repository's `chart/` directory to `/chart`. The
+   destination is removed and recreated before the copy: `docker cp` will not create its parent directory
+   on a fresh clone, and copying into an existing directory instead of its contents would nest the new tree
+   one level down and silently leave the previous run's chart in the path that Helm renders.
 
    Render the guarded branches too, because the defaults leave most of them out:
    `--api-versions gateway.networking.k8s.io/v1` exercises the HTTPRoute paths, and
