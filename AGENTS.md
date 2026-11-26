@@ -17,15 +17,15 @@ The deployable artifact is a Helm chart assembled from multiple sub-charts. It i
 # Output: ./target/chart/spark-on-k8s/
 ```
 
-This copies `chart/helm/*`, downloads the upstream spark-operator v2.1.0 chart, and merges in the sub-charts from `spark-history-server/`, `spark-service-integration-tests/`, and `spark-thrift-server/`.
+This copies `chart/helm/*`, downloads the upstream spark-operator v2.6.0 chart, and merges in the sub-charts from `spark-history-server/`, `spark-service-integration-tests/`, and `spark-thrift-server/`.
 
 ### Build Docker images
 
 Images are built via GitHub Actions using `.github/docker-build-config.json`. For local builds, use the Dockerfiles directly:
 
-- Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.3.0`, adds AWS SDK, Hadoop AWS, and overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions)
+- Main Spark image: `spark-customized/Dockerfile` (builds on `apache/spark:4.3.0-scala2.13-java21-ubuntu`, adds AWS SDK, Hadoop AWS, and overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions)
 - Python variant: `spark-customized/py/Dockerfile` (extends the main image, adds Python 3.14)
-- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.6.0`, adds AWS SDK, Hadoop AWS, overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions, upgrades jersey-client, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 for CVE fixes, adds gosu and gnupg)
+- Spark Operator image: `spark-operator-image/Dockerfile` (builds on `ghcr.io/kubeflow/spark-operator/controller:2.6.0`, adds AWS SDK, Hadoop AWS, overrides Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs with patched versions, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 for CVE fixes, adds gosu and gnupg)
 - Test runner image: `spark-service-integration-tests/docker/Dockerfile` (builds on `ghcr.io/netcracker/qubership-docker-integration-tests:0.5.8`, copies Robot Framework suites and requirements)
 
 ### Build sample apps (Maven)
@@ -65,16 +65,17 @@ The main chart `chart/helm/spark-on-k8s/` depends on four sub-charts (assembled 
 
 | Sub-chart | Source | Condition |
 |---|---|---|
-| `spark-operator` | Downloaded from kubeflow/spark-operator v2.1.0 | always |
+| `spark-operator` | Downloaded from kubeflow/spark-operator v2.6.0 | always |
 | `spark-history-server` | `spark-history-server/chart/helm/` | `spark-history-server.enabled` |
 | `spark-thrift-server` | `spark-thrift-server/chart/helm/` | `spark-thrift-server.enabled` |
 | `spark-integration-tests` | `spark-service-integration-tests/chart/helm/` | `spark-integration-tests.enabled` |
 
 ### Spark image layering
 
-`spark-customized/Dockerfile` is a two-stage build:
-1. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs from Maven Central
-2. **Main stage** (`apache/spark:4.3.0`) — removes bundled Netty 4.2.13, Jackson 2.21.2, netty-tcnative 2.0.76.Final, zstd-jni 1.5.7-7, snappy-java 1.1.10.8, lz4-java 1.11.0, Vert.x 4.5.26 and xmlschema-core 2.3.1 JARs and copies in patched versions (Netty 4.2.18, Jackson 2.21.8, netty-tcnative 2.0.84, zstd-jni 1.5.7-25, snappy-java 1.1.10.10, lz4-java 1.11.4, Vert.x 4.5.36, xmlschema-core 2.3.3) and S3 JARs, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 (CVE fixes), upgrades curl, adds `gosu`, copies `entrypoint.sh`
+`spark-customized/Dockerfile` is a multi-stage build:
+1. **JDK stages** (`jdk-amd64`, `jdk-arm64`, `jdk`) — select the JDK per architecture: Temurin 21.0.13.1 on amd64, the base image's own JDK on arm64. Remove them once the base image ships Temurin 21.0.13.1 or later
+2. **Unpacker stage** (Alpine) — downloads AWS SDK, Hadoop AWS, Netty, Jackson, netty-tcnative, zstd-jni, snappy-java, lz4-java, Vert.x and xmlschema-core JARs from Maven Central
+3. **Main stage** (`apache/spark:4.3.0-scala2.13-java21-ubuntu`) — removes bundled Netty 4.2.13, Jackson 2.21.2, netty-tcnative 2.0.76.Final, zstd-jni 1.5.7-7, snappy-java 1.1.10.8, lz4-java 1.11.0, Vert.x 4.5.26 and xmlschema-core 2.3.1 JARs and copies in patched versions (Netty 4.2.18, Jackson 2.21.8, netty-tcnative 2.0.84, zstd-jni 1.5.7-25, snappy-java 1.1.10.10, lz4-java 1.11.4, Vert.x 4.5.36, xmlschema-core 2.3.3) and S3 JARs, replaces the bundled JDK with Temurin 21.0.13.1 on amd64 (CVE fixes), upgrades curl, adds `gosu`, copies `entrypoint.sh`
 
 The custom `entrypoint.sh` handles:
 - JCEKS credential file creation for S3 authentication at runtime

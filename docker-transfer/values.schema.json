@@ -541,6 +541,21 @@
               "type": "boolean",
               "default": true,
               "description": "Specifies whether to enable leader election for webhook."
+            },
+            "leaseDuration": {
+              "type": "string",
+              "default": "15s",
+              "description": "Leader election lease duration."
+            },
+            "renewDeadline": {
+              "type": "string",
+              "default": "10s",
+              "description": "Leader election renew deadline."
+            },
+            "retryPeriod": {
+              "type": "string",
+              "default": "2s",
+              "description": "Leader election retry period."
             }
           }
         },

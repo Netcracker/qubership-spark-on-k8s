@@ -75,9 +75,10 @@ Facts below are grounded in the actual Spark Operator source
 - `SparkApplication` has no finalizer — `kubectl delete sparkapplication` removes the CR from etcd immediately.
   Cleanup of the driver pod/PDB/UI Service/Ingress is best-effort plus owner-reference garbage collection, not a
   guaranteed-synchronous teardown. Don't assume the driver pod is already gone the instant the CR delete returns.
-- Webhook leader-election timing (`leaseDuration`/`renewDeadline`/`retryPeriod`) is only configurable for
-  `spark-operator.controller.leaderElection` — `spark-operator.webhook.leaderElection` only exposes `enable` in the
-  Helm schema. Don't suggest tuning webhook leader-election timing via a Helm value; that knob doesn't exist.
+- Webhook leader-election timing is tunable under `spark-operator.webhook.leaderElection` (`leaseDuration`,
+  `renewDeadline`, `retryPeriod`; defaults `15s`, `10s`, `2s`), the same as the controller's. Reach for it only
+  when the operator log shows repeated `leader election lost`; otherwise check resources and the admission path
+  first.
 - Don't suggest disabling `controller.leaderElection.enable` (or `webhook.leaderElection.enable`) unless the
   matching `controller.replicas`/`webhook.replicas` is also `1`. With more than one replica and leader election off,
   multiple controllers reconcile the same `SparkApplication`s concurrently — duplicate `spark-submit` calls and

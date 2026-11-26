@@ -1043,7 +1043,7 @@ Status Provisioner is a component for providing the overall service status.
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `statusProvisioner.enabled` | bool | `true` | The parameter specifies if the status provisioner job is deployed.|
-| `statusProvisioner.image` | string | <div style="width:300px"> `ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.1` </div> | The image for the Deployment Status Provisioner pod.|
+| `statusProvisioner.image` | string | <div style="width:300px"> `ghcr.io/netcracker/qubership-deployment-status-provisioner:0.2.11` </div> | The image for the Deployment Status Provisioner pod.|
 | `statusProvisioner.lifetimeAfterCompletion` | int | `600` | The number of seconds that the job remains alive after its completion.|
 | `statusProvisioner.podReadinessTimeout` | int | `300` | The timeout in seconds that the job waits for the monitored resources to be ready or completed.|
 | `statusProvisioner.integrationTestsTimeout` | int | `2000` | The timeout in seconds that the job waits for the integration tests to complete.|
@@ -1055,7 +1055,7 @@ Status Provisioner is a component for providing the overall service status.
 ```yaml
 statusProvisioner:
   enabled: true
-  dockerImage: ghcr.io/netcracker/qubership-deployment-status-provisioner:0.1.1
+  image: ghcr.io/netcracker/qubership-deployment-status-provisioner:0.2.11
   lifetimeAfterCompletion: 600
   podReadinessTimeout: 300
   integrationTestsTimeout: 300
